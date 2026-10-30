@@ -14,8 +14,8 @@ Tick a box only when the step is done and verified.
       _(decided: seed data lives in `data/seed/*.csv`, loaded by `seed_db()`; values are approximate placeholders with `source='seed'`, replaced at step 11)_
 
 ## Phase 2 — Core pipeline
-- [ ] 4. Parser — LLM text -> JSON items (`food`, `qty`, `unit`), Pydantic-validated
-      _(decide provider first: Gemini free tier vs Claude API)_
+- [x] 4. Parser — LLM text -> JSON items (`food`, `qty`, `unit`), Pydantic-validated
+      _(decided: Gemini (`gemini-3.5-flash-lite`, set in `.env`) behind a `complete(text) -> json` function so other providers can be swapped in; combo names stay whole, the DB splits them; live tests run with `pytest -m live`)_
 - [ ] 5. Matcher — BGE-M3 embeddings + cosine search, rapidfuzz fallback, confidence score
 - [ ] 6. Calculator — units -> grams, scale nutrients, sum totals
 - [ ] 7. CLI — `python cli.py "<dish>"` prints breakdown + totals (first working version)
