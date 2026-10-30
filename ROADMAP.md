@@ -18,7 +18,8 @@ Tick a box only when the step is done and verified.
       _(decided: Gemini (`gemini-3.5-flash-lite`, set in `.env`) behind a `complete(text) -> json` function so other providers can be swapped in; combo names stay whole, the DB splits them; live tests run with `pytest -m live`)_
 - [x] 5. Matcher — BGE-M3 embeddings + cosine search, rapidfuzz fallback, confidence score
       _(decided: exact match -> embeddings -> fuzzy only when embedding is weak; returns top-k per-food matches; embeddings cached in `data/processed/`; raw cosine is poorly calibrated on 34 foods (nonsense scores ~0.5-0.6), so step 9 should use the top-1/top-2 margin and tune thresholds in step 13; real-model tests run with `pytest -m slow`)_
-- [ ] 6. Calculator — units -> grams, scale nutrients, sum totals
+- [x] 6. Calculator — units -> grams, scale nutrients, sum totals
+      _(decided: a user-named item replaces the matching default component of a combo; qty with no unit = default servings; unknown unit falls back to servings with a visible warning)_
 - [ ] 7. CLI — `python cli.py "<dish>"` prints breakdown + totals (first working version)
 
 ## Phase 3 — Make it good
