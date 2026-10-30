@@ -1,0 +1,15 @@
+seed_food,doh_food_id,note
+ข้าวเหนียวนึ่ง,01039,Glutinous rice steamed
+ข้าวสวย,01017,Rice polished steamed
+ไข่ดาว,14011,Egg hen sunny side up (includes frying oil)
+ไข่เจียว,14010,Egg hen omelet (includes frying oil)
+แตงกวา,04061,Cucumber
+มะเขือเทศ,04172,Tomato big size
+แครอท,04038,Carrot
+ส้มตำ,11090,Papaya salad with crab and dried shrimp
+ข้าวโพดต้ม,01029,Corn yellow boiled
+นมสด,09001,Milk whole pasteurised plain
+เนย,09032,Butter salted
+ขนมปังขาว,01006,Bread loaf
+เต้าหู้ขาว,03011,Soybean curd white soft (proxy: softer than the seed's generic tofu)
+ไก่ทอด,14005,Chicken drumstick fried (proxy for a generic fried chicken piece)

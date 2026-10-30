@@ -248,9 +248,24 @@ def check(kcal, protein, fat, carbs, fibre) -> str:
         return "missing value"
     if protein + fat + carbs > 105:
         return "macros exceed 100 g"
-    expected = 4 * protein + 9 * fat + 4 * carbs
+    # The table's energy counts fibre too (about 2 kcal/g), so it is part of the expectation.
+    expected = 4 * protein + 9 * fat + 4 * carbs + 2 * (fibre or 0)
     if abs(kcal - expected) > max(12, 0.15 * kcal):
         return f"energy {kcal:g} vs {expected:.0f} from macros"
+    return ""
+
+
+_ODD_LETTERS = re.compile(r"[຀-໿Ѐ-ӿ؀-ۿ぀-ヿ一-鿿]")
+_DOUBLED_MARKS = re.compile(r"[่-๋]{2}|[ัิ-ฺ]{2}")
+
+
+def name_problem(name: str) -> str:
+    """Spot garbled Thai (stray Lao/Cyrillic/CJK letters, doubled tone marks) from the vision
+    model; the energy check cannot see wrong names."""
+    if _ODD_LETTERS.search(name):
+        return "non-Thai letter in name"
+    if _DOUBLED_MARKS.search(name) or name[:1] in "ัิีึืุู่้๊๋":
+        return "garbled Thai name"
     return ""
 
 
@@ -267,7 +282,7 @@ def build() -> None:
             fat, _ = number(r.fat)
             carbs, p2 = number(r.carbs)
             fibre, _ = number(r.fibre)
-            problem = check(kcal, protein, fat, carbs, fibre)
+            problem = check(kcal, protein, fat, carbs, fibre) or name_problem(r.name_th)
             if r.food_id in seen:
                 problem = problem or f"duplicate food_id (also page {seen[r.food_id]})"
             seen.setdefault(r.food_id, page)

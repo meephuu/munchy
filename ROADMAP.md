@@ -43,6 +43,24 @@ Tick a box only when the step is done and verified.
 - [x] 15. (Optional) Swap LLM parser for self-hosted Qwen/Typhoon via Ollama
       _(done as code + mocked tests only: `LLM_PROVIDER=ollama` with `OLLAMA_MODEL`; not run against a real Ollama server because it is not installed here — accuracy of a local model on the eval set is still unmeasured)_
 
+## Where we left off (step 11 and 13 are still open)
+Source for step 11 is the Dept. of Health Thai food table (INMU data is not downloadable; see
+README "Data sources"). Done: extraction + import tooling, 14 seed->DoH links
+(`data/seed/doh_links.csv`), steps 12/14/15. The 1,197 transcribed rows live in gitignored
+`data/processed/doh2018/` (re-creatable from `data/raw/anamai_thai_nutrition/table2018.pdf`).
+
+To resume (all steps are safe to re-run; finished pages are cached):
+1. Dish pages 93-95 and 98-108 were still transcribed by the weaker lite model, which shifts
+   columns there (rows get flagged and are NOT imported). Redo them:
+   `python extract_doh_table.py --pages 93-95 --model gemini-flash-latest` and `--pages 98-108`.
+   The Gemini free tier is slow/overloaded at times; `gemini-3.5-flash` allows only ~20 requests/day.
+2. Pages whose Thai names were garbled (rows flagged "non-Thai letter in name", ~28 rows on
+   pages 35, 36, 52 ...): re-run those pages the same way.
+3. `python extract_doh_table.py --build`, then `python -m src.db --seed`.
+4. `python calibrate_matcher.py`: re-pick LOW/HIGH/MARGIN in `src/matcher.py`, and move
+   queries in `data/eval/match_queries.csv` that the table now covers from "unknown" to expected.
+5. `python evaluate.py`, then tick steps 11 and 13 here and commit.
+
 ## Decisions log
 - Hybrid design: LLM parses only; nutrition numbers come from our DB + code.
 - Python-only backend for now; SQLite until the web app exists.
