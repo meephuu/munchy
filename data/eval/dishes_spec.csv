@@ -1,0 +1,22 @@
+id,text,components,note
+rice,ข้าวสวย 200 กรัม,168878:200,plain cooked white rice
+chicken_breast,อกไก่ย่าง 150 กรัม,171477:150,roasted skinless breast
+boiled_egg,ไข่ต้ม 2 ฟอง,173424:100,large egg = 50 g (USDA portion)
+fried_egg,ไข่ดาว 1 ฟอง,173423:46,large fried egg = 46 g (USDA portion)
+milk,นมสด 1 แก้ว,171265:244,1 cup = 244 g (USDA portion)
+bread,ขนมปังขาว 2 แผ่น,174924:56,slice = 28 g (USDA portion); Thai slices may be heavier
+carrot,แครอท 100 กรัม,170393:100,raw
+cucumber,แตงกวา 100 กรัม,168409:100,raw with peel
+tomato,มะเขือเทศ 100 กรัม,170457:100,raw
+butter,เนย 1 ช้อนโต๊ะ,173410:14.2,1 tbsp = 14.2 g (USDA portion)
+corn,ข้าวโพดต้ม 100 กรัม,169999:100,boiled sweet corn
+shrimp,กุ้งต้ม 100 กรัม,171971:100,cooked moist heat
+fried_chicken,ไก่ทอด 100 กรัม,172374:100,battered fried drumstick with skin
+fried_chicken_en,fried chicken 100 g,172374:100,same food typed in English
+mashed_potato_en,mashed potato 150 g,168555:150,home-prepared with whole milk and butter
+cheddar_en,cheddar cheese 20 g,173414:20,
+french_fries_en,french fries 120 g,170698:120,restaurant-style deep-fried fries (what the seed food describes); oven-heated frozen fries have about half the calories
+banana_en,banana 1,173944:118,USDA medium banana = 118 g; Thai nam wa bananas are smaller so expect over-estimate
+ref1_sticky_rice_pork,ข้าวเหนียวหมูปิ้ง 5 ไม้,167820:150|169711:90,reference input 1. USDA boiled glutinous rice is far lighter than Thai steamed sticky rice (DoH 230 kcal/100 g vs 97): reference is uncertain
+ref2_chicken_salad,สลัดอกไก่ ใส่แตงกวา มะเขือเทศ ไข่ต้ม 1 ฟอง,169247:100|171477:120|173592:30|168409:50|170457:60|173424:50,reference input 2 with the same default portions the system assumes (greens 100 g; breast 120 g; dressing 30 g)
+ref3_cheese_mash_gravy,cheese mashed potato with gravy sauce,168555:150|173414:20|171564:30,reference input 3 with the system's default portions (150 + 20 + 30 g)

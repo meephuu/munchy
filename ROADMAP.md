@@ -33,7 +33,8 @@ Tick a box only when the step is done and verified.
 
 ## Phase 4 — Real data & evaluation
 - [ ] 11. Import real datasets — clean INMU Thai FCD + USDA FoodData Central with pandas, load into DB
-- [ ] 12. Evaluation set — CSV of dishes with known nutrition + script reporting average error
+- [x] 12. Evaluation set — CSV of dishes with known nutrition + script reporting average error
+      _(decided: 21 dishes whose expected kcal/macros come from USDA SR Legacy x explicit grams (independent of our DB; spec in `data/eval/dishes_spec.csv`, built by `build_eval_set.py`); `python evaluate.py` runs the real pipeline and reports mean/median % error; references must compare like with like — the first fries reference was oven-heated frozen fries vs our deep-fried seed and looked like a 111% error)_
 - [ ] 13. Improve — tune thresholds, add units/combos based on failures
 
 ## Phase 5 — Ready for the app
