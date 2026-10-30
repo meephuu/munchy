@@ -112,10 +112,13 @@ def _grams(conn: sqlite3.Connection, food: sqlite3.Row,
 def _line(food: sqlite3.Row, grams: float, item_text: str, *,
           via_combo: str | None = None, assumptions: list[str] | None = None) -> Line:
     k = grams / 100
+    assumptions = list(assumptions or [])
+    if food["oil_note"]:
+        assumptions.append(f"{food['name_th'] or food['name_en']}: {food['oil_note']}")
     return Line(food["id"], food["name_th"] or food["name_en"], grams,
                 food["kcal_100g"] * k, food["protein_100g"] * k,
                 food["fat_100g"] * k, food["carbs_100g"] * k,
-                item_text, via_combo, assumptions or [])
+                item_text, via_combo, assumptions)
 
 
 def _expand_combo(conn: sqlite3.Connection, combo: sqlite3.Row, qty: float | None,

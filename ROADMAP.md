@@ -24,7 +24,8 @@ Tick a box only when the step is done and verified.
       _(decided: orchestration lives in `src/pipeline.py` so FastAPI can reuse it; CLI prints each match's method + confidence but does not flag weak matches yet (step 9))_
 
 ## Phase 3 — Make it good
-- [ ] 8. Defaults & assumptions — missing quantity, dressing, cooking oil; show assumptions in output
+- [x] 8. Defaults & assumptions — missing quantity, dressing, cooking oil; show assumptions in output
+      _(decided: missing quantity/dressing were already covered by steps 6-7; cooking oil is a per-food `oil_note` shown as an assumption; assumptions stay plain strings until the API step)_
 - [ ] 9. Low-confidence handling — flag weak matches instead of guessing silently
 - [ ] 10. Cache — store parse results so repeated dishes skip the LLM
 

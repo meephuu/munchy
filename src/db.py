@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS foods (
     default_serving_g  REAL,
     source             TEXT NOT NULL DEFAULT 'seed',   -- 'seed' | 'inmu' | 'usda'
     notes              TEXT,
+    oil_note           TEXT,   -- set when the per-100 g values include cooking oil; shown as an assumption
     CHECK (name_th IS NOT NULL OR name_en IS NOT NULL),
     CHECK (kind = 'combo' OR (kcal_100g IS NOT NULL AND protein_100g IS NOT NULL
                               AND fat_100g IS NOT NULL AND carbs_100g IS NOT NULL))
@@ -104,12 +105,13 @@ def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR) -> dict[str, int]:
         for row in _read_csv(seed_dir, "foods.csv"):
             cur = conn.execute(
                 """INSERT INTO foods (name_th, name_en, kind, kcal_100g, protein_100g,
-                       fat_100g, carbs_100g, default_serving_g, notes)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                       fat_100g, carbs_100g, default_serving_g, notes, oil_note)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (row["name_th"] or None, row["name_en"] or None, row["kind"],
                  _num(row["kcal_100g"]), _num(row["protein_100g"]),
                  _num(row["fat_100g"]), _num(row["carbs_100g"]),
-                 _num(row["default_serving_g"]), row["notes"] or None),
+                 _num(row["default_serving_g"]), row["notes"] or None,
+                 row["oil_note"] or None),
             )
             for name in (row["name_th"], row["name_en"]):
                 if name:

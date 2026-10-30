@@ -120,6 +120,30 @@ def test_nutrients_scale_per_100g(db_path):
     assert (est.kcal, est.protein, est.fat, est.carbs) == pytest.approx((155, 12.6, 10.6, 1.1))
 
 
+# --- cooking oil ----------------------------------------------------------------------
+
+def test_fried_food_reports_that_its_values_include_oil(db_path):
+    est = estimate(db_path, ("ไข่ดาว", 2, "ฟอง"))
+    assert est.lines[0].grams == 92
+    assert any("ไข่ดาว" in a and "frying oil" in a for a in est.assumptions)
+
+
+def test_oil_note_comes_in_addition_to_other_assumptions(db_path):
+    est = estimate(db_path, ("ไก่ทอด",))          # no quantity -> default serving AND oil note
+    assert len(est.assumptions) == 2
+
+
+def test_boiled_or_grilled_food_has_no_oil_note(db_path):
+    assert estimate(db_path, ("ไข่ต้ม", 1, "ฟอง")).assumptions == []
+
+
+def test_oil_note_follows_a_food_used_as_combo_component(db_path, tmp_path):
+    path = edited_db(db_path, tmp_path,
+                     "UPDATE foods SET oil_note = 'values include oil' WHERE name_th = 'หมูปิ้ง'")
+    est = calculate([pair(path, "ข้าวเหนียวหมูปิ้ง", 5, "ไม้")], path)
+    assert by_name(est)["หมูปิ้ง"].assumptions == ["หมูปิ้ง: values include oil"]
+
+
 # --- edge cases that need a modified DB -----------------------------------------------
 
 def edited_db(db_path, tmp_path, sql, *params):

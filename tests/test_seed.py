@@ -37,6 +37,12 @@ def test_seed_size(db):
     assert db.execute("SELECT COUNT(*) FROM foods WHERE kind='combo'").fetchone()[0] == 3
 
 
+def test_oil_notes_only_on_fried_foods(db):
+    with_oil = {r["name_th"] for r in db.execute(
+        "SELECT name_th FROM foods WHERE oil_note IS NOT NULL")}
+    assert with_oil == {"ไข่ดาว", "ไข่เจียว", "ไก่ทอด", "เฟรนช์ฟรายส์", "ผัดกะเพราหมูสับ"}
+
+
 def test_no_dangling_references(db):
     assert db.execute("PRAGMA foreign_key_check").fetchall() == []
 
