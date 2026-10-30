@@ -112,9 +112,37 @@ def gemini_complete(api_key: str, model: str) -> Complete:
     return complete
 
 
+def ollama_complete(model: str, base_url: str, client: "httpx.Client | None" = None) -> Complete:
+    """Build a `complete` function backed by a local Ollama server (self-hosted models such as
+    Qwen or Typhoon). Ollama constrains the output to our JSON schema, same as Gemini does."""
+    import httpx
+
+    http = client or httpx.Client(timeout=120)
+    schema = ParseResult.model_json_schema()
+
+    def complete(text: str) -> str:
+        body = {"model": model, "stream": False, "format": schema, "options": {"temperature": 0},
+                "messages": [{"role": "system", "content": SYSTEM_PROMPT},
+                             {"role": "user", "content": text}]}
+        try:
+            resp = http.post(f"{base_url.rstrip('/')}/api/chat", json=body)
+        except httpx.TransportError as e:
+            raise RuntimeError(f"cannot reach Ollama at {base_url} - is it running? ({e})") from e
+        if resp.status_code == 404:
+            raise RuntimeError(f"Ollama does not have model {model!r} - run: ollama pull {model}")
+        resp.raise_for_status()
+        return resp.json()["message"]["content"]
+
+    return complete
+
+
 def model_id() -> str:
     """Name of the model behind the current provider (part of the parse-cache key)."""
-    return config.GEMINI_MODEL if config.LLM_PROVIDER == "gemini" else ""
+    if config.LLM_PROVIDER == "gemini":
+        return config.GEMINI_MODEL
+    if config.LLM_PROVIDER == "ollama":
+        return config.OLLAMA_MODEL
+    return ""
 
 
 def get_parser() -> LLMParser:
@@ -123,7 +151,9 @@ def get_parser() -> LLMParser:
         if not config.GEMINI_API_KEY:
             raise RuntimeError("GEMINI_API_KEY is empty - set it in .env")
         return LLMParser(gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL))
-    raise RuntimeError(f"Unknown LLM_PROVIDER {config.LLM_PROVIDER!r} (supported: gemini)")
+    if config.LLM_PROVIDER == "ollama":
+        return LLMParser(ollama_complete(config.OLLAMA_MODEL, config.OLLAMA_URL))
+    raise RuntimeError(f"Unknown LLM_PROVIDER {config.LLM_PROVIDER!r} (supported: gemini, ollama)")
 
 
 def parse(text: str) -> list[ParsedItem]:

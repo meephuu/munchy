@@ -37,8 +37,10 @@ Tick a box only when the step is done and verified.
 - [ ] 13. Improve — tune thresholds, add units/combos based on failures
 
 ## Phase 5 — Ready for the app
-- [ ] 14. FastAPI wrapper — `POST /estimate`
-- [ ] 15. (Optional) Swap LLM parser for self-hosted Qwen/Typhoon via Ollama
+- [x] 14. FastAPI wrapper — `POST /estimate`
+      _(decided: embedding model loaded once at startup; partial results return 200 with `complete: false` + warnings; pipeline errors map to 422/500/502/503 without leaking provider details; CORS origins from `CORS_ORIGINS`; verified against a real running server)_
+- [x] 15. (Optional) Swap LLM parser for self-hosted Qwen/Typhoon via Ollama
+      _(done as code + mocked tests only: `LLM_PROVIDER=ollama` with `OLLAMA_MODEL`; not run against a real Ollama server because it is not installed here — accuracy of a local model on the eval set is still unmeasured)_
 
 ## Decisions log
 - Hybrid design: LLM parses only; nutrition numbers come from our DB + code.

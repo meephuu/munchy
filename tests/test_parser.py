@@ -6,6 +6,9 @@ from src import config
 from src.parser import LLMParser, ParseError, ParsedItem, parse
 
 
+GOOD_OLLAMA = json.dumps({"items": [{"food": "หมูปิ้ง", "qty": 5, "unit": "ไม้"}]}, ensure_ascii=False)
+
+
 def fake(*outputs: str):
     """A `complete` function that returns the given raw outputs in order."""
     calls = iter(outputs)
@@ -56,6 +59,78 @@ def test_blank_input_never_calls_llm():
 
     with pytest.raises(ParseError):
         LLMParser(boom).parse("   ")
+
+
+# --- Ollama backend (mocked HTTP) -------------------------------------------------------
+
+def ollama_client(handler):
+    import httpx
+    return httpx.Client(transport=httpx.MockTransport(handler))
+
+
+def test_ollama_sends_schema_and_prompt_and_returns_the_message_content():
+    import httpx
+    from src.parser import SYSTEM_PROMPT, ParseResult, ollama_complete
+
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["url"] = str(request.url)
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"message": {"role": "assistant", "content": GOOD_OLLAMA}})
+
+    complete = ollama_complete("qwen2.5:7b", "http://ollama:11434/", ollama_client(handler))
+    items = LLMParser(complete).parse("หมูปิ้ง 5 ไม้")
+    assert items == [ParsedItem(food="หมูปิ้ง", qty=5, unit="ไม้")]
+    assert seen["url"] == "http://ollama:11434/api/chat"
+    body = seen["body"]
+    assert body["model"] == "qwen2.5:7b" and body["stream"] is False
+    assert body["format"] == ParseResult.model_json_schema()
+    assert body["messages"] == [{"role": "system", "content": SYSTEM_PROMPT},
+                                {"role": "user", "content": "หมูปิ้ง 5 ไม้"}]
+    assert body["options"]["temperature"] == 0
+
+
+def test_ollama_unreachable_server_is_a_setup_error():
+    import httpx
+    from src.parser import ollama_complete
+
+    def handler(request):
+        raise httpx.ConnectError("connection refused")
+
+    with pytest.raises(RuntimeError, match="is it running"):
+        ollama_complete("m", "http://localhost:11434", ollama_client(handler))("x")
+
+
+def test_ollama_missing_model_tells_you_to_pull_it():
+    import httpx
+    from src.parser import ollama_complete
+
+    complete = ollama_complete("typhoon", "http://x", ollama_client(lambda r: httpx.Response(404)))
+    with pytest.raises(RuntimeError, match="ollama pull typhoon"):
+        complete("x")
+
+
+def test_ollama_bad_output_still_goes_through_validation_and_retry():
+    import httpx
+    from src.parser import ollama_complete
+
+    replies = iter(["not json", GOOD_OLLAMA])
+    complete = ollama_complete("m", "http://x", ollama_client(
+        lambda r: httpx.Response(200, json={"message": {"content": next(replies)}})))
+    assert LLMParser(complete).parse("x")[0].food == "หมูปิ้ง"
+
+
+def test_provider_selection_follows_the_config(monkeypatch):
+    from src import parser as parser_module
+
+    monkeypatch.setattr(config, "LLM_PROVIDER", "ollama")
+    monkeypatch.setattr(config, "OLLAMA_MODEL", "qwen2.5:7b")
+    assert parser_module.model_id() == "qwen2.5:7b"
+    assert isinstance(parser_module.get_parser(), LLMParser)       # no server needed to build it
+    monkeypatch.setattr(config, "LLM_PROVIDER", "nope")
+    with pytest.raises(RuntimeError, match="gemini, ollama"):
+        parser_module.get_parser()
 
 
 # --- real API: run with `pytest -m live` ---------------------------------------------

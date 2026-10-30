@@ -9,8 +9,12 @@ load_dotenv(ROOT / ".env")
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
 DB_PATH = ROOT / os.getenv("DB_PATH", "data/foods.db")
 CACHE_PATH = ROOT / os.getenv("CACHE_PATH", "data/cache.db")
+# Origins allowed to call the API from a browser (the Next.js frontend), comma-separated.
+CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
