@@ -45,14 +45,20 @@ def main(argv: list[str] | None = None,
 
     ap = argparse.ArgumentParser(description="Estimate calories and macros for a dish.")
     ap.add_argument("text", nargs="+", help="dish and details, e.g. ข้าวเหนียวหมูปิ้ง 5 ไม้")
-    text = " ".join(ap.parse_args(argv).text)
+    ap.add_argument("--no-cache", action="store_true",
+                    help="always call the LLM instead of reusing a cached parse")
+    args = ap.parse_args(argv)
+    text = " ".join(args.text)
 
     if estimate_fn is None:
         if not config.DB_PATH.exists():
             print(f"Database not found at {config.DB_PATH}. Build it first:\n"
                   "  python -m src.db --seed", file=sys.stderr)
             return 1
-        from src.pipeline import estimate as estimate_fn
+        from functools import partial
+
+        from src.pipeline import estimate
+        estimate_fn = partial(estimate, use_cache=not args.no_cache)
 
     try:
         est = estimate_fn(text)

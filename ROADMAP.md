@@ -28,7 +28,8 @@ Tick a box only when the step is done and verified.
       _(decided: missing quantity/dressing were already covered by steps 6-7; cooking oil is a per-food `oil_note` shown as an assumption; assumptions stay plain strings until the API step)_
 - [x] 9. Low-confidence handling — flag weak matches instead of guessing silently
       _(decided: `classify()` -> ok / uncertain / no_match; no_match items are left out of totals with a "totals incomplete" warning, uncertain ones are counted but warned; thresholds LOW 0.65 / HIGH 0.80 / MARGIN 0.05 chosen with `calibrate_matcher.py` on `data/eval/match_queries.csv`; on that set 1 wrong match and 2 unknown foods still pass silently — re-run the script after step 11)_
-- [ ] 10. Cache — store parse results so repeated dishes skip the LLM
+- [x] 10. Cache — store parse results so repeated dishes skip the LLM
+      _(decided: separate `data/cache.db` (survives re-seeding); key = hash of normalised text + provider + model + system prompt, so prompt/model changes miss automatically; only validated parses are stored; `--no-cache` flag; a hit needs no API key)_
 
 ## Phase 4 — Real data & evaluation
 - [ ] 11. Import real datasets — clean INMU Thai FCD + USDA FoodData Central with pandas, load into DB

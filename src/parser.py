@@ -112,6 +112,11 @@ def gemini_complete(api_key: str, model: str) -> Complete:
     return complete
 
 
+def model_id() -> str:
+    """Name of the model behind the current provider (part of the parse-cache key)."""
+    return config.GEMINI_MODEL if config.LLM_PROVIDER == "gemini" else ""
+
+
 def get_parser() -> LLMParser:
     """Pick the backend from LLM_PROVIDER in .env."""
     if config.LLM_PROVIDER == "gemini":

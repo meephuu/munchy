@@ -8,7 +8,6 @@ score is the best score over its strings. Order of attempts:
 Several candidates are returned (top_k) so later steps can show runners-up.
 """
 import hashlib
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -18,6 +17,7 @@ from rapidfuzz import fuzz
 
 from src import config
 from src.db import connect
+from src.textutil import normalize
 
 CACHE_DIR = config.ROOT / "data" / "processed"
 
@@ -78,10 +78,6 @@ def classify(matches: list[Match], low: float = LOW, high: float = HIGH,
         return "no_match"
     gap = top.confidence - matches[1].confidence if len(matches) > 1 else 1.0
     return "uncertain" if top.confidence < high or gap < margin else "ok"
-
-
-def normalize(text: str) -> str:
-    return re.sub(r"\s+", " ", text.strip().casefold())
 
 
 class Matcher:
