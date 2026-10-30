@@ -25,8 +25,10 @@ def main() -> None:
     results = [(q, matcher.match(q["query"], top_k=3)) for q in queries]
 
     def right(q, m) -> bool:
-        """expected may list several acceptable foods separated by '|' (the table has near-duplicates)."""
-        return m[0].name in q["expected"].split("|")
+        """expected may list several acceptable foods separated by '|' (the table has
+        near-duplicates); a trailing '*' accepts any food whose name starts with that text."""
+        return any(m[0].name.startswith(e[:-1]) if e.endswith("*") else m[0].name == e
+                   for e in q["expected"].split("|"))
 
     print(f"{'query':32} {'expected':16} {'top1':16} {'conf':>5} {'gap':>5}  method")
     for q, m in results:
@@ -73,7 +75,7 @@ def main() -> None:
         k, u = tally(low, high, gap)
         rows.append((k["wrong"] + u["ok"], k["none"], low, high, gap))
     print("\nbest by fewest silent errors (ok-WRONG + false accepts), then fewest real foods rejected:")
-    for _, _, low, high, gap in sorted(rows)[:10]:
+    for _, _, low, high, gap in sorted(rows)[:30]:
         show(low, high, gap)
     print("\nNote: zero silent errors needs HIGH ~0.85, which flags over half of the correct matches.")
 

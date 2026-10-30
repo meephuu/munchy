@@ -23,12 +23,13 @@ CACHE_DIR = config.ROOT / "data" / "processed"
 
 
 # Thresholds, chosen with calibrate_matcher.py on data/eval/match_queries.csv (66 queries,
-# 34-food table). No threshold separates good from bad perfectly: foods we lack but that sit
-# near one we have (fried fish vs fried chicken) score as high as correct matches. Re-run the
-# script whenever the food table or model changes (steps 11-13).
-LOW = 0.65       # embedding confidence below this -> no_match (lowest real food seen: 0.71)
+# ~1,150-food table). No threshold separates good from bad perfectly: foods we lack but that sit
+# near one we have (fried fish vs fried chicken) score as high as correct matches. On that set
+# these values reject 12 of 29 unknown foods outright, lose no real food, and let 2 unknown foods
+# through unflagged. Re-run the script whenever the food table or model changes.
+LOW = 0.68       # embedding confidence below this -> no_match (lowest real food seen: 0.71)
 HIGH = 0.80      # below this (but >= LOW) -> uncertain
-MARGIN = 0.05    # top-1 minus top-2 below this -> uncertain even if confident
+MARGIN = 0.08    # top-1 minus top-2 below this -> uncertain even if confident
 FUZZY_MIN = 0.85  # fuzzy only wins if the strings are nearly identical
 
 

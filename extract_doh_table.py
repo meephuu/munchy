@@ -43,11 +43,15 @@ WORKERS = 2
 
 PROMPT = """\
 This image is one page of a Thai food composition table. Transcribe every food row on the page.
-For each row return exactly what is printed in these columns (use the column headers to find them):
+The numeric columns appear in this order, left to right, right after the two name columns:
+Energy (kcal) | Water (g) | Protein (g) | Fat (g) | Carbohydrate (g) | Dietary fibre (g) | Ash (g) | minerals...
+Use the column HEADERS to place each number: Water is usually the largest number in the row
+(often 50-95) and is NOT protein. For each row return exactly what is printed:
 - food_id: the Food ID number
 - name_th: the Thai name
 - name_en: the English description (join wrapped lines with a space)
 - energy: Energy (kcal)
+- water: Water (g)
 - protein: Protein (g)
 - fat: Fat (g)
 - carbs: Carbohydrate (g)
@@ -62,6 +66,7 @@ class Row(BaseModel):
     name_th: str | None = None
     name_en: str | None = None
     energy: str | None = None
+    water: str | None = None
     protein: str | None = None
     fat: str | None = None
     carbs: str | None = None
@@ -269,9 +274,39 @@ def name_problem(name: str) -> str:
     return ""
 
 
+def attach_serving_rows(rows: list[dict]) -> list[dict]:
+    """The dessert pages print two lines per food: the 100 g row and a serving row
+    ("1 piece (27 g)") with the same Food ID. The serving's weight is its energy relative to the
+    100 g row, so use it as the food's serving size (serving_g) and drop the extra row.
+    A same-ID row that does not scale consistently stays in the list and keeps its flag."""
+    by_id: dict[str, dict] = {}
+    out = []
+    for r in rows:
+        first = by_id.get(r["food_id"])
+        if first is None:
+            r.setdefault("serving_g", "")
+            by_id[r["food_id"]] = r
+            out.append(r)
+            continue
+        ratio = r["kcal"] / first["kcal"] if r["kcal"] and first["kcal"] else None
+        consistent = ratio is not None and 0.02 <= ratio <= 3 and first["pdf_page"] == r["pdf_page"]
+        if consistent:
+            for k in ("protein_g", "fat_g", "carbs_g"):
+                a, b = first[k], r[k]
+                if a is not None and b is not None and a > 2 and abs(b / a - ratio) > 0.25 * ratio:
+                    consistent = False
+        if consistent and not first["serving_g"]:
+            first["serving_g"] = round(100 * ratio)
+            continue
+        r["serving_g"] = ""
+        r["review"] = r["review"] or f"duplicate food_id (also page {first['pdf_page']})"
+        out.append(r)
+    return out
+
+
 def build() -> None:
     models = recorded_models()
-    rows, seen = [], {}
+    rows = []
     for path in sorted(OUT_DIR.glob("page_*.json")):
         page = int(path.stem.split("_")[1])
         for r in PageRows.model_validate_json(path.read_text(encoding="utf-8")).rows:
@@ -283,14 +318,15 @@ def build() -> None:
             carbs, p2 = number(r.carbs)
             fibre, _ = number(r.fibre)
             problem = check(kcal, protein, fat, carbs, fibre) or name_problem(r.name_th)
-            if r.food_id in seen:
-                problem = problem or f"duplicate food_id (also page {seen[r.food_id]})"
-            seen.setdefault(r.food_id, page)
             rows.append({"food_id": r.food_id.strip(), "name_th": r.name_th.strip(),
                          "name_en": (r.name_en or "").strip(), "kcal": kcal, "protein_g": protein,
                          "fat_g": fat, "carbs_g": carbs, "fibre_g": fibre,
                          "calculated_values": int(p1 or p2), "pdf_page": page,
-                         "model": models.get(page, FULL_MODEL), "review": problem})
+                         "model": models.get(page, FULL_MODEL),
+                         # the lite model reads numbers well but sometimes garbles Thai letters
+                         "name_verified": int(models.get(page, FULL_MODEL) != LITE_MODEL),
+                         "review": problem})
+    rows = attach_serving_rows(rows)
     out = OUT_DIR / "foods.csv"
     with open(out, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
@@ -304,10 +340,14 @@ def build() -> None:
 
 
 def parse_range(text: str) -> list[int]:
-    m = re.fullmatch(r"(\d+)(?:-(\d+))?", text)
-    if not m:
-        raise argparse.ArgumentTypeError("use N or N-M")
-    return list(range(int(m[1]), int(m[2] or m[1]) + 1))
+    """'96-97' or '23,31,35' or '89,91-95' -> list of PDF page numbers."""
+    pages: list[int] = []
+    for part in text.split(","):
+        m = re.fullmatch(r"(\d+)(?:-(\d+))?", part.strip())
+        if not m:
+            raise argparse.ArgumentTypeError("use N, N-M or a comma-separated mix, e.g. 23,31,89-95")
+        pages += range(int(m[1]), int(m[2] or m[1]) + 1)
+    return pages
 
 
 def main() -> None:

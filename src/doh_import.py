@@ -17,6 +17,7 @@ from src import config
 
 DOH_CSV = config.ROOT / "data" / "processed" / "doh2018" / "foods.csv"
 LINKS_CSV = config.ROOT / "data" / "seed" / "doh_links.csv"
+ALIASES_CSV = config.ROOT / "data" / "seed" / "doh_aliases.csv"   # popular dish names -> DoH ids
 
 # (first PDF page, last PDF page, group, default serving in grams). PDF page = printed page + 2.
 # Serving sizes are guesses for "one typical portion", not measured data.
@@ -42,8 +43,10 @@ def _read(path: Path) -> list[dict]:
 
 
 def import_doh(conn: sqlite3.Connection, doh_csv: Path = DOH_CSV,
-               links_csv: Path = LINKS_CSV) -> dict[str, int]:
-    """Add DoH foods and apply the seed links. Returns counts (and what was left out)."""
+               links_csv: Path = LINKS_CSV, aliases_csv: Path | None = None) -> dict[str, int]:
+    """Add DoH foods, apply the seed links and extra aliases. Returns counts (and what was
+    left out). aliases_csv defaults to doh_aliases.csv next to links_csv."""
+    aliases_csv = aliases_csv or links_csv.with_name(ALIASES_CSV.name)
     rows = _read(doh_csv)
     by_id = {r["food_id"]: r for r in rows}
     links = _read(links_csv) if links_csv.exists() else []
@@ -52,7 +55,8 @@ def import_doh(conn: sqlite3.Connection, doh_csv: Path = DOH_CSV,
     taken = {r[0] for r in conn.execute(
         "SELECT name_th FROM foods WHERE name_th IS NOT NULL")}
     counts = {"doh_added": 0, "doh_skipped_review": 0, "doh_links_applied": 0,
-              "doh_links_unresolved": 0}
+              "doh_links_unresolved": 0, "doh_aliases_added": 0, "doh_aliases_skipped": 0}
+    inserted: dict[str, int] = {}            # DoH food id -> foods.id of the row we created
 
     for r in rows:
         if r["review"] or not r["kcal"]:
@@ -65,15 +69,36 @@ def import_doh(conn: sqlite3.Connection, doh_csv: Path = DOH_CSV,
             name = f"{name} ({r['food_id']})"
         taken.add(name)
         group, serving = group_of(int(r["pdf_page"]))
-        conn.execute(
+        if r.get("serving_g"):               # the table printed a serving size for this food
+            serving = float(r["serving_g"])
+            serving_note = "serving size from the DoH table"
+        else:
+            serving_note = "default serving is a group-level guess"
+        unverified = ("; Thai name not verified (read by the lite model)"
+                      if r.get("name_verified", "1") == "0" else "")
+        cur = conn.execute(
             """INSERT INTO foods (name_th, name_en, kind, kcal_100g, protein_100g, fat_100g,
                    carbs_100g, default_serving_g, source, notes)
                VALUES (?, ?, 'ingredient', ?, ?, ?, ?, ?, 'doh2018', ?)""",
             (name, r["name_en"] or None, float(r["kcal"]), float(r["protein_g"]),
              float(r["fat_g"]), float(r["carbs_g"]), serving,
-             f"DoH 2018 table id {r['food_id']}; group: {group}; "
-             f"default serving is a group-level guess"))
+             f"DoH 2018 table id {r['food_id']}; group: {group}; {serving_note}{unverified}"))
+        inserted[r["food_id"]] = cur.lastrowid
+        if group == "dishes":                # a dish's default serving is one plate
+            conn.execute("INSERT INTO food_units (food_id, unit, grams) VALUES (?, 'จาน', ?)",
+                         (cur.lastrowid, serving))
         counts["doh_added"] += 1
+
+    for a in (_read(aliases_csv) if aliases_csv.exists() else []):
+        food_id = inserted.get(a["doh_food_id"])
+        clash = conn.execute("SELECT 1 FROM foods WHERE name_th = ?1 OR name_en = ?1 "
+                             "UNION SELECT 1 FROM food_aliases WHERE alias = ?1", (a["alias"],)).fetchone()
+        if food_id is None or clash:         # the DoH row was flagged, or the name is already taken
+            counts["doh_aliases_skipped"] += 1
+            continue
+        conn.execute("INSERT INTO food_aliases (food_id, alias, lang) VALUES (?, ?, ?)",
+                     (food_id, a["alias"], a["lang"] or None))
+        counts["doh_aliases_added"] += 1
 
     for link in links:
         row = by_id.get(link["doh_food_id"])

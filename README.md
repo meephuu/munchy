@@ -44,6 +44,14 @@ python -m pytest -m live      # real Gemini API (needs a key)
 python -m pytest -m slow      # real BGE-M3 embedding model
 ```
 
+## Evaluate and tune
+```powershell
+python evaluate.py            # 21 dishes vs USDA reference values: mean/median % error, worst cases
+python calibrate_matcher.py   # re-pick the matcher's confidence thresholds from data/eval/match_queries.csv
+```
+The evaluation shows where our data and USDA disagree, not which one is right for Thai foods
+(for example Thai steamed sticky rice is far denser than USDA's boiled rice).
+
 ## LLM provider
 Gemini by default. For a self-hosted model set `LLM_PROVIDER=ollama` (and `OLLAMA_MODEL`) in
 `.env` after installing Ollama and pulling the model; see `.env.example`.
