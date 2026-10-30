@@ -29,6 +29,8 @@ def format_estimate(text: str, est: Estimate) -> str:
     out += ["", f"Total: {est.kcal:.0f} kcal | protein {est.protein:.1f} g | "
                 f"fat {est.fat:.1f} g | carbs {est.carbs:.1f} g"]
 
+    if est.warnings:
+        out += ["", "Warnings"] + [f"  ! {w}" for w in est.warnings]
     if est.assumptions:
         out += ["", "Assumptions"] + [f"  - {a}" for a in est.assumptions]
     out += ["", "Estimates are approximate: portion size and cooking oil dominate the error."]
@@ -65,6 +67,12 @@ def main(argv: list[str] | None = None,
         return 1
     except RuntimeError as e:                        # e.g. missing GEMINI_API_KEY
         print(f"Setup problem: {e}", file=sys.stderr)
+        return 1
+
+    if not est.lines:                                # every item was left unmatched
+        print("Nothing could be matched to the food database.", file=sys.stderr)
+        for w in est.warnings:
+            print(f"  ! {w}", file=sys.stderr)
         return 1
 
     print(format_estimate(text, est))

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from src.db import seed_db
-from src.matcher import EMBEDDING_WEAK, BGEEmbedder, Matcher, normalize
+from src.matcher import HIGH, LOW, MARGIN, BGEEmbedder, Match, Matcher, classify, normalize
 
 
 class BigramEmbedder:
@@ -75,7 +75,7 @@ def test_fuzzy_rescues_typo_when_embedding_is_weak(db_path):
 def test_nonsense_is_not_fuzzy_matched(db_path):
     m = Matcher(db_path, HashEmbedder(), cache_dir=None)
     top = m.match("zzqxv")[0]
-    assert top.method == "embedding" and top.confidence < EMBEDDING_WEAK
+    assert top.method == "embedding" and top.confidence < LOW
 
 
 def test_blank_query_returns_nothing(db_path):
@@ -88,6 +88,37 @@ def test_embedding_cache_is_written_and_reused(db_path, tmp_path):
     assert len(list(tmp_path.glob("embeddings_*.npy"))) == 1
     second = Matcher(db_path, ExplodingEmbedder(), cache_dir=tmp_path)
     second._embeddings()                                    # loaded from disk, no encode call
+
+
+# --- classify() -----------------------------------------------------------------------
+
+def m(conf, method="embedding", food_id=1):
+    return Match(food_id, f"food{food_id}", "ingredient", conf, method, "text")
+
+
+def test_classify_exact_and_fuzzy_are_always_ok():
+    assert classify([m(1.0, "exact")]) == "ok"
+    assert classify([m(0.88, "fuzzy"), m(0.88, food_id=2)]) == "ok"
+
+
+def test_classify_empty_is_no_match():
+    assert classify([]) == "no_match"
+
+
+def test_classify_thresholds():
+    assert classify([m(LOW - 0.01), m(0.1, food_id=2)]) == "no_match"
+    assert classify([m(LOW), m(0.1, food_id=2)]) == "uncertain"
+    assert classify([m(HIGH - 0.01), m(0.1, food_id=2)]) == "uncertain"
+    assert classify([m(HIGH), m(0.1, food_id=2)]) == "ok"
+
+
+def test_classify_close_runner_up_makes_a_confident_match_uncertain():
+    assert classify([m(0.95), m(0.95 - MARGIN + 0.01, food_id=2)]) == "uncertain"
+    assert classify([m(0.95), m(0.95 - MARGIN - 0.01, food_id=2)]) == "ok"
+
+
+def test_classify_single_candidate_has_no_gap_penalty():
+    assert classify([m(0.95)]) == "ok"
 
 
 # --- real BGE-M3 model: run with `pytest -m slow` -------------------------------------
@@ -113,5 +144,11 @@ def test_real_model_finds_the_right_food(real, query, expected):
 
 
 @pytest.mark.slow
-def test_real_model_scores_nonsense_low(real):
-    assert real.match("รถแทรกเตอร์")[0].confidence < EMBEDDING_WEAK + 0.1
+@pytest.mark.parametrize("query, status", [
+    ("egg boiled", "ok"),                  # clear match
+    ("ไข่ตม", "uncertain"),                # typo: right food, but a shaky score
+    ("เบียร์", "no_match"),                # not in the table
+    ("รถแทรกเตอร์", "no_match"),            # nonsense
+])
+def test_real_model_classification(real, query, status):
+    assert classify(real.match(query)) == status

@@ -1,0 +1,64 @@
+query,expected,note
+ไข่ตม,ไข่ต้ม,typo
+egg boiled,ไข่ต้ม,word order
+boiled chicken,อกไก่ต้ม,paraphrase
+ไก่ย่างอก,อกไก่ย่าง,word order
+grilled chicken breast fillet,อกไก่ย่าง,paraphrase
+ไก่ทอดเคเอฟซี,ไก่ทอด,brand
+fried chicken drumstick,ไก่ทอด,paraphrase
+grilled pork skewers,หมูปิ้ง,plural
+หมูย่างไม้,หมูปิ้ง,paraphrase
+sticky rice and moo ping,ข้าวเหนียวหมูปิ้ง,mixed language
+ข้าวสวยร้อน,ข้าวสวย,extra word
+steamed rice,ข้าวสวย,paraphrase
+ผักสลัดสด,ผักสลัด,extra word
+cucumber slices,แตงกวา,paraphrase
+แตงกวาสด,แตงกวา,extra word
+มะเขือเทศลูกใหญ่,มะเขือเทศ,extra word
+mashed potatoe,มันฝรั่งบด,typo
+cheddar slice,ชีสเชดดาร์,paraphrase
+sliced cheese,ชีสเชดดาร์,paraphrase
+brown sauce gravy,เกรวี่,paraphrase
+french fry,เฟรนช์ฟรายส์,singular
+กะเพราหมู,ผัดกะเพราหมูสับ,short form
+thai style omelet,ไข่เจียว,paraphrase
+sunny side fried egg,ไข่ดาว,paraphrase
+glass of milk,นมสด,paraphrase
+ripe banana,กล้วยน้ำว้า,paraphrase
+ขนมปังปิ้ง,ขนมปังขาว,toast
+grilled pork belly,สามชั้นย่าง,paraphrase
+grilled sausages,ไส้กรอก,paraphrase
+tofu block,เต้าหู้ขาว,paraphrase
+boiled prawns,กุ้งต้ม,paraphrase
+sweet corn,ข้าวโพดต้ม,paraphrase
+สลัดไก่ย่าง,สลัดอกไก่,paraphrase
+chicken salad with egg,สลัดอกไก่,paraphrase
+เบียร์,,not in table
+รถแทรกเตอร์,,nonsense
+pad thai,,not in table
+ผัดไทย,,not in table
+ต้มยำกุ้ง,,not in table
+tom yum soup,,not in table
+ข้าวมันไก่,,not in table
+ก๋วยเตี๋ยวเรือ,,not in table
+pizza,,not in table
+hamburger,,not in table
+sushi,,not in table
+coffee latte,,not in table
+ไอศกรีม,,not in table
+ช็อกโกแลต,,not in table
+แกงเขียวหวานไก่,,not in table
+สเต็กเนื้อ,,not in table
+beef steak,,not in table
+น้ำอัดลม,,not in table
+spaghetti carbonara,,not in table
+ข้าวผัดกุ้ง,,not in table
+salmon sashimi,,not in table
+apple,,not in table
+ส้ม,,not in table
+มะม่วงข้าวเหนียว,,not in table
+ปลาทอด,,near miss (fried)
+grilled fish,,near miss (grilled)
+ramen,,not in table
+เฟอร์นิเจอร์,,nonsense
+asdfgh,,nonsense

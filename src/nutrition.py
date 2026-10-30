@@ -48,6 +48,8 @@ class Estimate:
     lines: list[Line]
     notes: list[str] = field(default_factory=list)   # estimate-level assumptions (replacements)
     matches: list[tuple[ParsedItem, Match]] = field(default_factory=list)  # how each input matched
+    warnings: list[str] = field(default_factory=list)       # weak matches, partial totals
+    unmatched: list[ParsedItem] = field(default_factory=list)  # items left out of the totals
 
     @property
     def kcal(self) -> float:

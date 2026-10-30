@@ -21,9 +21,15 @@ from src.db import connect
 
 CACHE_DIR = config.ROOT / "data" / "processed"
 
-# Starting guesses, to be tuned on real failures in step 13.
-EMBEDDING_WEAK = 0.55   # below this the embedding match is not trusted on its own
-FUZZY_MIN = 0.85        # fuzzy only wins if the strings are nearly identical
+
+# Thresholds, chosen with calibrate_matcher.py on data/eval/match_queries.csv (66 queries,
+# 34-food table). No threshold separates good from bad perfectly: foods we lack but that sit
+# near one we have (fried fish vs fried chicken) score as high as correct matches. Re-run the
+# script whenever the food table or model changes (steps 11-13).
+LOW = 0.65       # embedding confidence below this -> no_match (lowest real food seen: 0.71)
+HIGH = 0.80      # below this (but >= LOW) -> uncertain
+MARGIN = 0.05    # top-1 minus top-2 below this -> uncertain even if confident
+FUZZY_MIN = 0.85  # fuzzy only wins if the strings are nearly identical
 
 
 @dataclass(frozen=True)
@@ -53,6 +59,25 @@ class BGEEmbedder:
             from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer(self.model_name)
         return self._model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+
+
+def classify(matches: list[Match], low: float = LOW, high: float = HIGH,
+             margin: float = MARGIN) -> str:
+    """'ok' | 'uncertain' | 'no_match' for the result of Matcher.match().
+
+    Exact matches are always ok; a fuzzy match already needed near-identical spelling.
+    Embedding cosine is not well calibrated, so besides the score we look at the gap to
+    the runner-up: two foods scoring alike means the model is guessing between them.
+    """
+    if not matches:
+        return "no_match"
+    top = matches[0]
+    if top.method in ("exact", "fuzzy"):
+        return "ok"
+    if top.confidence < low:
+        return "no_match"
+    gap = top.confidence - matches[1].confidence if len(matches) > 1 else 1.0
+    return "uncertain" if top.confidence < high or gap < margin else "ok"
 
 
 def normalize(text: str) -> str:
@@ -138,7 +163,7 @@ class Matcher:
         results = [self._make(i, sims[i], "embedding")
                    for i in self._best_per_food(sims)[:top_k]]
 
-        if results[0].confidence < EMBEDDING_WEAK:
+        if results[0].confidence < LOW:
             fuzzy = np.array([fuzz.ratio(q, n) / 100 for n in self._norm])
             top = self._best_per_food(fuzzy)[0]
             if fuzzy[top] >= FUZZY_MIN:

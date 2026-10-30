@@ -1,10 +1,12 @@
 """The three reference inputs, end to end (parser faked unless marked live)."""
+from contextlib import closing
+
 import pytest
 
 from cli import format_estimate, main
 from src import config
-from src.db import seed_db
-from src.matcher import BGEEmbedder, Matcher
+from src.db import connect, seed_db
+from src.matcher import BGEEmbedder, Match, Matcher
 from src.nutrition import CalcError
 from src.parser import ParsedItem, ParseError
 from src.pipeline import estimate
@@ -59,7 +61,73 @@ def test_input3_total(run):
     assert len(est.assumptions) == 3
 
 
+# --- weak matches (step 9) ------------------------------------------------------------
+
+class StubMatcher:
+    """Returns canned candidates so the pipeline's handling of each status is tested."""
+
+    def __init__(self, db_path, canned):
+        self._real = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+        self._canned = canned
+
+    def match(self, query, top_k=3):
+        return self._canned.get(query) or self._real.match(query, top_k)
+
+
+def candidate(db_path, name, conf, method="embedding"):
+    return Match(*_food(db_path, name), conf, method, name)
+
+
+def _food(db_path, name):
+    with closing(connect(db_path)) as conn:
+        r = conn.execute("SELECT id, name_th, kind FROM foods WHERE name_th = ?", (name,)).fetchone()
+    return r["id"], r["name_th"], r["kind"]
+
+
+def run_with(db_path, canned, items):
+    return estimate("x", parse_fn=lambda t: items, matcher=StubMatcher(db_path, canned),
+                    db_path=db_path)
+
+
+def test_unmatched_item_is_left_out_and_reported(db_path):
+    canned = {"เบียร์": [candidate(db_path, "เนย", 0.57), candidate(db_path, "นมสด", 0.57)]}
+    est = run_with(db_path, canned, [ParsedItem(food="ข้าวสวย", qty=1, unit="จาน"),
+                                     ParsedItem(food="เบียร์")])
+    assert [l.name for l in est.lines] == ["ข้าวสวย"]          # butter is NOT counted
+    assert [i.food for i in est.unmatched] == ["เบียร์"]
+    assert any("เบียร์" in w and "incomplete" in w for w in est.warnings)
+
+
+def test_uncertain_item_is_counted_with_a_warning_listing_alternatives(db_path):
+    canned = {"ไข่ตม": [candidate(db_path, "ไข่ต้ม", 0.71), candidate(db_path, "ไข่ดาว", 0.67),
+                        candidate(db_path, "ไข่เจียว", 0.61)]}
+    est = run_with(db_path, canned, [ParsedItem(food="ไข่ตม", qty=1, unit="ฟอง")])
+    assert [l.name for l in est.lines] == ["ไข่ต้ม"]
+    assert est.unmatched == []
+    [warning] = est.warnings
+    assert "ไข่ตม" in warning and "0.71" in warning and "ไข่ดาว" in warning
+
+
+def test_confident_matches_produce_no_warnings(run):
+    assert run(I1).warnings == [] and run(I2).warnings == [] and run(I3).warnings == []
+
+
 # --- CLI ------------------------------------------------------------------------------
+
+def test_cli_prints_warnings_section(db_path, capsys):
+    canned = {"ไข่ตม": [candidate(db_path, "ไข่ต้ม", 0.71), candidate(db_path, "ไข่ดาว", 0.67)]}
+    est = run_with(db_path, canned, [ParsedItem(food="ไข่ตม")])
+    assert main(["x"], estimate_fn=lambda t: est) == 0
+    out = capsys.readouterr().out
+    assert "Warnings" in out and "! uncertain match: 'ไข่ตม'" in out
+
+
+def test_cli_exits_1_when_nothing_matches(db_path, capsys):
+    canned = {"เบียร์": [candidate(db_path, "เนย", 0.57)]}
+    est = run_with(db_path, canned, [ParsedItem(food="เบียร์")])
+    assert main(["เบียร์"], estimate_fn=lambda t: est) == 1
+    captured = capsys.readouterr()
+    assert captured.out == "" and "Nothing could be matched" in captured.err
 
 def test_cli_prints_breakdown_totals_and_assumptions(run, capsys):
     assert main([I1], estimate_fn=run) == 0
