@@ -20,7 +20,8 @@ Tick a box only when the step is done and verified.
       _(decided: exact match -> embeddings -> fuzzy only when embedding is weak; returns top-k per-food matches; embeddings cached in `data/processed/`; raw cosine is poorly calibrated on 34 foods (nonsense scores ~0.5-0.6), so step 9 should use the top-1/top-2 margin and tune thresholds in step 13; real-model tests run with `pytest -m slow`)_
 - [x] 6. Calculator — units -> grams, scale nutrients, sum totals
       _(decided: a user-named item replaces the matching default component of a combo; qty with no unit = default servings; unknown unit falls back to servings with a visible warning)_
-- [ ] 7. CLI — `python cli.py "<dish>"` prints breakdown + totals (first working version)
+- [x] 7. CLI — `python cli.py "<dish>"` prints breakdown + totals (first working version)
+      _(decided: orchestration lives in `src/pipeline.py` so FastAPI can reuse it; CLI prints each match's method + confidence but does not flag weak matches yet (step 9))_
 
 ## Phase 3 — Make it good
 - [ ] 8. Defaults & assumptions — missing quantity, dressing, cooking oil; show assumptions in output

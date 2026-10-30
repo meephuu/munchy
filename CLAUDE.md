@@ -71,6 +71,7 @@ src/db.py          schema + seed data            (step 2-3)
 src/parser.py      text -> structured items      (step 4)
 src/matcher.py     food name -> DB entry         (step 5)
 src/nutrition.py   portions -> totals            (step 6)
+src/pipeline.py    parse -> match -> calculate   (step 7; shared by cli.py and the future API)
 cli.py             entry point                   (step 7)
 check_setup.py     verifies the environment
 tests/
