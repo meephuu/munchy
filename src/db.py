@@ -93,11 +93,14 @@ def _num(value: str | None) -> float | None:
     return float(value) if value not in (None, "") else None
 
 
-def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR) -> dict[str, int]:
+def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR,
+            doh_csv: Path | None = None) -> dict[str, int]:
     """Rebuild the DB from the CSVs in seed_dir. Returns row counts per table.
 
     Units, aliases and components refer to foods by name (name_th or name_en);
     an unknown or ambiguous name raises ValueError so typos fail loudly.
+    If doh_csv is given, the transcribed Department of Health table is imported on top
+    (see src/doh_import.py); the counts then also include the import summary.
     """
     init_db(path, reset=True)
     with closing(connect(path)) as conn, conn:
@@ -152,19 +155,30 @@ def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR) -> dict[str, int]:
                  int(row["sort_order"] or 0)),
             )
 
-        return {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
-                for t in ("foods", "food_units", "food_aliases", "combo_components")}
+        extra = {}
+        if doh_csv is not None:
+            from src.doh_import import LINKS_CSV, import_doh
+            extra = import_doh(conn, doh_csv, seed_dir / LINKS_CSV.name)
+        return {**{t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+                   for t in ("foods", "food_units", "food_aliases", "combo_components")},
+                **extra}
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create or seed the Munchy database.")
     parser.add_argument("--seed", action="store_true",
                         help="rebuild foods.db from data/seed/*.csv (deletes the old file)")
+    parser.add_argument("--no-doh", action="store_true",
+                        help="with --seed: skip the Department of Health table even if present")
     args = parser.parse_args()
 
     if args.seed:
-        for table, n in seed_db().items():
-            print(f"{table:18} {n}")
+        from src.doh_import import DOH_CSV
+        use_doh = DOH_CSV.exists() and not args.no_doh
+        if not use_doh:
+            print("(Department of Health table not imported)")
+        for table, n in seed_db(doh_csv=DOH_CSV if use_doh else None).items():
+            print(f"{table:22} {n}")
     else:
         init_db()
         with closing(connect()) as conn:
