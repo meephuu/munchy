@@ -1,0 +1,9 @@
+combo,component,default_qty,default_unit,takes_user_qty,assumption_note,sort_order
+ข้าวเหนียวหมูปิ้ง,ข้าวเหนียวนึ่ง,1,ห่อ,0,assumed 1 serving of sticky rice (1 ห่อ ~90 g),1
+ข้าวเหนียวหมูปิ้ง,หมูปิ้ง,3,ไม้,1,assumed 3 sticks of grilled pork (no quantity given),2
+สลัดอกไก่,ผักสลัด,1,จาน,0,assumed 1 bowl of salad greens (~100 g),1
+สลัดอกไก่,อกไก่ย่าง,1,ชิ้น,1,assumed 1 grilled chicken breast (~120 g),2
+สลัดอกไก่,น้ำสลัดครีม,2,ช้อนโต๊ะ,0,assumed default dressing (2 tbsp creamy),3
+มันบดชีสราดเกรวี่,มันฝรั่งบด,1,จาน,1,assumed 1 serving of mashed potato (~150 g),1
+มันบดชีสราดเกรวี่,ชีสเชดดาร์,1,แผ่น,0,assumed 1 slice of cheddar (~20 g),2
+มันบดชีสราดเกรวี่,เกรวี่,2,ช้อนโต๊ะ,0,assumed 2 tbsp of gravy (~30 g),3

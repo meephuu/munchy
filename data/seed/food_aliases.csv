@@ -1,0 +1,86 @@
+food,alias,lang
+ข้าวเหนียวนึ่ง,ข้าวเหนียว,th
+ข้าวเหนียวนึ่ง,sticky rice,en
+ข้าวสวย,ข้าว,th
+ข้าวสวย,rice,en
+ข้าวสวย,white rice,en
+หมูปิ้ง,หมูปิ้งย่าง,th
+หมูปิ้ง,pork skewer,en
+หมูปิ้ง,grilled pork,en
+หมูปิ้ง,moo ping,en
+ไข่ต้ม,ไข่ต้มสุก,th
+ไข่ต้ม,boiled eggs,en
+ไข่ต้ม,hard boiled egg,en
+ไข่ดาว,fried eggs,en
+ไข่ดาว,sunny side up egg,en
+ไข่เจียว,omelette,en
+ไข่เจียว,omelet,en
+อกไก่ย่าง,อกไก่,th
+อกไก่ย่าง,chicken breast,en
+อกไก่ย่าง,grilled chicken,en
+อกไก่ต้ม,อกไก่ลวก,th
+อกไก่ต้ม,poached chicken breast,en
+สะโพกไก่ย่าง,ไก่ย่าง,th
+สะโพกไก่ย่าง,chicken thigh,en
+ไก่ทอด,ไก่ทอดกรอบ,th
+ไก่ทอด,kfc,en
+ผักสลัด,ผักสลัดรวม,th
+ผักสลัด,salad,en
+ผักสลัด,lettuce,en
+แตงกวา,แตง,th
+แตงกวา,cucumbers,en
+มะเขือเทศ,tomatoes,en
+มะเขือเทศ,มะเขือเทศสีดา,th
+แครอท,แครอต,th
+แครอท,carrots,en
+น้ำสลัดครีม,น้ำสลัด,th
+น้ำสลัดครีม,dressing,en
+น้ำสลัดครีม,salad dressing,en
+มันฝรั่งบด,มันบด,th
+มันฝรั่งบด,potato mash,en
+มันฝรั่งบด,mashed potatoes,en
+ชีสเชดดาร์,ชีส,th
+ชีสเชดดาร์,cheese,en
+ชีสเชดดาร์,cheddar,en
+เกรวี่,น้ำเกรวี่,th
+เกรวี่,gravy,en
+เกรวี่,gravy sauce,en
+เฟรนช์ฟรายส์,เฟรนช์ฟราย,th
+เฟรนช์ฟรายส์,มันฝรั่งทอด,th
+เฟรนช์ฟรายส์,fries,en
+เฟรนช์ฟรายส์,chips,en
+สามชั้นย่าง,หมูสามชั้น,th
+สามชั้นย่าง,pork belly,en
+ไส้กรอก,ไส้กรอกหมู,th
+ไส้กรอก,sausages,en
+กุ้งต้ม,กุ้ง,th
+กุ้งต้ม,shrimp,en
+กุ้งต้ม,prawn,en
+เต้าหู้ขาว,เต้าหู้,th
+เต้าหู้ขาว,tofu,en
+ส้มตำ,ส้มตำไทย,th
+ส้มตำ,som tam,en
+ส้มตำ,green papaya salad,en
+ผัดกะเพราหมูสับ,กะเพราหมูสับ,th
+ผัดกะเพราหมูสับ,pad kra pao,en
+ผัดกะเพราหมูสับ,pad krapow moo,en
+ข้าวโพดต้ม,ข้าวโพด,th
+ข้าวโพดต้ม,corn,en
+กล้วยน้ำว้า,กล้วย,th
+กล้วยน้ำว้า,bananas,en
+ขนมปังขาว,ขนมปัง,th
+ขนมปังขาว,bread,en
+นมสด,นม,th
+นมสด,milk,en
+เนย,butter,en
+น้ำมันพืช,น้ำมัน,th
+น้ำมันพืช,oil,en
+น้ำมันพืช,cooking oil,en
+ข้าวเหนียวหมูปิ้ง,sticky rice with pork skewers,en
+สลัดอกไก่,สลัดไก่,th
+สลัดอกไก่,chicken salad,en
+สลัดอกไก่,grilled chicken salad,en
+มันบดชีสราดเกรวี่,มันบดชีส,th
+มันบดชีสราดเกรวี่,cheese mashed potato with gravy sauce,en
+มันบดชีสราดเกรวี่,cheese mashed potato with gravy,en
+มันบดชีสราดเกรวี่,mashed potato with cheese and gravy,en

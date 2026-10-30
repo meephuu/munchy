@@ -1,0 +1,14 @@
+# Core
+pydantic>=2.6
+python-dotenv>=1.0
+
+# Matching (embeddings + fuzzy search)
+sentence-transformers>=3.0
+numpy>=1.26
+rapidfuzz>=3.6
+
+# Data cleaning
+pandas>=2.2
+
+# Testing
+pytest>=8.0
