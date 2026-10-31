@@ -52,6 +52,7 @@ class LineOut(Totals):
 
 class MatchOut(BaseModel):
     input: str
+    input_en: str | None = Field(description="English name of the input, if the parser gave one")
     qty: float | None
     unit: str | None
     matched_food: str
@@ -81,11 +82,11 @@ def to_response(text: str, est: Estimate) -> EstimateOut:
         lines=[LineOut(name=l.name, grams=_r(l.grams), kcal=_r(l.kcal), protein_g=_r(l.protein),
                        fat_g=_r(l.fat), carbs_g=_r(l.carbs), from_input=l.item_text,
                        part_of=l.via_combo, assumptions=l.assumptions) for l in est.lines],
-        matches=[MatchOut(input=i.food, qty=i.qty, unit=i.unit, matched_food=m.name,
+        matches=[MatchOut(input=i.food, input_en=i.food_en, qty=i.qty, unit=i.unit, matched_food=m.name,
                           method=m.method, confidence=m.confidence) for i, m in est.matches],
         assumptions=est.assumptions,
         warnings=est.warnings,
-        unmatched=[i.food for i in est.unmatched],
+        unmatched=[i.label for i in est.unmatched],
         complete=not est.unmatched,
     )
 

@@ -27,7 +27,8 @@ def main() -> None:
     def right(q, m) -> bool:
         """expected may list several acceptable foods separated by '|' (the table has
         near-duplicates); a trailing '*' accepts any food whose name starts with that text."""
-        return any(m[0].name.startswith(e[:-1]) if e.endswith("*") else m[0].name == e
+        names = [n for n in (m[0].name_th, m[0].name) if n]      # labels may be Thai or English
+        return any(any(n.startswith(e[:-1]) for n in names) if e.endswith("*") else e in names
                    for e in q["expected"].split("|"))
 
     print(f"{'query':32} {'expected':16} {'top1':16} {'conf':>5} {'gap':>5}  method")

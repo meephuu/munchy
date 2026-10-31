@@ -5,7 +5,7 @@ import pytest
 
 from cli import format_estimate, main
 from src import config
-from src.db import connect, seed_db
+from src.db import connect, display_name, seed_db
 from src.matcher import BGEEmbedder, Match, Matcher
 from src.nutrition import CalcError
 from src.parser import ParsedItem, ParseError
@@ -80,8 +80,8 @@ def candidate(db_path, name, conf, method="embedding"):
 
 def _food(db_path, name):
     with closing(connect(db_path)) as conn:
-        r = conn.execute("SELECT id, name_th, kind FROM foods WHERE name_th = ?", (name,)).fetchone()
-    return r["id"], r["name_th"], r["kind"]
+        r = conn.execute("SELECT * FROM foods WHERE name_th = ?", (name,)).fetchone()
+    return r["id"], display_name(r), r["kind"]
 
 
 def run_with(db_path, canned, items):
@@ -93,7 +93,7 @@ def test_unmatched_item_is_left_out_and_reported(db_path):
     canned = {"เบียร์": [candidate(db_path, "เนย", 0.57), candidate(db_path, "นมสด", 0.57)]}
     est = run_with(db_path, canned, [ParsedItem(food="ข้าวสวย", qty=1, unit="จาน"),
                                      ParsedItem(food="เบียร์")])
-    assert [l.name for l in est.lines] == ["ข้าวสวย"]          # butter is NOT counted
+    assert [l.name for l in est.lines] == ["steamed white rice"]          # butter is NOT counted
     assert [i.food for i in est.unmatched] == ["เบียร์"]
     assert any("เบียร์" in w and "incomplete" in w for w in est.warnings)
 
@@ -102,10 +102,10 @@ def test_uncertain_item_is_counted_with_a_warning_listing_alternatives(db_path):
     canned = {"ไข่ตม": [candidate(db_path, "ไข่ต้ม", 0.71), candidate(db_path, "ไข่ดาว", 0.67),
                         candidate(db_path, "ไข่เจียว", 0.61)]}
     est = run_with(db_path, canned, [ParsedItem(food="ไข่ตม", qty=1, unit="ฟอง")])
-    assert [l.name for l in est.lines] == ["ไข่ต้ม"]
+    assert [l.name for l in est.lines] == ["boiled egg"]
     assert est.unmatched == []
     [warning] = est.warnings
-    assert "ไข่ตม" in warning and "0.71" in warning and "ไข่ดาว" in warning
+    assert "ไข่ตม" in warning and "0.71" in warning and "fried egg" in warning
 
 
 def test_confident_matches_produce_no_warnings(run):
@@ -133,7 +133,7 @@ def test_cli_prints_breakdown_totals_and_assumptions(run, capsys):
     assert main([I1], estimate_fn=run) == 0
     out = capsys.readouterr().out
     assert "ข้าวเหนียวหมูปิ้ง 5 ไม้" in out
-    assert "หมูปิ้ง [ข้าวเหนียวหมูปิ้ง]: 150 g" in out
+    assert "grilled pork skewer [sticky rice with grilled pork skewers]: 150 g" in out
     assert "Total: 527 kcal" in out
     assert "Assumptions" in out and "sticky rice" in out
 
@@ -169,3 +169,25 @@ def test_live_full_pipeline(db_path, tmp_path, text, kcal):
     est = estimate(text, matcher=Matcher(db_path, BGEEmbedder(), cache_dir=tmp_path),
                    db_path=db_path)
     assert est.kcal == pytest.approx(kcal)
+
+
+# --- English names --------------------------------------------------------------------
+
+def test_warnings_use_the_english_name_when_the_parser_gave_one(db_path):
+    canned = {"เบียร์": [candidate(db_path, "เนย", 0.57)], "beer": [candidate(db_path, "เนย", 0.57)]}
+    est = run_with(db_path, canned, [ParsedItem(food="เบียร์", food_en="beer")])
+    assert any("'beer'" in w and "incomplete" in w for w in est.warnings)
+
+
+def test_english_name_is_tried_when_the_original_does_not_match_cleanly(db_path):
+    canned = {"ไข่ตม": [candidate(db_path, "ไข่ดาว", 0.60)],
+              "boiled egg": [candidate(db_path, "ไข่ต้ม", 1.0, method="exact")]}
+    est = run_with(db_path, canned, [ParsedItem(food="ไข่ตม", food_en="boiled egg", qty=1, unit="ฟอง")])
+    assert [l.name for l in est.lines] == ["boiled egg"] and est.warnings == []
+
+
+def test_english_name_does_not_override_a_clean_match(db_path):
+    canned = {"ไข่ต้ม": [candidate(db_path, "ไข่ต้ม", 1.0, method="exact")],
+              "egg": [candidate(db_path, "ไข่ดาว", 1.0, method="exact")]}
+    est = run_with(db_path, canned, [ParsedItem(food="ไข่ต้ม", food_en="egg")])
+    assert [l.name for l in est.lines] == ["boiled egg"]

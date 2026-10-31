@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from src import config
-from src.db import connect
+from src.db import connect, display_name
 from src.matcher import Match
 from src.parser import ParsedItem
 
@@ -79,7 +79,7 @@ def _unit_key(unit: str | None) -> str | None:
 def _grams(conn: sqlite3.Connection, food: sqlite3.Row,
            qty: float | None, unit: str | None) -> tuple[float, str | None]:
     """Return (grams, assumption or None) for qty+unit of one ingredient."""
-    name, serving = food["name_th"] or food["name_en"], food["default_serving_g"]
+    name, serving = display_name(food), food["default_serving_g"]
     u = _unit_key(unit)
 
     def serving_grams(n: float) -> float:
@@ -116,8 +116,8 @@ def _line(food: sqlite3.Row, grams: float, item_text: str, *,
     k = grams / 100
     assumptions = list(assumptions or [])
     if food["oil_note"]:
-        assumptions.append(f"{food['name_th'] or food['name_en']}: {food['oil_note']}")
-    return Line(food["id"], food["name_th"] or food["name_en"], grams,
+        assumptions.append(f"{display_name(food)}: {food['oil_note']}")
+    return Line(food["id"], display_name(food), grams,
                 food["kcal_100g"] * k, food["protein_100g"] * k,
                 food["fat_100g"] * k, food["carbs_100g"] * k,
                 item_text, via_combo, assumptions)
@@ -126,8 +126,8 @@ def _line(food: sqlite3.Row, grams: float, item_text: str, *,
 def _expand_combo(conn: sqlite3.Connection, combo: sqlite3.Row, qty: float | None,
                   unit: str | None, item_text: str, depth: int = 0) -> list[Line]:
     if depth >= MAX_COMBO_DEPTH:
-        raise CalcError(f"combo nesting too deep (cycle?) at {combo['name_th']}")
-    combo_name = combo["name_th"] or combo["name_en"]
+        raise CalcError(f"combo nesting too deep (cycle?) at {display_name(combo)}")
+    combo_name = display_name(combo)
     comps = conn.execute(
         """SELECT c.*, f.* FROM combo_components c JOIN foods f ON f.id = c.component_id
            WHERE c.combo_id = ? ORDER BY c.sort_order""", (combo["id"],)).fetchall()
@@ -149,7 +149,7 @@ def _expand_combo(conn: sqlite3.Connection, combo: sqlite3.Row, qty: float | Non
             continue
         grams, note = _grams(conn, c, c_qty, c_unit)
         notes = [] if takes_user else [c["assumption_note"] or note or
-                                       f"assumed default amount of {c['name_th']}"]
+                                       f"assumed default amount of {display_name(c)}"]
         if takes_user and note:
             notes.append(note)
         out.append(_line(c, grams, item_text, via_combo=combo_name, assumptions=notes))

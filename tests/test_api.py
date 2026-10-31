@@ -46,10 +46,10 @@ def test_estimate_returns_totals_lines_and_assumptions(client, db_path):
     assert r.status_code == 200
     body = r.json()
     assert body["totals"] == {"kcal": 527.1, "protein_g": 33.4, "fat_g": 25.9, "carbs_g": 40.8}
-    assert [l["name"] for l in body["lines"]] == ["ข้าวเหนียวนึ่ง", "หมูปิ้ง"]
-    assert body["lines"][1]["grams"] == 150 and body["lines"][1]["part_of"] == "ข้าวเหนียวหมูปิ้ง"
-    assert body["matches"] == [{"input": "ข้าวเหนียวหมูปิ้ง", "qty": 5, "unit": "ไม้",
-                                "matched_food": "ข้าวเหนียวหมูปิ้ง", "method": "exact", "confidence": 1.0}]
+    assert [l["name"] for l in body["lines"]] == ["steamed sticky rice", "grilled pork skewer"]
+    assert body["lines"][1]["grams"] == 150 and body["lines"][1]["part_of"] == "sticky rice with grilled pork skewers"
+    assert body["matches"] == [{"input": "ข้าวเหนียวหมูปิ้ง", "input_en": None, "qty": 5, "unit": "ไม้",
+                                "matched_food": "sticky rice with grilled pork skewers", "method": "exact", "confidence": 1.0}]
     assert any("sticky rice" in a for a in body["assumptions"])
     assert body["warnings"] == [] and body["unmatched"] == [] and body["complete"] is True
 
@@ -69,7 +69,7 @@ def test_unmatched_item_gives_a_partial_but_successful_response(client, db_path)
     body = r.json()
     assert body["complete"] is False and body["unmatched"] == ["เบียร์"]
     assert any("incomplete" in w for w in body["warnings"])
-    assert [l["name"] for l in body["lines"]] == ["ข้าวสวย"]
+    assert [l["name"] for l in body["lines"]] == ["steamed white rice"]
 
 
 def test_use_cache_flag_is_passed_through(client):

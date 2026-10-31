@@ -17,6 +17,7 @@ You only extract what the text says. Never invent foods, never give nutrition nu
 
 Each item has:
 - "food": the food name, in the language it was written in. Do not translate it.
+- "food_en": the same food named in plain English ("grilled pork skewer"). Copy "food" if it is already English.
 - "qty": the number the user gave for that food, or null if none was given.
 - "unit": the counting unit exactly as written (ไม้, ฟอง, จาน, ถ้วย, ห่อ, ช้อน, piece, cup, g ...), or null.
 
@@ -30,19 +31,21 @@ Rules:
 
 Examples:
 "ข้าวเหนียวหมูปิ้ง 5 ไม้" ->
-  [{"food": "ข้าวเหนียวหมูปิ้ง", "qty": 5, "unit": "ไม้"}]
+  [{"food": "ข้าวเหนียวหมูปิ้ง", "food_en": "sticky rice with grilled pork skewers", "qty": 5, "unit": "ไม้"}]
 "สลัดอกไก่ ใส่แตงกวา มะเขือเทศ ไข่ต้ม 1 ฟอง" ->
-  [{"food": "สลัดอกไก่", "qty": null, "unit": null},
-   {"food": "แตงกวา", "qty": null, "unit": null},
-   {"food": "มะเขือเทศ", "qty": null, "unit": null},
-   {"food": "ไข่ต้ม", "qty": 1, "unit": "ฟอง"}]
+  [{"food": "สลัดอกไก่", "food_en": "chicken breast salad", "qty": null, "unit": null},
+   {"food": "แตงกวา", "food_en": "cucumber", "qty": null, "unit": null},
+   {"food": "มะเขือเทศ", "food_en": "tomato", "qty": null, "unit": null},
+   {"food": "ไข่ต้ม", "food_en": "boiled egg", "qty": 1, "unit": "ฟอง"}]
 "cheese mashed potato with gravy sauce" ->
-  [{"food": "cheese mashed potato with gravy sauce", "qty": null, "unit": null}]
+  [{"food": "cheese mashed potato with gravy sauce", "food_en": "cheese mashed potato with gravy sauce",
+    "qty": null, "unit": null}]
 """
 
 
 class ParsedItem(BaseModel):
     food: str = Field(min_length=1)
+    food_en: str | None = None   # English name, for display; matching tries `food` first
     qty: float | None = None  # positivity checked below: Gemini's schema has no `gt`
     unit: str | None = None
 
@@ -57,6 +60,16 @@ class ParsedItem(BaseModel):
     @classmethod
     def _strip_food(cls, v: str) -> str:
         return v.strip()
+
+    @field_validator("food_en")
+    @classmethod
+    def _blank_english_is_none(cls, v: str | None) -> str | None:
+        return (v or "").strip() or None
+
+    @property
+    def label(self) -> str:
+        """What to call this item when talking to the user: English if the parser gave it."""
+        return self.food_en or self.food
 
     @field_validator("unit")
     @classmethod

@@ -18,6 +18,7 @@ from src import config
 DOH_CSV = config.ROOT / "data" / "processed" / "doh2018" / "foods.csv"
 LINKS_CSV = config.ROOT / "data" / "seed" / "doh_links.csv"
 ALIASES_CSV = config.ROOT / "data" / "seed" / "doh_aliases.csv"   # popular dish names -> DoH ids
+ENGLISH_CSV = config.ROOT / "data" / "seed" / "doh_english.csv"   # English names missing in the table
 
 # (first PDF page, last PDF page, group, default serving in grams). PDF page = printed page + 2.
 # Serving sizes are guesses for "one typical portion", not measured data.
@@ -52,6 +53,9 @@ def import_doh(conn: sqlite3.Connection, doh_csv: Path = DOH_CSV,
     links = _read(links_csv) if links_csv.exists() else []
     linked_ids = {l["doh_food_id"] for l in links}
 
+    english_csv = links_csv.with_name(ENGLISH_CSV.name)   # names the transcription left empty
+    english = {e["doh_food_id"]: e["name_en"] for e in _read(english_csv)} if english_csv.exists() else {}
+
     taken = {r[0] for r in conn.execute(
         "SELECT name_th FROM foods WHERE name_th IS NOT NULL")}
     counts = {"doh_added": 0, "doh_skipped_review": 0, "doh_links_applied": 0,
@@ -80,7 +84,7 @@ def import_doh(conn: sqlite3.Connection, doh_csv: Path = DOH_CSV,
             """INSERT INTO foods (name_th, name_en, kind, kcal_100g, protein_100g, fat_100g,
                    carbs_100g, default_serving_g, source, notes)
                VALUES (?, ?, 'ingredient', ?, ?, ?, ?, ?, 'doh2018', ?)""",
-            (name, r["name_en"] or None, float(r["kcal"]), float(r["protein_g"]),
+            (name, r["name_en"] or english.get(r["food_id"]) or None, float(r["kcal"]), float(r["protein_g"]),
              float(r["fat_g"]), float(r["carbs_g"]), serving,
              f"DoH 2018 table id {r['food_id']}; group: {group}; {serving_note}{unverified}"))
         inserted[r["food_id"]] = cur.lastrowid

@@ -162,3 +162,10 @@ def test_live_input3_english_dish_stays_whole():
     assert len(items) == 1
     assert items[0].food.lower() == "cheese mashed potato with gravy sauce"
     assert items[0].qty is None
+
+
+def test_english_name_is_optional_and_cleaned():
+    assert ParsedItem(food="ไข่ต้ม").food_en is None and ParsedItem(food="ไข่ต้ม").label == "ไข่ต้ม"
+    item = ParsedItem(food="ไข่ต้ม", food_en="  boiled egg ")
+    assert item.food_en == "boiled egg" and item.label == "boiled egg"
+    assert ParsedItem(food="ไข่ต้ม", food_en="  ").food_en is None

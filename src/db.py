@@ -75,6 +75,11 @@ def connect(path: Path = DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+def display_name(food) -> str:
+    """The name shown to the user: English when we have it, else the Thai one."""
+    return food["name_en"] or food["name_th"]
+
+
 def init_db(path: Path = DB_PATH, reset: bool = False) -> None:
     """Create the tables. reset=True deletes the file first (DB is rebuildable)."""
     if reset:

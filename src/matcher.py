@@ -16,7 +16,7 @@ import numpy as np
 from rapidfuzz import fuzz
 
 from src import config
-from src.db import connect
+from src.db import connect, display_name
 from src.textutil import normalize
 
 CACHE_DIR = config.ROOT / "data" / "processed"
@@ -36,11 +36,12 @@ FUZZY_MIN = 0.85  # fuzzy only wins if the strings are nearly identical
 @dataclass(frozen=True)
 class Match:
     food_id: int
-    name: str            # display name (Thai if available)
+    name: str            # display name (English if available)
     kind: str            # 'ingredient' | 'combo'
     confidence: float    # 0..1
     method: str          # 'exact' | 'embedding' | 'fuzzy'
     matched_text: str    # which name/alias produced the score
+    name_th: str | None = None   # Thai name, when the food has one (labels in data files use it)
 
 
 class Embedder(Protocol):
@@ -86,7 +87,7 @@ class Matcher:
                  cache_dir: Path | None = CACHE_DIR):
         self.embedder = embedder or BGEEmbedder()
         self.cache_dir = cache_dir
-        self._foods: dict[int, tuple[str, str]] = {}   # id -> (display name, kind)
+        self._foods: dict[int, tuple[str, str, str | None]] = {}   # id -> (display name, kind, Thai name)
         self._texts: list[str] = []                    # original search strings
         self._norm: list[str] = []                     # normalised, parallel to _texts
         self._owner: list[int] = []                    # food id per string
@@ -98,7 +99,7 @@ class Matcher:
         from contextlib import closing
         with closing(connect(db_path)) as conn:
             for r in conn.execute("SELECT id, name_th, name_en, kind FROM foods"):
-                self._foods[r["id"]] = (r["name_th"] or r["name_en"], r["kind"])
+                self._foods[r["id"]] = (display_name(r), r["kind"], r["name_th"])
                 for text in (r["name_th"], r["name_en"]):
                     self._add(text, r["id"])
             for r in conn.execute("SELECT food_id, alias FROM food_aliases"):
@@ -137,8 +138,9 @@ class Matcher:
     # --- matching ---------------------------------------------------------------------
 
     def _make(self, idx: int, score: float, method: str) -> Match:
-        name, kind = self._foods[self._owner[idx]]
-        return Match(self._owner[idx], name, kind, round(float(score), 4), method, self._texts[idx])
+        name, kind, name_th = self._foods[self._owner[idx]]
+        return Match(self._owner[idx], name, kind, round(float(score), 4), method,
+                     self._texts[idx], name_th)
 
     def _best_per_food(self, scores: np.ndarray) -> list[int]:
         """Indices of each food's best string, sorted by score descending."""

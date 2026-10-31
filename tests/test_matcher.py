@@ -48,19 +48,19 @@ def db_path(tmp_path_factory):
 def test_exact_match_by_alias_skips_the_embedder(db_path):
     m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
     [top] = m.match("  Pork  Skewer ")
-    assert (top.name, top.method, top.confidence) == ("หมูปิ้ง", "exact", 1.0)
+    assert (top.name, top.method, top.confidence) == ("grilled pork skewer", "exact", 1.0)
 
 
 def test_exact_match_on_combo(db_path):
     m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
     [top] = m.match("cheese mashed potato with gravy sauce")
-    assert top.kind == "combo" and top.name == "มันบดชีสราดเกรวี่"
+    assert top.kind == "combo" and top.name == "cheesy mashed potato with gravy"
 
 
 def test_embedding_ranks_similar_spelling_first_and_returns_top_k(db_path):
     m = Matcher(db_path, BigramEmbedder(), cache_dir=None)
     results = m.match("mashed potatos", top_k=3)
-    assert results[0].name == "มันฝรั่งบด" and results[0].method == "embedding"
+    assert results[0].name == "mashed potato" and results[0].method == "embedding"
     assert len(results) == 3
     assert len({r.food_id for r in results}) == 3          # one entry per food
     assert [r.confidence for r in results] == sorted((r.confidence for r in results), reverse=True)
@@ -69,7 +69,7 @@ def test_embedding_ranks_similar_spelling_first_and_returns_top_k(db_path):
 def test_fuzzy_rescues_typo_when_embedding_is_weak(db_path):
     m = Matcher(db_path, HashEmbedder(), cache_dir=None)
     top = m.match("ไข่ตม")[0]                                # missing tone mark
-    assert (top.name, top.method) == ("ไข่ต้ม", "fuzzy")
+    assert (top.name, top.method) == ("boiled egg", "fuzzy")
 
 
 def test_nonsense_is_not_fuzzy_matched(db_path):
@@ -130,14 +130,14 @@ def real(db_path, tmp_path_factory):
 
 @pytest.mark.slow
 @pytest.mark.parametrize("query, expected", [
-    ("หมูปิ้ง", "หมูปิ้ง"),
-    ("ข้าวเหนียวหมูปิ้ง", "ข้าวเหนียวหมูปิ้ง"),
-    ("cheese mashed potato with gravy sauce", "มันบดชีสราดเกรวี่"),
-    ("boiled egg", "ไข่ต้ม"),
-    ("ไข่ต้ม", "ไข่ต้ม"),
-    ("แตงกวา", "แตงกวา"),
-    ("grilled chicken salad", "สลัดอกไก่"),
-    ("ไก่ย่างอก", "อกไก่ย่าง"),
+    ("หมูปิ้ง", "grilled pork skewer"),
+    ("ข้าวเหนียวหมูปิ้ง", "sticky rice with grilled pork skewers"),
+    ("cheese mashed potato with gravy sauce", "cheesy mashed potato with gravy"),
+    ("boiled egg", "boiled egg"),
+    ("ไข่ต้ม", "boiled egg"),
+    ("แตงกวา", "cucumber"),
+    ("grilled chicken salad", "chicken breast salad"),
+    ("ไก่ย่างอก", "grilled chicken breast"),
 ])
 def test_real_model_finds_the_right_food(real, query, expected):
     assert real.match(query)[0].name == expected

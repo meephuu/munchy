@@ -1,12 +1,22 @@
+import csv
 import shutil
 from contextlib import closing
 
 import pytest
 
-from src.db import connect, seed_db
+from src.db import SEED_DIR, connect, display_name, seed_db
 from src.matcher import Match
 from src.nutrition import CalcError, calculate
 from src.parser import ParsedItem
+
+
+def _seed_english() -> dict[str, str]:
+    with open(SEED_DIR / "foods.csv", encoding="utf-8-sig", newline="") as f:
+        return {r["name_th"]: r["name_en"] for r in csv.DictReader(f) if r["name_th"] and r["name_en"]}
+
+
+EN = _seed_english()                      # results show English names; tests are written in Thai
+TH = {en: th for th, en in EN.items()}
 
 
 @pytest.fixture(scope="module")
@@ -19,9 +29,9 @@ def db_path(tmp_path_factory):
 def pair(db_path, food, qty=None, unit=None, text=None):
     """(ParsedItem, Match) as the pipeline would produce for an exactly matched name."""
     with closing(connect(db_path)) as conn:
-        r = conn.execute("SELECT id, name_th, kind FROM foods WHERE name_th = ?", (food,)).fetchone()
+        r = conn.execute("SELECT * FROM foods WHERE name_th = ?", (food,)).fetchone()
     return (ParsedItem(food=text or food, qty=qty, unit=unit),
-            Match(r["id"], r["name_th"], r["kind"], 1.0, "exact", food))
+            Match(r["id"], display_name(r), r["kind"], 1.0, "exact", food))
 
 
 def estimate(db_path, *specs):
@@ -29,7 +39,7 @@ def estimate(db_path, *specs):
 
 
 def by_name(est):
-    return {l.name: l for l in est.lines}
+    return {TH[l.name]: l for l in est.lines}      # keyed by the Thai seed name
 
 
 # --- reference input 1: ข้าวเหนียวหมูปิ้ง 5 ไม้ ---------------------------------------------
@@ -73,7 +83,7 @@ def test_input2_salad_defaults_plus_user_extras(db_path):
 
 def test_user_item_replaces_matching_combo_component(db_path):
     est = estimate(db_path, ("สลัดอกไก่",), ("อกไก่ย่าง", 2, "ชิ้น"))
-    chicken = [l for l in est.lines if l.name == "อกไก่ย่าง"]
+    chicken = [l for l in est.lines if l.name == EN["อกไก่ย่าง"]]
     assert [l.grams for l in chicken] == [240]
     assert any("instead of the default" in a for a in est.notes)
 
@@ -125,7 +135,7 @@ def test_nutrients_scale_per_100g(db_path):
 def test_fried_food_reports_that_its_values_include_oil(db_path):
     est = estimate(db_path, ("ไข่ดาว", 2, "ฟอง"))
     assert est.lines[0].grams == 92
-    assert any("ไข่ดาว" in a and "frying oil" in a for a in est.assumptions)
+    assert any(EN["ไข่ดาว"] in a and "frying oil" in a for a in est.assumptions)
 
 
 def test_oil_note_comes_in_addition_to_other_assumptions(db_path):
@@ -141,7 +151,7 @@ def test_oil_note_follows_a_food_used_as_combo_component(db_path, tmp_path):
     path = edited_db(db_path, tmp_path,
                      "UPDATE foods SET oil_note = 'values include oil' WHERE name_th = 'หมูปิ้ง'")
     est = calculate([pair(path, "ข้าวเหนียวหมูปิ้ง", 5, "ไม้")], path)
-    assert by_name(est)["หมูปิ้ง"].assumptions == ["หมูปิ้ง: values include oil"]
+    assert by_name(est)["หมูปิ้ง"].assumptions == [f"{EN['หมูปิ้ง']}: values include oil"]
 
 
 # --- edge cases that need a modified DB -----------------------------------------------
