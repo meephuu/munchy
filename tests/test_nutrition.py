@@ -125,6 +125,18 @@ def test_unknown_unit_warning_names_the_unit(db_path):
     assert "ลูกบาศก์" in est.assumptions[0]
 
 
+def test_english_mass_units_and_synonyms(db_path):
+    assert estimate(db_path, ("ไข่ต้ม", 2, "oz")).lines[0].grams == pytest.approx(56.699)
+    assert estimate(db_path, ("ไข่ต้ม", 1, "lb")).lines[0].grams == pytest.approx(453.592)
+
+
+def test_unit_synonym_finds_the_stored_unit(db_path, tmp_path):
+    path = edited_db(db_path, tmp_path, "INSERT INTO food_units (food_id, unit, grams) "
+                     "SELECT id, 'tbsp', 14 FROM foods WHERE name_th = 'น้ำมันพืช'")
+    est = calculate([pair(path, "น้ำมันพืช", 2, "Tablespoons")], path)
+    assert est.lines[0].grams == 28 and est.assumptions == []
+
+
 def test_nutrients_scale_per_100g(db_path):
     est = estimate(db_path, ("ไข่ต้ม", 100, "g"))
     assert (est.kcal, est.protein, est.fat, est.carbs) == pytest.approx((155, 12.6, 10.6, 1.1))

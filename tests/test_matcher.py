@@ -92,8 +92,8 @@ def test_embedding_cache_is_written_and_reused(db_path, tmp_path):
 
 # --- classify() -----------------------------------------------------------------------
 
-def m(conf, method="embedding", food_id=1):
-    return Match(food_id, f"food{food_id}", "ingredient", conf, method, "text")
+def m(conf, method="embedding", food_id=1, text=None):
+    return Match(food_id, f"food{food_id}", "ingredient", conf, method, text or f"text{food_id}")
 
 
 def test_classify_exact_and_fuzzy_are_always_ok():
@@ -115,6 +115,14 @@ def test_classify_thresholds():
 def test_classify_close_runner_up_makes_a_confident_match_uncertain():
     assert classify([m(0.95), m(0.95 - MARGIN + 0.01, food_id=2)]) == "uncertain"
     assert classify([m(0.95), m(0.95 - MARGIN - 0.01, food_id=2)]) == "ok"
+
+
+def test_classify_close_runner_up_of_the_same_family_is_not_a_rival():
+    top = m(0.90, text="Yogurt, Greek, plain, nonfat")
+    variant = m(0.89, food_id=2, text="Yogurt, Greek, plain, whole milk")
+    other = m(0.89, food_id=3, text="Yoghurt drink")
+    assert classify([top, variant]) == "ok"                  # same first word group: just a variant
+    assert classify([top, variant, other]) == "uncertain"    # a different food is still a rival
 
 
 def test_classify_single_candidate_has_no_gap_penalty():

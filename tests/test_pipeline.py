@@ -18,10 +18,13 @@ I3 = "cheese mashed potato with gravy sauce"
 
 # What Gemini returned for these inputs in the live parser tests.
 PARSED = {
-    I1: [ParsedItem(food="ข้าวเหนียวหมูปิ้ง", qty=5, unit="ไม้")],
-    I2: [ParsedItem(food="สลัดอกไก่"), ParsedItem(food="แตงกวา"), ParsedItem(food="มะเขือเทศ"),
+    I1: [ParsedItem(food="ข้าวเหนียวหมูปิ้ง", qty=5, unit="ไม้",
+                    components=["sticky rice", "grilled pork skewer"])],
+    I2: [ParsedItem(food="สลัดอกไก่", components=["salad greens", "grilled chicken breast", "salad dressing"]),
+         ParsedItem(food="แตงกวา"), ParsedItem(food="มะเขือเทศ"),
          ParsedItem(food="ไข่ต้ม", qty=1, unit="ฟอง")],
-    I3: [ParsedItem(food="cheese mashed potato with gravy sauce")],
+    I3: [ParsedItem(food="cheese mashed potato with gravy sauce",
+                    components=["mashed potato", "cheddar cheese", "gravy"])],
 }
 
 
@@ -74,8 +77,8 @@ class StubMatcher:
         return self._canned.get(query) or self._real.match(query, top_k)
 
 
-def candidate(db_path, name, conf, method="embedding"):
-    return Match(*_food(db_path, name), conf, method, name)
+def candidate(db_path, name, conf, method="embedding", dish=False):
+    return Match(*_food(db_path, name), conf, method, name, dish=dish)
 
 
 def _food(db_path, name):
@@ -191,3 +194,120 @@ def test_english_name_does_not_override_a_clean_match(db_path):
               "egg": [candidate(db_path, "ไข่ดาว", 1.0, method="exact")]}
     est = run_with(db_path, canned, [ParsedItem(food="ไข่ต้ม", food_en="egg")])
     assert [l.name for l in est.lines] == ["boiled egg"]
+
+
+# --- dishes the database does not know are rebuilt from typical parts ----------------------
+
+SALAD = ParsedItem(food="caesar salad", components=["salad greens", "salad dressing", "grilled chicken breast"])
+
+
+def parts_matcher(db_path):
+    """caesar salad has no dish entry (it only resembles a dressing); each part matches exactly."""
+    return StubMatcher(db_path, {
+        "caesar salad": [candidate(db_path, "น้ำสลัดครีม", 0.86)],        # an ingredient, not a dish
+        "salad greens": [candidate(db_path, "ผักสลัด", 1.0, "exact")],
+        "salad dressing": [candidate(db_path, "น้ำสลัดครีม", 1.0, "exact")],
+        "grilled chicken breast": [candidate(db_path, "อกไก่ย่าง", 1.0, "exact")],
+    })
+
+
+def test_unknown_dish_is_built_from_its_typical_parts_and_reports_them(db_path):
+    est = estimate("x", parse_fn=lambda t: [SALAD, ParsedItem(food="กุ้งต้ม", food_en="boiled shrimp")],
+                   matcher=parts_matcher(db_path), db_path=db_path)
+    names = [l.name for l in est.lines]
+    assert names == ["mixed salad greens", "creamy salad dressing", "grilled chicken breast", "boiled shrimp"]
+    assert any("no database entry for 'caesar salad'" in n for n in est.notes)
+    added = [a for l in est.lines for a in l.assumptions if a.startswith("added")]
+    assert len(added) == 3 and all("typical part of caesar salad" in a for a in added)
+    assert [(i.food, i.implied_for) for i, _ in est.matches][:3] == [
+        ("salad greens", "caesar salad"), ("salad dressing", "caesar salad"),
+        ("grilled chicken breast", "caesar salad")]
+    assert est.warnings == []
+
+
+def test_a_dish_the_database_knows_is_used_whole_and_its_parts_are_ignored(db_path):
+    est = estimate("x", parse_fn=lambda t: [ParsedItem(food="สลัดอกไก่", components=["lettuce", "tomato"])],
+                   matcher=Matcher(db_path, ExplodingEmbedder(), cache_dir=None), db_path=db_path)
+    assert est.notes == [] and all(i.implied_for is None for i, _ in est.matches)
+    assert [l.via_combo for l in est.lines] == ["chicken breast salad"] * 3
+
+
+def test_a_shaky_dish_match_is_not_trusted_either(db_path):
+    canned = {"caesar salad": [candidate(db_path, "สลัดอกไก่", 0.74, dish=True)]}
+    matcher = StubMatcher(db_path, {**parts_matcher(db_path)._canned, **canned})
+    est = estimate("x", parse_fn=lambda t: [SALAD], matcher=matcher, db_path=db_path)
+    assert [i.implied_for for i, _ in est.matches] == ["caesar salad"] * 3
+
+
+def test_a_part_the_user_also_listed_is_not_counted_twice(db_path):
+    items = [SALAD, ParsedItem(food="grilled chicken breast", qty=2, unit="ชิ้น")]
+    est = estimate("x", parse_fn=lambda t: items, matcher=parts_matcher(db_path), db_path=db_path)
+    chicken = [l for l in est.lines if l.name == "grilled chicken breast"]
+    assert [l.grams for l in chicken] == [240]
+    assert any("already in the meal" in n for n in est.notes)
+
+
+def test_a_count_of_plates_scales_every_part_but_grams_do_not(db_path):
+    plates = ParsedItem(food="caesar salad", qty=2, unit="จาน", components=SALAD.components)
+    two = estimate("x", parse_fn=lambda t: [plates], matcher=parts_matcher(db_path), db_path=db_path)
+    one = estimate("x", parse_fn=lambda t: [SALAD], matcher=parts_matcher(db_path), db_path=db_path)
+    assert two.kcal == pytest.approx(2 * one.kcal)
+    grams = ParsedItem(food="caesar salad", qty=300, unit="g", components=SALAD.components)
+    est = estimate("x", parse_fn=lambda t: [grams], matcher=parts_matcher(db_path), db_path=db_path)
+    assert est.kcal == pytest.approx(one.kcal) and any("could not be split" in n for n in est.notes)
+
+
+def test_a_part_with_no_match_makes_the_total_incomplete(db_path):
+    matcher = StubMatcher(db_path, {**parts_matcher(db_path)._canned,
+                                    "salad dressing": [candidate(db_path, "เนย", 0.5)]})
+    est = estimate("x", parse_fn=lambda t: [SALAD], matcher=matcher, db_path=db_path)
+    assert [i.food for i in est.unmatched] == ["salad dressing"]
+    assert any("'salad dressing'" in w and "incomplete" in w for w in est.warnings)
+
+
+# --- the second LLM call: typical parts looked up when the parse did not carry them --------
+
+PLAIN_SALAD = ParsedItem(food="caesar salad")      # what the real parser returns: no parts
+
+
+def test_parts_are_looked_up_for_a_dish_the_database_does_not_know(db_path):
+    asked = []
+    est = estimate("x", parse_fn=lambda t: [PLAIN_SALAD], matcher=parts_matcher(db_path), db_path=db_path,
+                   decompose_fn=lambda d: asked.append(d) or SALAD.components)
+    assert asked == ["caesar salad"]
+    assert [l.name for l in est.lines] == ["mixed salad greens", "creamy salad dressing",
+                                           "grilled chicken breast"]
+
+
+def test_no_lookup_when_the_database_already_has_a_clean_answer(db_path):
+    def boom(dish):
+        raise AssertionError("the LLM must not be asked")
+    matcher = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)           # exact matches only
+    est = estimate("x", parse_fn=lambda t: [ParsedItem(food="ข้าวเหนียวหมูปิ้ง", qty=5, unit="ไม้"),
+                                           ParsedItem(food="กุ้งต้ม")],
+                   matcher=matcher, db_path=db_path, decompose_fn=boom)
+    assert est.notes == []
+
+
+def test_a_single_food_gets_no_parts_and_is_matched_as_before(db_path):
+    canned = {"greek yogurt": [candidate(db_path, "ไข่ต้ม", 0.71), candidate(db_path, "ไข่ดาว", 0.60)]}
+    est = estimate("x", parse_fn=lambda t: [ParsedItem(food="greek yogurt")],
+                   matcher=StubMatcher(db_path, canned), db_path=db_path, decompose_fn=lambda d: [])
+    assert [l.name for l in est.lines] == ["boiled egg"] and len(est.warnings) == 1
+
+
+def test_a_failed_lookup_is_reported_and_the_estimate_still_runs(db_path):
+    def down(dish):
+        raise RuntimeError("quota exhausted")
+    est = estimate("x", parse_fn=lambda t: [PLAIN_SALAD], matcher=parts_matcher(db_path), db_path=db_path,
+                   decompose_fn=down)
+    assert any("could not look up the typical parts of 'caesar salad'" in w and "quota" in w
+               for w in est.warnings)
+    assert [l.name for l in est.lines] == ["creamy salad dressing"]        # falls back to the weak match
+
+
+def test_parts_themselves_are_never_split_again(db_path):
+    asked = []
+    est = estimate("x", parse_fn=lambda t: [PLAIN_SALAD], matcher=parts_matcher(db_path), db_path=db_path,
+                   decompose_fn=lambda d: asked.append(d) or SALAD.components)
+    assert asked == ["caesar salad"] and len(est.lines) == 3

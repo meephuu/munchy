@@ -82,11 +82,11 @@ def import_doh(conn: sqlite3.Connection, doh_csv: Path = DOH_CSV,
                       if r.get("name_verified", "1") == "0" else "")
         cur = conn.execute(
             """INSERT INTO foods (name_th, name_en, kind, kcal_100g, protein_100g, fat_100g,
-                   carbs_100g, default_serving_g, source, notes)
-               VALUES (?, ?, 'ingredient', ?, ?, ?, ?, ?, 'doh2018', ?)""",
+                   carbs_100g, default_serving_g, source, notes, food_group)
+               VALUES (?, ?, 'ingredient', ?, ?, ?, ?, ?, 'doh2018', ?, ?)""",
             (name, r["name_en"] or english.get(r["food_id"]) or None, float(r["kcal"]), float(r["protein_g"]),
              float(r["fat_g"]), float(r["carbs_g"]), serving,
-             f"DoH 2018 table id {r['food_id']}; group: {group}; {serving_note}{unverified}"))
+             f"DoH 2018 table id {r['food_id']}; group: {group}; {serving_note}{unverified}", group))
         inserted[r["food_id"]] = cur.lastrowid
         if group == "dishes":                # a dish's default serving is one plate
             conn.execute("INSERT INTO food_units (food_id, unit, grams) VALUES (?, 'จาน', ?)",

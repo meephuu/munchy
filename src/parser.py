@@ -8,6 +8,7 @@ a self-hosted Ollama model later) can be swapped in by providing a `complete` fu
 from typing import Callable
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic.json_schema import SkipJsonSchema
 
 from src import config
 
@@ -40,12 +41,40 @@ Examples:
 "cheese mashed potato with gravy sauce" ->
   [{"food": "cheese mashed potato with gravy sauce", "food_en": "cheese mashed potato with gravy sauce",
     "qty": null, "unit": null}]
+"caesar salad with boiled shrimp" ->
+  [{"food": "caesar salad", "food_en": "caesar salad", "qty": null, "unit": null},
+   {"food": "boiled shrimp", "food_en": "boiled shrimp", "qty": null, "unit": null}]
+"nutella" ->
+  [{"food": "nutella", "food_en": "chocolate hazelnut spread", "qty": null, "unit": null}]
+"""
+
+# Second, separate call: what does a dish usually contain? Kept apart from the parse because a
+# small model follows one narrow task much better than two at once.
+PARTS_PROMPT = """\
+You are given the name of one dish or food (Thai or English). Decide whether it is a prepared dish
+made of several foods, and if so list the foods it usually contains.
+
+- Return "components": 2 to 6 plain, generic English food names of the kind a nutrition table uses
+  ("romaine lettuce", "caesar dressing", "croutons"). Include the carbohydrate base, the main protein,
+  and the usual sauce, dressing or topping.
+- Return an empty list for a single food or drink (egg, banana, white rice, plain yogurt, chocolate
+  spread, beer, milk) and for anything that is not food.
+- Never return amounts, calories or any numbers.
+
+Examples:
+"caesar salad" -> {"components": ["romaine lettuce", "caesar dressing", "croutons", "parmesan cheese"]}
+"ผัดกะเพราไก่ไข่ดาว" -> {"components": ["stir-fried chicken with basil", "steamed rice", "fried egg"]}
+"chicken sandwich" -> {"components": ["bread", "chicken breast", "lettuce", "mayonnaise"]}
+"greek yogurt" -> {"components": []}
+"banana" -> {"components": []}
 """
 
 
 class ParsedItem(BaseModel):
     food: str = Field(min_length=1)
     food_en: str | None = None   # English name, for display; matching tries `food` first
+    components: SkipJsonSchema[list[str]] = Field(default_factory=list)   # typical parts of a dish; filled by the pipeline
+    implied_for: SkipJsonSchema[str | None] = None   # set by the pipeline, never by the LLM: the dish this part was added for
     qty: float | None = None  # positivity checked below: Gemini's schema has no `gt`
     unit: str | None = None
 
@@ -81,6 +110,15 @@ class ParseResult(BaseModel):
     items: list[ParsedItem] = Field(min_length=1)
 
 
+class Decomposition(BaseModel):
+    components: list[str] = Field(default_factory=list, max_length=8)
+
+    @field_validator("components")
+    @classmethod
+    def _clean(cls, v: list[str]) -> list[str]:
+        return [c.strip() for c in v if c and c.strip()]
+
+
 class ParseError(Exception):
     """The LLM never produced output that passes validation."""
 
@@ -89,9 +127,22 @@ Complete = Callable[[str], str]  # user text -> raw JSON string matching ParseRe
 
 
 class LLMParser:
-    def __init__(self, complete: Complete, retries: int = 1):
+    def __init__(self, complete: Complete, retries: int = 1, complete_parts: Complete | None = None):
         self._complete = complete
+        self._complete_parts = complete_parts
         self._retries = retries
+
+    def decompose(self, dish: str) -> list[str]:
+        """Typical parts of a dish as generic English food names; [] for a single food."""
+        if self._complete_parts is None:
+            raise RuntimeError("this parser has no decomposition backend")
+        last_error: ValidationError | None = None
+        for _ in range(self._retries + 1):
+            try:
+                return Decomposition.model_validate_json(self._complete_parts(dish)).components
+            except ValidationError as e:
+                last_error = e
+        raise ParseError(f"LLM output failed validation: {last_error}")
 
     def parse(self, text: str) -> list[ParsedItem]:
         if not text.strip():
@@ -106,16 +157,17 @@ class LLMParser:
         raise ParseError(f"LLM output failed validation: {last_error}")
 
 
-def gemini_complete(api_key: str, model: str) -> Complete:
+def gemini_complete(api_key: str, model: str, prompt: str = SYSTEM_PROMPT,
+                    schema: type[BaseModel] = ParseResult) -> Complete:
     """Build a `complete` function backed by the Gemini API (schema-constrained JSON)."""
     from google import genai
     from google.genai import types
 
     client = genai.Client(api_key=api_key)
     cfg = types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
+        system_instruction=prompt,
         response_mime_type="application/json",
-        response_schema=ParseResult,
+        response_schema=schema,
         temperature=0,
     )
 
@@ -125,17 +177,18 @@ def gemini_complete(api_key: str, model: str) -> Complete:
     return complete
 
 
-def ollama_complete(model: str, base_url: str, client: "httpx.Client | None" = None) -> Complete:
+def ollama_complete(model: str, base_url: str, client: "httpx.Client | None" = None,
+                    prompt: str = SYSTEM_PROMPT, schema: type[BaseModel] = ParseResult) -> Complete:
     """Build a `complete` function backed by a local Ollama server (self-hosted models such as
     Qwen or Typhoon). Ollama constrains the output to our JSON schema, same as Gemini does."""
     import httpx
 
     http = client or httpx.Client(timeout=120)
-    schema = ParseResult.model_json_schema()
+    json_schema = schema.model_json_schema()
 
     def complete(text: str) -> str:
-        body = {"model": model, "stream": False, "format": schema, "options": {"temperature": 0},
-                "messages": [{"role": "system", "content": SYSTEM_PROMPT},
+        body = {"model": model, "stream": False, "format": json_schema, "options": {"temperature": 0},
+                "messages": [{"role": "system", "content": prompt},
                              {"role": "user", "content": text}]}
         try:
             resp = http.post(f"{base_url.rstrip('/')}/api/chat", json=body)
@@ -163,11 +216,19 @@ def get_parser() -> LLMParser:
     if config.LLM_PROVIDER == "gemini":
         if not config.GEMINI_API_KEY:
             raise RuntimeError("GEMINI_API_KEY is empty - set it in .env")
-        return LLMParser(gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL))
+        return LLMParser(gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL),
+                         complete_parts=gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL,
+                                                        PARTS_PROMPT, Decomposition))
     if config.LLM_PROVIDER == "ollama":
-        return LLMParser(ollama_complete(config.OLLAMA_MODEL, config.OLLAMA_URL))
+        return LLMParser(ollama_complete(config.OLLAMA_MODEL, config.OLLAMA_URL),
+                         complete_parts=ollama_complete(config.OLLAMA_MODEL, config.OLLAMA_URL,
+                                                        prompt=PARTS_PROMPT, schema=Decomposition))
     raise RuntimeError(f"Unknown LLM_PROVIDER {config.LLM_PROVIDER!r} (supported: gemini, ollama)")
 
 
 def parse(text: str) -> list[ParsedItem]:
     return get_parser().parse(text)
+
+
+def decompose(dish: str) -> list[str]:
+    return get_parser().decompose(dish)

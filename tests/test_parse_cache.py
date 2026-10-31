@@ -140,3 +140,57 @@ def test_cli_no_cache_flag(flags, expected, monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(pipeline, "estimate", fake_estimate)
     cli.main(["x", *flags])
     assert seen["use_cache"] is expected
+
+
+# --- typical parts of a dish (second LLM call) ----------------------------------------
+
+PARTS = json.dumps({"components": ["romaine lettuce", " caesar dressing ", ""]})
+
+
+@pytest.fixture
+def parts_llm(monkeypatch):
+    class Fake:
+        calls = 0
+        output = PARTS
+
+    fake = Fake()
+
+    def complete_parts(dish):
+        fake.calls += 1
+        return fake.output
+
+    monkeypatch.setattr(parser, "get_parser",
+                        lambda: LLMParser(lambda t: GOOD, complete_parts=complete_parts))
+    return fake
+
+
+def test_decompose_cleans_the_names(parts_llm):
+    assert parser.decompose("caesar salad") == ["romaine lettuce", "caesar dressing"]
+
+
+def test_decompose_retries_once_then_raises(parts_llm):
+    parts_llm.output = '{"components": "not a list"}'
+    with pytest.raises(ParseError):
+        parser.decompose("caesar salad")
+    assert parts_llm.calls == 2
+
+
+def test_parts_are_cached_per_dish(cache, parts_llm):
+    from src.parse_cache import cached_decompose
+    assert cached_decompose("Caesar salad", cache=cache) == ["romaine lettuce", "caesar dressing"]
+    assert cached_decompose("  caesar   SALAD ", cache=cache) == ["romaine lettuce", "caesar dressing"]
+    assert parts_llm.calls == 1
+    cached_decompose("caesar salad", use_cache=False)
+    assert parts_llm.calls == 2
+
+
+def test_an_empty_answer_is_cached_too(cache, parts_llm):
+    from src.parse_cache import cached_decompose
+    parts_llm.output = '{"components": []}'
+    assert cached_decompose("banana", cache=cache) == [] and cached_decompose("banana", cache=cache) == []
+    assert parts_llm.calls == 1
+
+
+def test_a_parser_without_a_parts_backend_says_so():
+    with pytest.raises(RuntimeError, match="decomposition"):
+        LLMParser(lambda t: GOOD).decompose("caesar salad")

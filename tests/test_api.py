@@ -48,7 +48,7 @@ def test_estimate_returns_totals_lines_and_assumptions(client, db_path):
     assert body["totals"] == {"kcal": 527.1, "protein_g": 33.4, "fat_g": 25.9, "carbs_g": 40.8}
     assert [l["name"] for l in body["lines"]] == ["steamed sticky rice", "grilled pork skewer"]
     assert body["lines"][1]["grams"] == 150 and body["lines"][1]["part_of"] == "sticky rice with grilled pork skewers"
-    assert body["matches"] == [{"input": "ข้าวเหนียวหมูปิ้ง", "input_en": None, "qty": 5, "unit": "ไม้",
+    assert body["matches"] == [{"input": "ข้าวเหนียวหมูปิ้ง", "input_en": None, "implied_for": None, "qty": 5, "unit": "ไม้",
                                 "matched_food": "sticky rice with grilled pork skewers", "method": "exact", "confidence": 1.0}]
     assert any("sticky rice" in a for a in body["assumptions"])
     assert body["warnings"] == [] and body["unmatched"] == [] and body["complete"] is True

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS foods (
     source             TEXT NOT NULL DEFAULT 'seed',   -- 'seed' | 'inmu' | 'usda'
     notes              TEXT,
     oil_note           TEXT,   -- set when the per-100 g values include cooking oil; shown as an assumption
+    food_group         TEXT,   -- source's food group ('dishes' marks a whole prepared dish, not an ingredient)
     CHECK (name_th IS NOT NULL OR name_en IS NOT NULL),
     CHECK (kind = 'combo' OR (kcal_100g IS NOT NULL AND protein_100g IS NOT NULL
                               AND fat_100g IS NOT NULL AND carbs_100g IS NOT NULL))
@@ -99,13 +100,14 @@ def _num(value: str | None) -> float | None:
 
 
 def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR,
-            doh_csv: Path | None = None) -> dict[str, int]:
+            doh_csv: Path | None = None, usda_dir: Path | None = None) -> dict[str, int]:
     """Rebuild the DB from the CSVs in seed_dir. Returns row counts per table.
 
     Units, aliases and components refer to foods by name (name_th or name_en);
     an unknown or ambiguous name raises ValueError so typos fail loudly.
     If doh_csv is given, the transcribed Department of Health table is imported on top
     (see src/doh_import.py); the counts then also include the import summary.
+    If usda_dir is given, generic USDA SR Legacy foods are added after it (src/usda_import.py).
     """
     init_db(path, reset=True)
     with closing(connect(path)) as conn, conn:
@@ -113,13 +115,13 @@ def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR,
         for row in _read_csv(seed_dir, "foods.csv"):
             cur = conn.execute(
                 """INSERT INTO foods (name_th, name_en, kind, kcal_100g, protein_100g,
-                       fat_100g, carbs_100g, default_serving_g, notes, oil_note)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                       fat_100g, carbs_100g, default_serving_g, notes, oil_note, food_group)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (row["name_th"] or None, row["name_en"] or None, row["kind"],
                  _num(row["kcal_100g"]), _num(row["protein_100g"]),
                  _num(row["fat_100g"]), _num(row["carbs_100g"]),
                  _num(row["default_serving_g"]), row["notes"] or None,
-                 row["oil_note"] or None),
+                 row["oil_note"] or None, row.get("food_group") or None),
             )
             for name in (row["name_th"], row["name_en"]):
                 if name:
@@ -164,6 +166,9 @@ def seed_db(path: Path = DB_PATH, seed_dir: Path = SEED_DIR,
         if doh_csv is not None:
             from src.doh_import import LINKS_CSV, import_doh
             extra = import_doh(conn, doh_csv, seed_dir / LINKS_CSV.name)
+        if usda_dir is not None:
+            from src.usda_import import import_usda
+            extra = {**extra, **import_usda(conn, usda_dir)}
         return {**{t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
                    for t in ("foods", "food_units", "food_aliases", "combo_components")},
                 **extra}
@@ -175,6 +180,8 @@ if __name__ == "__main__":
                         help="rebuild foods.db from data/seed/*.csv (deletes the old file)")
     parser.add_argument("--no-doh", action="store_true",
                         help="with --seed: skip the Department of Health table even if present")
+    parser.add_argument("--no-usda", action="store_true",
+                        help="with --seed: skip the USDA SR Legacy foods even if downloaded")
     args = parser.parse_args()
 
     if args.seed:
@@ -182,7 +189,12 @@ if __name__ == "__main__":
         use_doh = DOH_CSV.exists() and not args.no_doh
         if not use_doh:
             print("(Department of Health table not imported)")
-        for table, n in seed_db(doh_csv=DOH_CSV if use_doh else None).items():
+        from src.usda_import import USDA_DIR
+        use_usda = USDA_DIR.exists() and not args.no_usda
+        if not use_usda:
+            print("(USDA SR Legacy foods not imported)")
+        for table, n in seed_db(doh_csv=DOH_CSV if use_doh else None,
+                                usda_dir=USDA_DIR if use_usda else None).items():
             print(f"{table:22} {n}")
     else:
         init_db()

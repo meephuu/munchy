@@ -12,7 +12,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from src import config, parser
-from src.parser import ParsedItem, ParseResult
+from src.parser import Decomposition, ParsedItem, ParseResult
 from src.textutil import normalize
 
 SCHEMA = """
@@ -20,6 +20,12 @@ CREATE TABLE IF NOT EXISTS parse_cache (
     key         TEXT PRIMARY KEY,
     text        TEXT NOT NULL,          -- original input, for debugging
     result      TEXT NOT NULL,          -- ParseResult as JSON
+    created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS parts_cache (
+    key         TEXT PRIMARY KEY,
+    dish        TEXT NOT NULL,
+    result      TEXT NOT NULL,          -- Decomposition as JSON
     created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 """
@@ -37,7 +43,7 @@ class ParseCache:
     def _connect(self) -> sqlite3.Connection:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(self.path)
-        conn.execute(SCHEMA)
+        conn.executescript(SCHEMA)
         return conn
 
     def get(self, key: str) -> list[ParsedItem] | None:
@@ -55,6 +61,36 @@ class ParseCache:
         with closing(self._connect()) as conn, conn:
             conn.execute("INSERT OR REPLACE INTO parse_cache (key, text, result) VALUES (?, ?, ?)",
                          (key, text, result))
+
+    def get_parts(self, key: str) -> list[str] | None:
+        with closing(self._connect()) as conn:
+            row = conn.execute("SELECT result FROM parts_cache WHERE key = ?", (key,)).fetchone()
+        if row is None:
+            return None
+        try:
+            return Decomposition.model_validate_json(row[0]).components
+        except ValidationError:
+            return None
+
+    def put_parts(self, key: str, dish: str, components: list[str]) -> None:
+        result = Decomposition(components=components).model_dump_json()
+        with closing(self._connect()) as conn, conn:
+            conn.execute("INSERT OR REPLACE INTO parts_cache (key, dish, result) VALUES (?, ?, ?)",
+                         (key, dish, result))
+
+
+def cached_decompose(dish: str, *, use_cache: bool = True,
+                     cache: ParseCache | None = None) -> list[str]:
+    """parser.decompose() with a cache in front (a dish's typical parts do not change)."""
+    if not use_cache:
+        return parser.decompose(dish)
+    cache = cache or ParseCache()
+    key = cache_key(dish, config.LLM_PROVIDER, parser.model_id(), parser.PARTS_PROMPT)
+    parts = cache.get_parts(key)
+    if parts is None:
+        parts = parser.decompose(dish)
+        cache.put_parts(key, dish, parts)
+    return parts
 
 
 def cached_parse(text: str, *, use_cache: bool = True,

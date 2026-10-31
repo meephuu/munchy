@@ -1,7 +1,7 @@
 """Step 6: parsed items + matches -> grams -> nutrients -> totals. Pure, deterministic code.
 
 Rules for turning a quantity into grams (every guess is recorded as an assumption):
-  - g / กรัม / kg / กก.            -> used directly
+  - g / กรัม / kg / กก. / oz / lb  -> used directly
   - a unit in food_units            -> qty * grams-per-unit      (ไม้, ฟอง, จาน, ...)
   - no qty and no unit              -> 1 default serving
   - qty without a unit              -> qty default servings
@@ -22,6 +22,14 @@ from src.parser import ParsedItem
 
 GRAM_UNITS = {"g", "gram", "grams", "กรัม", "ก."}
 KILOGRAM_UNITS = {"kg", "kilogram", "kilograms", "กก.", "กิโลกรัม", "กิโล"}
+OUNCE_UNITS = {"oz", "ounce", "ounces"}
+POUND_UNITS = {"lb", "lbs", "pound", "pounds"}
+# English count/measure words the LLM may write, mapped to the spelling stored in food_units
+UNIT_SYNONYMS = {"tablespoon": "tbsp", "tablespoons": "tbsp", "tbs": "tbsp", "tbsps": "tbsp",
+                 "teaspoon": "tsp", "teaspoons": "tsp", "tsps": "tsp", "cups": "cup",
+                 "pieces": "piece", "pc": "piece", "pcs": "piece", "slices": "slice",
+                 "cans": "can", "bars": "bar", "cookies": "cookie", "fillets": "fillet",
+                 "servings": "serving", "portion": "serving", "portions": "serving"}
 MAX_COMBO_DEPTH = 5
 
 
@@ -98,9 +106,13 @@ def _grams(conn: sqlite3.Connection, food: sqlite3.Row,
         return qty, None
     if u in KILOGRAM_UNITS:
         return qty * 1000, None
+    if u in OUNCE_UNITS:
+        return qty * 28.3495, None
+    if u in POUND_UNITS:
+        return qty * 453.592, None
     if u is not None:
-        row = conn.execute("SELECT grams FROM food_units WHERE food_id = ? AND unit = ?",
-                           (food["id"], unit.strip())).fetchone()
+        row = conn.execute("SELECT grams FROM food_units WHERE food_id = ? AND unit IN (?, ?)",
+                           (food["id"], unit.strip(), UNIT_SYNONYMS.get(u, u))).fetchone()
         if row:
             note = f"assumed 1 {unit.strip()} of {name}" if said_one else None
             return qty * row["grams"], note
@@ -169,11 +181,15 @@ def calculate(pairs: list[tuple[ParsedItem, Match]],
         for item, match in pairs:
             food = conn.execute("SELECT * FROM foods WHERE id = ?", (match.food_id,)).fetchone()
             if food["kind"] == "combo":
-                lines += _expand_combo(conn, food, item.qty, item.unit, item.food)
+                new = _expand_combo(conn, food, item.qty, item.unit, item.food)
             else:
                 grams, note = _grams(conn, food, item.qty, item.unit)
-                lines.append(_line(food, grams, item.food, assumptions=[note] if note else []))
+                new = [_line(food, grams, item.food, assumptions=[note] if note else [])]
                 standalone_ids[food["id"]] = item.food
+            if item.implied_for:
+                new[0].assumptions.insert(0, f"added {display_name(food)} (you did not list it): "
+                                             f"a typical part of {item.implied_for}")
+            lines += new
 
         # The user's own item beats a default component of a combo.
         notes: list[str] = []

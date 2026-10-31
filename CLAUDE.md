@@ -74,6 +74,7 @@ src/nutrition.py   portions -> totals            (step 6)
 src/pipeline.py    parse -> match -> calculate   (step 7; shared by cli.py and the future API)
 src/parse_cache.py cache of LLM parse results    (step 10; data/cache.db)
 src/doh_import.py  Dept. of Health Thai food table -> DB (step 11); extract_doh_table.py transcribes the PDF
+src/usda_import.py generic USDA SR Legacy foods -> DB (after step 15); output language is English
 src/api.py         FastAPI app, POST /estimate    (step 14)
 evaluate.py        pipeline error vs USDA reference dishes (step 12); build_eval_set.py builds the CSV
 src/textutil.py    shared text normalisation

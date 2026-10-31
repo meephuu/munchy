@@ -18,6 +18,8 @@ def format_estimate(text: str, est: Estimate) -> str:
     for item, m in est.matches:
         qty = " ".join(str(x) for x in (f"{item.qty:g}" if item.qty is not None else None, item.unit) if x)
         shown = f"{item.label} {qty}".strip()
+        if item.implied_for:
+            shown += f"  [typical part of {item.implied_for}]"
         out.append(f"  {shown}  ->  {m.name}  ({m.method} {m.confidence:.2f})")
 
     out += ["", "Breakdown"]

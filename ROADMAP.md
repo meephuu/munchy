@@ -45,6 +45,25 @@ Tick a box only when the step is done and verified.
 - [x] 15. (Optional) Swap LLM parser for self-hosted Qwen/Typhoon via Ollama
       _(done as code + mocked tests only: `LLM_PROVIDER=ollama` with `OLLAMA_MODEL`; not run against a real Ollama server because it is not installed here — accuracy of a local model on the eval set is still unmeasured)_
 
+## After step 15: first real-use feedback (greek yogurt, caesar salad) — done
+- [x] Results in English: output uses `name_en`; the parser also returns `food_en`, which is tried as a
+      second match query when the original name is not a clean match.
+- [x] ~5,750 generic USDA SR Legacy foods imported (`src/usda_import.py`, needs the SR Legacy CSVs in
+      `data/raw/usda_sr_legacy_csv/`): no brands/baby/fast/restaurant foods, trim/grade variants collapsed,
+      English units (cup, tbsp, slice, oz, lb) understood.
+- [x] Dishes the DB does not know are rebuilt from typical parts: a second, cached LLM call
+      (`parser.decompose`, prompt `PARTS_PROMPT`) names the usual foods, never amounts; each is matched like
+      any item and reported as "added ... (you did not list it)". Done as its own call because the lite model
+      ignored a `components` field in the main parse even with the exact input as an example.
+      _(decided with the owner: this extends "LLM only parses" to "LLM names foods, never numbers")_
+- [x] Matcher: runner-ups of the same food family ("Yogurt, Greek, ...") are not rivals; candidates that
+      contain all the query's words get a bonus, plain variants are preferred, and processed forms
+      ("Oil, avocado" for "avocado") are penalised. 83 calibration queries: top-1 right for 58/64 known
+      foods, no unknown food accepted unflagged, 1 wrong match unflagged. Known misses: "olive oil" ->
+      seed "vegetable oil", "brown rice" -> "steamed white rice" (both flagged as uncertain).
+- Not re-verified live because the Gemini free-tier daily quota ran out: `pytest -m live` and the three
+  reference inputs through the real parser (offline tests cover them with fake parser output).
+
 ## Where we are: all 15 steps done; known follow-ups
 - **Thai names are unverified for most imported rows.** Numbers are checked in code (energy vs
   macros) and were read correctly in every spot check, but the lite vision model sometimes
@@ -64,5 +83,7 @@ Tick a box only when the step is done and verified.
   weighed portions, a Next.js frontend that calls `POST /estimate`.
 
 ## Decisions log
+- LLM may also name the usual parts of a dish the DB lacks (never amounts or nutrition numbers); amounts come from DB default servings and every added part is reported.
+- Output language is English; Thai names stay in the DB for matching.
 - Hybrid design: LLM parses only; nutrition numbers come from our DB + code.
 - Python-only backend for now; SQLite until the web app exists.
