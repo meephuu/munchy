@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DishResult } from "@/components/DishResult";
+import { DishLoading, DishProblem } from "@/components/DishStates";
+import { EstimateError, fetchEstimate, toView } from "@/lib/estimate";
 
-// Guest dish result. Public. `?q=` is the dish the guest typed; without it there is nothing
-// to show, so go back to search. With Cache Components, reading searchParams must sit behind
-// <Suspense> so the rest of the route can be prerendered.
-//
-// TODO: send q to the backend (POST /estimate). For now DishResult shows the design's fixture
-// (pad kra pao) whatever the query is.
+// Guest dish result. Public. `?q=` is the dish the guest typed; it is sent to the backend
+// (POST /estimate). Without it there is nothing to show, so go back to search. With Cache
+// Components, reading searchParams must sit behind <Suspense> so the rest of the route can be
+// prerendered; the same boundary shows the loading state while the backend works.
 export default function DishPage({ searchParams }: PageProps<"/dish">) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<DishLoading />}>
       <Dish searchParams={searchParams} />
     </Suspense>
   );
@@ -21,5 +21,25 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
   const query = (Array.isArray(q) ? q[0] : q)?.trim();
   if (!query) redirect("/");
 
-  return <DishResult />;
+  let view;
+  try {
+    view = toView(await fetchEstimate(query));
+  } catch (e) {
+    if (!(e instanceof EstimateError)) throw e;
+    const title = e.kind === "unclear" ? "We couldn't read that" : "Couldn't estimate this bite";
+    return <DishProblem query={query} title={title} message={e.message} />;
+  }
+
+  if (view.empty) {
+    return (
+      <DishProblem
+        query={query}
+        title="Not in our food list yet"
+        message="We couldn't match anything in that to a food we know. Try a simpler name, like “fried egg” or “pad thai”."
+        details={view.warnings}
+      />
+    );
+  }
+
+  return <DishResult query={query} view={view} />;
 }
