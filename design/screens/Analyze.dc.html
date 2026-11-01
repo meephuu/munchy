@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Munchy — Dish analysis</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4A43}a:hover{color:#08332E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F2F3D3; font-family: 'Figtree', 'Anuphan', sans-serif; color: #2F3212">
+  <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 14px">
+    <header style="display: flex; align-items: center; gap: 12px; padding-top: 8px">
+      <a href="Main.dc.html" aria-label="Back to home" style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #2F3212">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+      </a>
+      <h1 style="margin: 0; font-family: 'Climate Crisis', sans-serif; font-size: 20px; font-weight: 400; color: #2F3212">Bite check</h1>
+    </header>
+
+    <div style="background: #FFFFFF; border: 1px solid #E1E2B8; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+      <img src="../assets/bowl.png" alt="" style="width: 36px; height: 36px">
+      <span style="flex: 1; font-size: 15px">Pad kra pao, minced pork, fried egg, rice</span>
+      <span style="font-size: 11px; color: #5E6128">Edit</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; color: #5E6128">Quick question — where's it from?</span>
+      <div style="display: flex; gap: 8px">
+        <sc-for list="{{places}}" as="p" hint-placeholder-count="3">
+          <button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="{{p.style}}">{{p.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section style="background: #BCBE7B; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <span style="font-size: 12px">Estimated</span>
+          <div style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Climate Crisis', sans-serif; font-size: 44px; line-height: 1; color: #1F2209">{{kcal}}</span><span style="font-size: 14px">kcal</span></div>
+          <span style="font-size: 12px">Range {{low}}–{{high}}</span>
+        </div>
+        <span style="background: #0E4A43; color: #F2F3D3; font-size: 11px; padding: 6px 10px; border-radius: 999px">Medium confidence</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Protein</span><span style="font-size: 15px; color: #0E4A43">{{protein}}g</span></div>
+        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Carbs</span><span style="font-size: 15px; color: #7A5600">{{carbs}}g</span></div>
+        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Fat</span><span style="font-size: 15px; color: #A63E0D">{{fat}}g</span></div>
+        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Sodium</span><span style="font-size: 15px">1.3g</span></div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; color: #5E6128">Tweak it</span>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{mods}}" as="m" hint-placeholder-count="4">
+          <button type="button" onClick="{{m.toggle}}" aria-pressed="{{m.on}}" style="{{m.style}}">{{m.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section style="background: #FFFFFF; border-radius: 16px; padding: 6px 14px; display: flex; flex-direction: column">
+      <sc-for list="{{parts}}" as="it" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #EEEFD0">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: {{it.dot}}"></span>
+          <span style="flex: 1; font-size: 13px">{{it.name}}</span>
+          <span style="font-size: 12px; color: #5E6128">{{it.amt}}</span>
+          <span style="width: 44px; text-align: right; font-size: 13px">{{it.kcal}}</span>
+        </div>
+      </sc-for>
+      <span style="font-size: 11px; color: #5E6128; padding: 8px 0">Matched to Thai Food Composition Table</span>
+    </section>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; gap: 10px">
+    <button type="button" aria-label="Save to favorites" style="width: 56px; height: 56px; border: 0; border-radius: 18px; background: #FFFFFF; color: #E05A1C; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg>
+    </button>
+    <a href="Main.dc.html" style="flex: 1; height: 56px; border-radius: 18px; background: #0E4A43; color: #F2F3D3; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 15px">Log to lunch · {{kcal}} kcal</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { place: 'stall', mods: {} }; }
+  renderVals() {
+    var s = this.state;
+    var chip = function (on) {
+      return 'height: 34px; padding: 0 14px; border-radius: 999px; font-family: inherit; font-size: 13px; cursor: pointer; ' +
+        (on ? 'background: #0E4A43; color: #F2F3D3; border: 1px solid #0E4A43' : 'background: #FFFFFF; color: #2F3212; border: 1px solid #DADBAE');
+    };
+    var self = this;
+    var placeDefs = [['stall', 'Street stall', 0], ['resto', 'Restaurant', 40], ['home', 'Home-cooked', -60]];
+    var places = placeDefs.map(function (d) {
+      var on = s.place === d[0];
+      return { label: d[1], on: on ? 'true' : 'false', style: chip(on), pick: function () { self.setState({ place: d[0] }); } };
+    });
+    var modDefs = [['oil', 'Less oil', -60, 0, 0, -7], ['egg', 'No egg', -110, -7, 0, -9], ['rice', 'Half rice', -125, -2, -28, 0], ['pork', 'Extra pork', 80, 8, 0, 6]];
+    var kcal = 650, protein = 32, carbs = 78, fat = 24;
+    placeDefs.forEach(function (d) { if (d[0] === s.place) { kcal += d[2]; fat += Math.round(d[2] / 9); } });
+    var mods = modDefs.map(function (d) {
+      var on = !!s.mods[d[0]];
+      if (on) { kcal += d[2]; protein += d[3]; carbs += d[4]; fat += d[5]; }
+      return { label: d[1], on: on ? 'true' : 'false', style: chip(on), toggle: function () { var m = Object.assign({}, self.state.mods); m[d[0]] = !m[d[0]]; self.setState({ mods: m }); } };
+    });
+    var parts = [
+      { name: 'Jasmine rice', amt: s.mods.rice ? '100 g' : '200 g', kcal: s.mods.rice ? 125 : 250, dot: '#F5B41C' },
+      { name: 'Minced pork', amt: s.mods.pork ? '130 g' : '90 g', kcal: s.mods.pork ? 240 : 160, dot: '#E05A1C' },
+      { name: 'Fried egg', amt: s.mods.egg ? '—' : '1 egg', kcal: s.mods.egg ? 0 : 110, dot: '#E8C35A' },
+      { name: 'Oil, basil & sauce', amt: s.mods.oil ? '½ tbsp' : '1 tbsp', kcal: s.mods.oil ? 70 : 130, dot: '#0E4A43' }
+    ];
+    return { places: places, mods: mods, parts: parts, kcal: kcal, low: Math.round(kcal * 0.86 / 10) * 10, high: Math.round(kcal * 1.14 / 10) * 10, protein: protein, carbs: carbs, fat: fat };
+  }
+}
+</script>
+</body>
+</html>

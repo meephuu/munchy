@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Munchy — Get started</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4A43}a:hover{color:#08332E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F2F3D3; font-family: 'Figtree', 'Anuphan', sans-serif; color: #2F3212">
+  <div style="padding: 24px 20px 0; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; gap: 14px; padding-top: 8px">
+      <img src="../assets/bowl.png" alt="Ramen bowl illustration" style="width: 96px; height: 96px; flex: none">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-family: 'Climate Crisis', sans-serif; font-size: 36px; line-height: 1; color: #8E9045">Munchy</span>
+        <span style="font-size: 14px; color: #5E6128">Your Bite Buddy</span>
+      </div>
+    </div>
+
+    <p style="margin: 0; font-size: 14px; line-height: 1.5">Tell me a bit about you, and I'll set a daily target that fits your body and your day.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; color: #5E6128">Your goal</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{goals}}" as="g" hint-placeholder-count="4">
+          <button type="button" onClick="{{g.pick}}" aria-pressed="{{g.on}}" style="{{g.style}}">{{g.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="age" style="font-size: 12px; color: #5E6128">Age</label>
+        <input id="age" type="number" value="21" style="height: 48px; box-sizing: border-box; border: 1px solid #DADBAE; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #2F3212; width: 100%">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="height" style="font-size: 12px; color: #5E6128">Height (cm)</label>
+        <input id="height" type="number" value="174" style="height: 48px; box-sizing: border-box; border: 1px solid #DADBAE; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #2F3212; width: 100%">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="weight" style="font-size: 12px; color: #5E6128">Weight (kg)</label>
+        <input id="weight" type="number" value="68" style="height: 48px; box-sizing: border-box; border: 1px solid #DADBAE; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #2F3212; width: 100%">
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; color: #5E6128">Your typical day</span>
+      <div style="display: flex; gap: 8px">
+        <sc-for list="{{acts}}" as="a" hint-placeholder-count="3">
+          <button type="button" onClick="{{a.pick}}" aria-pressed="{{a.on}}" style="{{a.style}}">{{a.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section style="background: #BCBE7B; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 12px">Your daily target</span>
+      <div style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Climate Crisis', sans-serif; font-size: 34px; line-height: 1; color: #1F2209">{{kcal}}</span><span style="font-size: 14px">kcal</span></div>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap">
+        <span style="font-size: 12px; background: #F2F3D3; padding: 4px 10px; border-radius: 999px">Protein {{p}} g</span>
+        <span style="font-size: 12px; background: #F2F3D3; padding: 4px 10px; border-radius: 999px">Carbs {{c}} g</span>
+        <span style="font-size: 12px; background: #F2F3D3; padding: 4px 10px; border-radius: 999px">Fat {{f}} g</span>
+      </div>
+      <span style="font-size: 11px">I'll fine-tune this as your weight trend comes in.</span>
+    </section>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center">
+    <a href="Main.dc.html" style="width: 100%; height: 56px; border-radius: 18px; background: #0E4A43; color: #F2F3D3; display: flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Climate Crisis', sans-serif; font-size: 16px">Let's munch</a>
+    <span style="font-size: 10px; color: #5E6128">Not medical advice. Have a health condition? Check with a pro.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { goal: 'maintain', act: 'desk' }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var chip = function (on) {
+      return 'height: 48px; padding: 0 12px; border-radius: 14px; font-family: inherit; font-size: 13px; cursor: pointer; ' +
+        (on ? 'background: #0E4A43; color: #F2F3D3; border: 1px solid #0E4A43' : 'background: #FFFFFF; color: #2F3212; border: 1px solid #DADBAE');
+    };
+    var goalDefs = [['lose', 'Lose weight', 1850, 130], ['maintain', 'Stay balanced', 2150, 110], ['gain', 'Gain weight', 2450, 120], ['muscle', 'Build muscle', 2350, 140]];
+    var actDefs = [['desk', 'Desk job', 0], ['feet', 'On my feet', 200], ['active', 'Very active', 400]];
+    var kcal = 0, p = 0;
+    var goals = goalDefs.map(function (d) {
+      var on = s.goal === d[0]; if (on) { kcal += d[2]; p = d[3]; }
+      return { label: d[1], on: on ? 'true' : 'false', style: chip(on), pick: function () { self.setState({ goal: d[0] }); } };
+    });
+    var acts = actDefs.map(function (d) {
+      var on = s.act === d[0]; if (on) kcal += d[2];
+      return { label: d[1], on: on ? 'true' : 'false', style: chip(on) + '; flex: 1', pick: function () { self.setState({ act: d[0] }); } };
+    });
+    var f = Math.round(kcal * 0.28 / 9);
+    var c = Math.round((kcal - p * 4 - f * 9) / 4);
+    return { goals: goals, acts: acts, kcal: kcal.toLocaleString('en-US'), p: p, c: c, f: f };
+  }
+}
+</script>
+</body>
+</html>

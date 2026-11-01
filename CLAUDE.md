@@ -104,3 +104,7 @@ backend/
 - Never commit or print secrets from `.env`. Keep `.env.example` in sync when adding settings.
 - Keep `foods.db` rebuildable from code/CSV (seed scripts), never hand-edited only.
 - Add/keep pytest cases for the three reference inputs as the pipeline comes together.
+
+## UI design
+The frontend UI must follow `design/DESIGN.md` (tokens, fonts, components, screens, guest vs logged-in rules).
+`design/screens/*.dc.html` are the visual reference for each screen (design-tool markup: rebuild as real components, do not ship them).
