@@ -62,28 +62,32 @@ Nutrition data sources (step 11): Thai Food Composition Database (INMU, Mahidol)
 for Thai dishes/ingredients, USDA FoodData Central for raw ingredients and Western food.
 
 ## Project layout
+The repo root holds `backend/` (everything below), a future `frontend/` (Next.js), `.venv/`, `.git`
+and this file. Run all Python commands from `backend/` (`cd backend`, with `.venv` from the root
+activated: `..\.venv\Scripts\activate`).
 ```
-data/raw/          original downloaded datasets (gitignored)
-data/processed/    cleaned CSVs (gitignored)
-data/foods.db      SQLite database (gitignored, rebuildable from code)
-src/config.py      loads .env (API keys, EMBEDDING_MODEL, DB_PATH)
-src/db.py          schema + seed data            (step 2-3)
-src/parser.py      text -> structured items      (step 4)
-src/matcher.py     food name -> DB entry         (step 5)
-src/nutrition.py   portions -> totals            (step 6)
-src/pipeline.py    parse -> match -> calculate   (step 7; shared by cli.py and the future API)
-src/parse_cache.py cache of LLM parse results    (step 10; data/cache.db)
-src/doh_import.py  Dept. of Health Thai food table -> DB (step 11); extract_doh_table.py transcribes the PDF
-src/usda_import.py generic USDA SR Legacy foods -> DB (after step 15); output language is English
-src/api.py         FastAPI app, POST /estimate    (step 14)
-evaluate.py        pipeline error vs USDA reference dishes (step 12); build_eval_set.py builds the CSV
-src/textutil.py    shared text normalisation
-calibrate_matcher.py  picks matcher thresholds from data/eval/match_queries.csv (step 9)
-data/eval/         evaluation/calibration queries (tracked in git)
-cli.py             entry point                   (step 7)
-check_setup.py     verifies the environment
-tests/
-ROADMAP.md         step list with progress checkboxes
+backend/
+  data/raw/          original downloaded datasets (gitignored)
+  data/processed/    cleaned CSVs (gitignored)
+  data/foods.db      SQLite database (gitignored, rebuildable from code)
+  src/config.py      loads .env (API keys, EMBEDDING_MODEL, DB_PATH)
+  src/db.py          schema + seed data            (step 2-3)
+  src/parser.py      text -> structured items      (step 4)
+  src/matcher.py     food name -> DB entry         (step 5)
+  src/nutrition.py   portions -> totals            (step 6)
+  src/pipeline.py    parse -> match -> calculate   (step 7; shared by cli.py and the future API)
+  src/parse_cache.py cache of LLM parse results    (step 10; data/cache.db)
+  src/doh_import.py  Dept. of Health Thai food table -> DB (step 11); extract_doh_table.py transcribes the PDF
+  src/usda_import.py generic USDA SR Legacy foods -> DB (after step 15); output language is English
+  src/api.py         FastAPI app, POST /estimate    (step 14)
+  evaluate.py        pipeline error vs USDA reference dishes (step 12); build_eval_set.py builds the CSV
+  src/textutil.py    shared text normalisation
+  calibrate_matcher.py  picks matcher thresholds from data/eval/match_queries.csv (step 9)
+  data/eval/         evaluation/calibration queries (tracked in git)
+  cli.py             entry point                   (step 7)
+  check_setup.py     verifies the environment
+  tests/
+  ROADMAP.md         step list with progress checkboxes
 ```
 
 ## How to work with the owner (important)
@@ -95,8 +99,8 @@ ROADMAP.md         step list with progress checkboxes
 - Direct, peer-like tone. Reply in whatever language the user writes in (English or Thai).
 - When a step is finished and verified, tick it in `ROADMAP.md` and add a one-line note
   if a decision was made.
-- Environment: Windows + PowerShell, VS Code. Activate with `.venv\Scripts\activate`.
-  Run things from the project root. Conda `(base)` may also be active; `.venv` on top is fine.
+- Environment: Windows + PowerShell, VS Code. The venv is `.venv` at the repo root; from
+  `backend/` activate it with `..\.venv\Scripts\activate`. Run Python things from `backend/`. Conda `(base)` may also be active; `.venv` on top is fine.
 - Never commit or print secrets from `.env`. Keep `.env.example` in sync when adding settings.
 - Keep `foods.db` rebuildable from code/CSV (seed scripts), never hand-edited only.
 - Add/keep pytest cases for the three reference inputs as the pipeline comes together.

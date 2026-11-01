@@ -10,12 +10,16 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Data (generated / large)
-data/*.db
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
+# Backend data (generated / large)
+backend/data/*.db
+backend/data/raw/*
+!backend/data/raw/.gitkeep
+backend/data/processed/*
+!backend/data/processed/.gitkeep
+
+# Frontend (Next.js)
+node_modules/
+.next/
 
 # Editors / OS
 .vscode/

@@ -22,8 +22,9 @@ serving and reported as an assumption.
 
 ## Setup (Windows)
 ```powershell
-py -m venv .venv
-.venv\Scripts\activate
+cd backend                    # run everything below from backend/
+py -m venv ..\.venv           # one venv at the repo root, shared by the whole project
+..\.venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env        # then put your GEMINI_API_KEY in .env
 python check_setup.py
