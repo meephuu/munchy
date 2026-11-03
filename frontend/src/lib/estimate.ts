@@ -3,6 +3,7 @@
 // needs the backend URL and no CORS setup is required for this path.
 
 import { BACKEND_URL } from "./backend";
+import type { UnitOption } from "./units";
 
 type ApiTotals = { kcal: number; protein_g: number; fat_g: number; carbs_g: number };
 
@@ -10,7 +11,7 @@ type ApiTotals = { kcal: number; protein_g: number; fat_g: number; carbs_g: numb
 export type EstimateResponse = {
   input: string;
   totals: ApiTotals;
-  lines: { name: string; grams: number; kcal: number; per_100g: ApiTotals }[];
+  lines: { name: string; grams: number; kcal: number; per_100g: ApiTotals; units: UnitOption[] }[];
   assumptions: string[];
   warnings: string[];
   unmatched: string[];
@@ -60,6 +61,8 @@ export type Ingredient = {
   name: string;
   grams: number;
   per100: Macros;
+  /** Units the food is naturally counted in (besides grams): 1 egg, 2 tbsp... */
+  units: UnitOption[];
   dot: string;
   /** Added by the user from the food search, not found by the AI. */
   added?: boolean;
@@ -103,6 +106,7 @@ export function toDish(res: EstimateResponse): Dish {
         carbs: l.per_100g.carbs_g,
         fat: l.per_100g.fat_g,
       },
+      units: l.units,
       dot: dotFor(i),
     })),
     confidence: confidenceOf(res),

@@ -19,6 +19,7 @@ from src import config
 from src.db import connect, display_name
 from src.matcher import Match
 from src.parser import ParsedItem
+from src.units import units_for
 
 GRAM_UNITS = {"g", "gram", "grams", "กรัม", "ก."}
 KILOGRAM_UNITS = {"kg", "kilogram", "kilograms", "กก.", "กิโลกรัม", "กิโล"}
@@ -49,6 +50,7 @@ class Line:
     item_text: str                    # the user's text this line came from
     via_combo: str | None = None      # combo name if this line is a component of one
     assumptions: list[str] = field(default_factory=list)
+    units: list[tuple[str, float]] = field(default_factory=list)   # (label, grams per 1) the food can be measured in
 
 
 @dataclass
@@ -123,7 +125,7 @@ def _grams(conn: sqlite3.Connection, food: sqlite3.Row,
     return g, f"assumed {qty:g} serving(s) of {name} ({g:g} g)"
 
 
-def _line(food: sqlite3.Row, grams: float, item_text: str, *,
+def _line(conn: sqlite3.Connection, food: sqlite3.Row, grams: float, item_text: str, *,
           via_combo: str | None = None, assumptions: list[str] | None = None) -> Line:
     k = grams / 100
     assumptions = list(assumptions or [])
@@ -132,7 +134,7 @@ def _line(food: sqlite3.Row, grams: float, item_text: str, *,
     return Line(food["id"], display_name(food), grams,
                 food["kcal_100g"] * k, food["protein_100g"] * k,
                 food["fat_100g"] * k, food["carbs_100g"] * k,
-                item_text, via_combo, assumptions)
+                item_text, via_combo, assumptions, units_for(conn, [food["id"]])[food["id"]])
 
 
 def _expand_combo(conn: sqlite3.Connection, combo: sqlite3.Row, qty: float | None,
@@ -164,7 +166,7 @@ def _expand_combo(conn: sqlite3.Connection, combo: sqlite3.Row, qty: float | Non
                                        f"assumed default amount of {display_name(c)}"]
         if takes_user and note:
             notes.append(note)
-        out.append(_line(c, grams, item_text, via_combo=combo_name, assumptions=notes))
+        out.append(_line(conn, c, grams, item_text, via_combo=combo_name, assumptions=notes))
 
     if user_gave_qty and not any(c["takes_user_qty"] for c in comps):
         out[0].assumptions.append(
@@ -184,7 +186,7 @@ def calculate(pairs: list[tuple[ParsedItem, Match]],
                 new = _expand_combo(conn, food, item.qty, item.unit, item.food)
             else:
                 grams, note = _grams(conn, food, item.qty, item.unit)
-                new = [_line(food, grams, item.food, assumptions=[note] if note else [])]
+                new = [_line(conn, food, grams, item.food, assumptions=[note] if note else [])]
                 standalone_ids[food["id"]] = item.food
             if item.implied_for:
                 new[0].assumptions.insert(0, f"added {display_name(food)} (you did not list it): "

@@ -205,3 +205,10 @@ def test_combo_cycle_raises(db_path, tmp_path):
                                             ('มันบดชีสราดเกรวี่', 'สลัดอกไก่'))""")
     with pytest.raises(CalcError, match="too deep"):
         calculate([pair(path, "สลัดอกไก่")], path)
+
+
+def test_lines_carry_the_units_their_food_is_counted_in(db_path):
+    est = estimate(db_path, ("ข้าวเหนียวหมูปิ้ง", 5, "ไม้"))
+    by = {l.name: l.units for l in est.lines}
+    assert by[EN["หมูปิ้ง"]] == [("skewer", 30.0), ("piece", 30.0)]
+    assert dict(by[EN["ข้าวเหนียวนึ่ง"]]).get("pack") == 90

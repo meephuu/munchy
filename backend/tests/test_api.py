@@ -166,3 +166,16 @@ def test_food_search_validates_its_parameters(client, db_path):
     assert client.get("/foods/search").status_code == 422                      # q is required
     assert client.get("/foods/search", params={"q": "egg", "limit": 99}).status_code == 422
     assert client.get("/foods/search", params={"q": "x" * 101}).status_code == 422
+
+
+def test_estimate_lines_list_the_units_of_each_food(client, db_path):
+    use(real_pipeline(db_path))
+    body = client.post("/estimate", json={"text": I1}).json()
+    pork = body["lines"][1]
+    assert pork["units"] == [{"label": "skewer", "grams": 30.0}, {"label": "piece", "grams": 30.0}]
+
+
+def test_food_search_lists_units_in_english(client, db_path):
+    search_matcher(db_path)
+    egg = next(f for f in client.get("/foods/search", params={"q": "boiled egg"}).json() if f["name"] == "boiled egg")
+    assert egg["units"] == [{"label": "egg", "grams": 50.0}]

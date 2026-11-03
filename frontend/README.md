@@ -29,8 +29,12 @@ npm run dev                      # http://localhost:3000
 - `src/app/onboarding/` – placeholder until the Onboarding screen is built
 
 ## Editing amounts
-Tap an ingredient on the result to change how much of it is in the meal: - / + (10 g steps), a typed
-amount in grams, or Half / As estimated / Double. 0 g leaves the food out. Totals, macros, weight and the
+Tap an ingredient on the result to change how much of it is in the meal: - / + , a typed amount, or
+Half / As estimated / Double. 0 leaves the food out. The amount can be in grams or in the food's own
+units (1 egg, 2 tbsp, 3 slices, a cup...): the backend sends each food's units (`units`, English labels),
+the editor opens in the unit the amount reads best in (50 g of boiled egg -> 1 egg) and a "measure in"
+row switches between them. Steps are 10 g, half a spoon/cup, or one piece. The meal itself always keeps
+grams (`src/lib/units.ts` only converts for display and typing). Totals, macros, weight and the
 range follow instantly: the backend sends each food's per-100 g values (`lines[].per_100g`), so this is
 plain arithmetic in the browser (`summarize` in `src/lib/estimate.ts`), with no new request. "Reset to
 the estimate" undoes all edits. Edits live only in the open page for now (nothing is saved).

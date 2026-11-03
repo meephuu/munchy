@@ -131,6 +131,7 @@ export function DishResult({ query, dish }: { query: string; dish: Dish }) {
                   id={`amount-${i}`}
                   name={row.name}
                   grams={row.grams}
+                  units={ingredients[i].units}
                   estimated={ingredients[i].grams}
                   baseLabel={row.added ? "Typical serving" : "As estimated"}
                   onChange={(g) => setAmount(i, g)}

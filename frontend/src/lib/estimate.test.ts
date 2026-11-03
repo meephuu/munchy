@@ -19,8 +19,8 @@ const response = (over: Partial<EstimateResponse> = {}): EstimateResponse => ({
   input: "x",
   totals: { kcal: 582.4, protein_g: 33.7, fat_g: 26.0, carbs_g: 54.1 },
   lines: [
-    { name: "steamed sticky rice", grams: 90, kcal: 207.2, per_100g: per100(230, 4.2, 0.5, 51.8) },
-    { name: "grilled pork skewer", grams: 150, kcal: 375, per_100g: per100(250, 20, 17, 5) },
+    { name: "steamed sticky rice", grams: 90, kcal: 207.2, per_100g: per100(230, 4.2, 0.5, 51.8), units: [{ label: "pack", grams: 90 }] },
+    { name: "grilled pork skewer", grams: 150, kcal: 375, per_100g: per100(250, 20, 17, 5), units: [{ label: "skewer", grams: 30 }] },
   ],
   assumptions: [],
   warnings: [],
@@ -34,6 +34,7 @@ describe("toDish", () => {
     const [rice, pork] = toDish(response()).ingredients;
     expect(rice).toMatchObject({ name: "steamed sticky rice", grams: 90, per100: { kcal: 230, protein: 4.2, fat: 0.5, carbs: 51.8 } });
     expect(pork.grams).toBe(150);
+    expect(pork.units).toEqual([{ label: "skewer", grams: 30 }]);
     expect(rice.dot).not.toBe(pork.dot);
   });
 

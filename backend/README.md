@@ -38,8 +38,8 @@ uvicorn src.api:app --reload                  # API on http://127.0.0.1:8000 (do
 ```
 ```
 POST /estimate   {"text": "ข้าวเหนียวหมูปิ้ง 5 ไม้", "use_cache": true}
--> totals, per-food lines, matches, assumptions, warnings, unmatched, complete
-GET  /foods/search?q=egg&limit=8   -> foods to add to a meal: id, name, per_100g, default_serving_g
+-> totals, per-food lines (grams, per_100g, units), matches, assumptions, warnings, unmatched, complete
+GET  /foods/search?q=egg&limit=8   -> foods to add to a meal: id, name, per_100g, default_serving_g, units
 GET  /health
 ```
 

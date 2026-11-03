@@ -18,6 +18,7 @@ from src.matcher import Matcher
 from src.nutrition import CalcError, Estimate, Line
 from src.parser import ParseError
 from src.pipeline import estimate as run_pipeline
+from src.units import units_for
 
 Estimator = Callable[[str, bool], Estimate]
 
@@ -43,11 +44,17 @@ class Totals(BaseModel):
     carbs_g: float
 
 
+class UnitOut(BaseModel):
+    label: str = Field(description="English name of the unit, e.g. egg, tbsp, slice, cup")
+    grams: float = Field(description="Weight of one of these")
+
+
 class LineOut(Totals):
     name: str
     grams: float
     per_100g: Totals = Field(description="Nutrients per 100 g of this food, so a client can rescale "
                                          "the line when the user changes the amount")
+    units: list[UnitOut] = Field(description="Units this food is naturally counted in (besides grams)")
     from_input: str
     part_of: str | None = Field(description="Combo dish this line is a component of, if any")
     assumptions: list[str]
@@ -58,6 +65,7 @@ class FoodOut(BaseModel):
     name: str
     per_100g: Totals
     default_serving_g: float = Field(description="Grams of one typical serving, a sensible amount to start from")
+    units: list[UnitOut] = Field(description="Units this food is naturally counted in (besides grams)")
 
 
 class MatchOut(BaseModel):
@@ -96,7 +104,8 @@ def to_response(text: str, est: Estimate) -> EstimateOut:
     return EstimateOut(
         input=text,
         totals=Totals(kcal=_r(est.kcal), protein_g=_r(est.protein), fat_g=_r(est.fat), carbs_g=_r(est.carbs)),
-        lines=[LineOut(name=l.name, grams=_r(l.grams), per_100g=_per_100g(l), kcal=_r(l.kcal),
+        lines=[LineOut(name=l.name, grams=_r(l.grams), per_100g=_per_100g(l),
+                       units=[UnitOut(label=u, grams=g) for u, g in l.units], kcal=_r(l.kcal),
                        protein_g=_r(l.protein),
                        fat_g=_r(l.fat), carbs_g=_r(l.carbs), from_input=l.item_text,
                        part_of=l.via_combo, assumptions=l.assumptions) for l in est.lines],
@@ -155,10 +164,12 @@ def search_foods(q: str = Query(max_length=100), limit: int = Query(8, ge=1, le=
         rows = {r["id"]: r for r in conn.execute(
             f"SELECT id, kcal_100g, protein_100g, fat_100g, carbs_100g, default_serving_g "
             f"FROM foods WHERE id IN ({marks})", [m.food_id for m in hits])}
+        units = units_for(conn, [m.food_id for m in hits])
     return [FoodOut(id=m.food_id, name=m.name,
                     per_100g=Totals(kcal=rows[m.food_id]["kcal_100g"], protein_g=rows[m.food_id]["protein_100g"],
                                     fat_g=rows[m.food_id]["fat_100g"], carbs_g=rows[m.food_id]["carbs_100g"]),
-                    default_serving_g=rows[m.food_id]["default_serving_g"] or 100.0)
+                    default_serving_g=rows[m.food_id]["default_serving_g"] or 100.0,
+                    units=[UnitOut(label=u, grams=g) for u, g in units[m.food_id]])
             for m in hits]
 
 

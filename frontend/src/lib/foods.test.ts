@@ -7,12 +7,13 @@ const egg: FoodHit = {
   name: "boiled egg",
   per_100g: { kcal: 155, protein_g: 12.6, fat_g: 10.6, carbs_g: 1.1 },
   default_serving_g: 50,
+  units: [{ label: "egg", grams: 50 }],
 };
 
 const response: EstimateResponse = {
   input: "x",
   totals: { kcal: 230, protein_g: 4.2, fat_g: 0.5, carbs_g: 51.8 },
-  lines: [{ name: "rice", grams: 100, kcal: 230, per_100g: { kcal: 230, protein_g: 4.2, fat_g: 0.5, carbs_g: 51.8 } }],
+  lines: [{ name: "rice", grams: 100, kcal: 230, per_100g: { kcal: 230, protein_g: 4.2, fat_g: 0.5, carbs_g: 51.8 }, units: [] }],
   assumptions: [],
   warnings: [],
   unmatched: [],
@@ -26,6 +27,7 @@ describe("toIngredient", () => {
       name: "boiled egg",
       grams: 50,
       added: true,
+      units: [{ label: "egg", grams: 50 }],
       per100: { kcal: 155, protein: 12.6, fat: 10.6, carbs: 1.1 },
     });
     expect(ing.dot).toMatch(/^var\(--color-/);

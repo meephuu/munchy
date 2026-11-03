@@ -1,4 +1,5 @@
 import { dotFor, type Ingredient } from "@/lib/estimate";
+import type { UnitOption } from "@/lib/units";
 
 /** One suggestion from GET /foods/search (FoodOut in backend/src/api.py). */
 export type FoodHit = {
@@ -6,6 +7,7 @@ export type FoodHit = {
   name: string;
   per_100g: { kcal: number; protein_g: number; fat_g: number; carbs_g: number };
   default_serving_g: number;
+  units: UnitOption[];
 };
 
 /** Search the food database through our own /api/foods route. Throws if the search fails. */
@@ -26,6 +28,7 @@ export function toIngredient(hit: FoodHit, position: number): Ingredient {
       carbs: hit.per_100g.carbs_g,
       fat: hit.per_100g.fat_g,
     },
+    units: hit.units,
     dot: dotFor(position),
     added: true,
   };
