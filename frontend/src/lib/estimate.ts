@@ -122,7 +122,18 @@ export function toDish(res: EstimateResponse): Dish {
   };
 }
 
-export type Row = { name: string; grams: number; kcal: number; dot: string; edited: boolean; added: boolean };
+export type Row = {
+  name: string;
+  grams: number;
+  kcal: number;
+  /** Grams of each macro in this row at its amount, to one decimal (kept so a logged meal can show them). */
+  protein: number;
+  carbs: number;
+  fat: number;
+  dot: string;
+  edited: boolean;
+  added: boolean;
+};
 
 export type Summary = Macros & {
   weight: number;
@@ -151,6 +162,9 @@ export function summarize(dish: Dish, grams: number[]): Summary {
       name: ing.name,
       grams: g,
       kcal: Math.round(ing.per100.kcal * k),
+      protein: round1(ing.per100.protein * k),
+      carbs: round1(ing.per100.carbs * k),
+      fat: round1(ing.per100.fat * k),
       dot: ing.dot,
       edited: g !== ing.grams,
       added: !!ing.added,
