@@ -42,7 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${climate.variable} ${figtree.variable} ${anuphan.variable}`}
     >
-      <body className="min-h-dvh antialiased">{children}</body>
+      <body className="antialiased">
+        <div className="app-shell">{children}</div>
+      </body>
     </html>
   );
 }

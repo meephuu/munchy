@@ -38,6 +38,9 @@
   --radius-field: 12px;            /* form fields, small inner tiles */
   --radius-btn: 18px;              /* primary buttons */
 
+  /* Screens at least this wide get the phone frame (see .app-shell below). */
+  --breakpoint-frame: 600px;
+
   /* Fonts: the --font-* variables below come from next/font in layout.tsx */
   --font-display: var(--font-climate), sans-serif;
   --font-body: var(--font-figtree), var(--font-anuphan), sans-serif;
@@ -51,6 +54,40 @@ body {
   background: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-body);
+}
+
+/*
+ * The app lives inside .app-shell. On a phone it simply fills the screen. On a bigger screen it
+ * becomes a 390 x 844 phone (shrinking to fit short windows) centered on a dark page; the content
+ * scrolls inside it. Real responsive layouts come later: for now big screens just see a phone.
+ */
+.app-shell {
+  min-height: 100dvh;
+}
+
+@media (min-width: 600px) {
+  body {
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+  }
+
+  .app-shell {
+    width: 390px;
+    height: min(844px, calc(100dvh - 48px));
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    border-radius: 40px;
+    background: var(--color-cream);
+    box-shadow: 0 0 0 8px #242424, 0 24px 60px rgb(0 0 0 / 0.5);
+  }
+
+  .app-shell::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* In @layer base so utilities like text-cream on a button-link still win. */

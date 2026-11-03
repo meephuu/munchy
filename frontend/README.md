@@ -24,8 +24,20 @@ npm run dev                      # http://localhost:3000
 - `src/app/page.tsx` – Guest home (`/`)
 - `src/app/dish/page.tsx` – Guest dish result (`/dish?q=...`): asks the backend, shows loading / error / empty states
 - `src/lib/estimate.ts` – `POST /estimate` client (run on the server, so no CORS needed) and the mapping to what the screen shows
-- `src/components/` – `DishResult`, `DishStates`, `DishHeader`, `Chip`, icons
+- `src/components/` – `DishResult`, `AmountEditor`, `DishStates`, `DishHeader`, `Chip`, icons
 - `src/app/onboarding/` – placeholder until the Onboarding screen is built
+
+## Editing amounts
+Tap an ingredient on the result to change how much of it is in the meal: - / + (10 g steps), a typed
+amount in grams, or Half / As estimated / Double. 0 g leaves the food out. Totals, macros, weight and the
+range follow instantly: the backend sends each food's per-100 g values (`lines[].per_100g`), so this is
+plain arithmetic in the browser (`summarize` in `src/lib/estimate.ts`), with no new request. "Reset to
+the estimate" undoes all edits. Edits live only in the open page for now (nothing is saved).
+
+## Phone frame
+Everything is built for phone size only for now. On screens 600px and wider the app is shown as a fixed
+390 x 844 phone on a dark page (scrolling inside it); below 600px it fills the screen with no frame.
+This is `.app-shell` in `src/app/globals.css`; remove it when real responsive layouts are built.
 
 ## How the numbers get on screen
 The backend returns totals, per-food lines, assumptions and warnings. The screen shows kcal with a

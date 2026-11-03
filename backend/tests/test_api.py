@@ -54,6 +54,17 @@ def test_estimate_returns_totals_lines_and_assumptions(client, db_path):
     assert body["warnings"] == [] and body["unmatched"] == [] and body["complete"] is True
 
 
+def test_each_line_carries_per_100g_values_that_rebuild_its_numbers(client, db_path):
+    use(real_pipeline(db_path))
+    body = client.post("/estimate", json={"text": I1}).json()
+    pork = body["lines"][1]                                    # 150 g of grilled pork skewer
+    assert pork["per_100g"] == {"kcal": 250.0, "protein_g": 20.0, "fat_g": 17.0, "carbs_g": 5.0}
+    for line in body["lines"]:
+        scale = line["grams"] / 100
+        assert line["kcal"] == pytest.approx(line["per_100g"]["kcal"] * scale, abs=0.2)
+        assert line["protein_g"] == pytest.approx(line["per_100g"]["protein_g"] * scale, abs=0.2)
+
+
 def test_salad_with_extras(client, db_path):
     use(real_pipeline(db_path))
     body = client.post("/estimate", json={"text": I2}).json()

@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from src import config
 from src.matcher import Matcher
-from src.nutrition import CalcError, Estimate
+from src.nutrition import CalcError, Estimate, Line
 from src.parser import ParseError
 from src.pipeline import estimate as run_pipeline
 
@@ -45,6 +45,8 @@ class Totals(BaseModel):
 class LineOut(Totals):
     name: str
     grams: float
+    per_100g: Totals = Field(description="Nutrients per 100 g of this food, so a client can rescale "
+                                         "the line when the user changes the amount")
     from_input: str
     part_of: str | None = Field(description="Combo dish this line is a component of, if any")
     assumptions: list[str]
@@ -76,11 +78,18 @@ def _r(x: float) -> float:
     return round(x, 1)
 
 
+def _per_100g(l: Line) -> Totals:
+    k = 100 / l.grams if l.grams else 0.0     # unrounded line values, so rescaling stays exact
+    return Totals(kcal=round(l.kcal * k, 2), protein_g=round(l.protein * k, 2),
+                  fat_g=round(l.fat * k, 2), carbs_g=round(l.carbs * k, 2))
+
+
 def to_response(text: str, est: Estimate) -> EstimateOut:
     return EstimateOut(
         input=text,
         totals=Totals(kcal=_r(est.kcal), protein_g=_r(est.protein), fat_g=_r(est.fat), carbs_g=_r(est.carbs)),
-        lines=[LineOut(name=l.name, grams=_r(l.grams), kcal=_r(l.kcal), protein_g=_r(l.protein),
+        lines=[LineOut(name=l.name, grams=_r(l.grams), per_100g=_per_100g(l), kcal=_r(l.kcal),
+                       protein_g=_r(l.protein),
                        fat_g=_r(l.fat), carbs_g=_r(l.carbs), from_input=l.item_text,
                        part_of=l.via_combo, assumptions=l.assumptions) for l in est.lines],
         matches=[MatchOut(input=i.food, input_en=i.food_en, implied_for=i.implied_for, qty=i.qty, unit=i.unit, matched_food=m.name,

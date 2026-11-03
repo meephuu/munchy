@@ -1,14 +1,16 @@
 // Talks to the backend (POST /estimate, backend/src/api.py) and turns its response into what
-// the dish screen shows. Called from server components only, so the browser never needs the
-// backend URL and no CORS setup is required for this path.
+// the dish screen shows. fetchEstimate runs in server components only, so the browser never
+// needs the backend URL and no CORS setup is required for this path.
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
+
+type ApiTotals = { kcal: number; protein_g: number; fat_g: number; carbs_g: number };
 
 /** Response of POST /estimate (EstimateOut in backend/src/api.py). Only the fields we use. */
 export type EstimateResponse = {
   input: string;
-  totals: { kcal: number; protein_g: number; fat_g: number; carbs_g: number };
-  lines: { name: string; grams: number; kcal: number }[];
+  totals: ApiTotals;
+  lines: { name: string; grams: number; kcal: number; per_100g: ApiTotals }[];
   assumptions: string[];
   warnings: string[];
   unmatched: string[];
@@ -51,18 +53,15 @@ export async function fetchEstimate(text: string): Promise<EstimateResponse> {
 }
 
 export type Confidence = "Low" | "Medium" | "High";
-export type Part = { name: string; amount: string; kcal: number; dot: string };
+export type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
-export type DishView = {
-  kcal: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  grams: number;
-  low: number;
-  high: number;
+/** One food in the meal, as the AI estimated it. `per100` is what lets the user change `grams`. */
+export type Ingredient = { name: string; grams: number; per100: Macros; dot: string };
+
+/** What the backend found, before the user changes anything. Plain data, safe to pass to the client. */
+export type Dish = {
+  ingredients: Ingredient[];
   confidence: Confidence;
-  parts: Part[];
   warnings: string[];
   assumptions: string[];
   /** Nothing in the input matched the food database. */
@@ -85,26 +84,64 @@ export function confidenceOf(res: Pick<EstimateResponse, "complete" | "warnings"
   return "High";
 }
 
-export function toView(res: EstimateResponse): DishView {
-  const kcal = Math.round(res.totals.kcal);
+export function toDish(res: EstimateResponse): Dish {
   return {
-    kcal,
-    protein: Math.round(res.totals.protein_g),
-    carbs: Math.round(res.totals.carbs_g),
-    fat: Math.round(res.totals.fat_g),
-    grams: Math.round(res.lines.reduce((sum, l) => sum + l.grams, 0)),
-    // The estimate is shown as roughly +/-14%, rounded to the nearest 10 (DESIGN.md).
-    low: round10(kcal * 0.86),
-    high: round10(kcal * 1.14),
-    confidence: confidenceOf(res),
-    parts: res.lines.map((l, i) => ({
+    ingredients: res.lines.map((l, i) => ({
       name: l.name,
-      amount: `${round1(l.grams)} g`,
-      kcal: Math.round(l.kcal),
+      grams: round1(l.grams),
+      per100: {
+        kcal: l.per_100g.kcal,
+        protein: l.per_100g.protein_g,
+        carbs: l.per_100g.carbs_g,
+        fat: l.per_100g.fat_g,
+      },
       dot: DOTS[i % DOTS.length],
     })),
+    confidence: confidenceOf(res),
     warnings: res.warnings,
     assumptions: [...new Set(res.assumptions)],
     empty: res.lines.length === 0,
+  };
+}
+
+export type Row = { name: string; grams: number; kcal: number; dot: string; edited: boolean };
+
+export type Summary = Macros & {
+  weight: number;
+  low: number;
+  high: number;
+  rows: Row[];
+  /** True if any amount differs from the AI's estimate. */
+  edited: boolean;
+};
+
+/** The numbers for the amounts the user has chosen (`grams`, one per ingredient, in order).
+ *  Each food's nutrients scale linearly with its weight, so this is plain arithmetic on the
+ *  per-100 g values the backend sent; with unchanged amounts it reproduces the backend totals. */
+export function summarize(dish: Dish, grams: number[]): Summary {
+  const total: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+  let weight = 0;
+  const rows = dish.ingredients.map((ing, i) => {
+    const g = grams[i] ?? ing.grams;
+    const k = g / 100;
+    total.kcal += ing.per100.kcal * k;
+    total.protein += ing.per100.protein * k;
+    total.carbs += ing.per100.carbs * k;
+    total.fat += ing.per100.fat * k;
+    weight += g;
+    return { name: ing.name, grams: g, kcal: Math.round(ing.per100.kcal * k), dot: ing.dot, edited: g !== ing.grams };
+  });
+  const kcal = Math.round(total.kcal);
+  return {
+    kcal,
+    protein: Math.round(total.protein),
+    carbs: Math.round(total.carbs),
+    fat: Math.round(total.fat),
+    weight: Math.round(weight),
+    // The estimate is shown as roughly +/-14%, rounded to the nearest 10 (DESIGN.md).
+    low: round10(kcal * 0.86),
+    high: round10(kcal * 1.14),
+    rows,
+    edited: rows.some((r) => r.edited),
   };
 }

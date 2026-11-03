@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DishResult } from "@/components/DishResult";
 import { DishLoading, DishProblem } from "@/components/DishStates";
-import { EstimateError, fetchEstimate, toView } from "@/lib/estimate";
+import { EstimateError, fetchEstimate, toDish } from "@/lib/estimate";
 
 // Guest dish result. Public. `?q=` is the dish the guest typed; it is sent to the backend
 // (POST /estimate). Without it there is nothing to show, so go back to search. With Cache
@@ -21,25 +21,25 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
   const query = (Array.isArray(q) ? q[0] : q)?.trim();
   if (!query) redirect("/");
 
-  let view;
+  let dish;
   try {
-    view = toView(await fetchEstimate(query));
+    dish = toDish(await fetchEstimate(query));
   } catch (e) {
     if (!(e instanceof EstimateError)) throw e;
     const title = e.kind === "unclear" ? "We couldn't read that" : "Couldn't estimate this bite";
     return <DishProblem query={query} title={title} message={e.message} />;
   }
 
-  if (view.empty) {
+  if (dish.empty) {
     return (
       <DishProblem
         query={query}
         title="Not in our food list yet"
         message="We couldn't match anything in that to a food we know. Try a simpler name, like “fried egg” or “pad thai”."
-        details={view.warnings}
+        details={dish.warnings}
       />
     );
   }
 
-  return <DishResult query={query} view={view} />;
+  return <DishResult query={query} dish={dish} />;
 }

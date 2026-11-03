@@ -1,12 +1,26 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { confidenceOf, EstimateError, fetchEstimate, toView, type EstimateResponse } from "./estimate";
+import {
+  confidenceOf,
+  EstimateError,
+  fetchEstimate,
+  summarize,
+  toDish,
+  type EstimateResponse,
+} from "./estimate";
+
+const per100 = (kcal: number, protein_g: number, fat_g: number, carbs_g: number) => ({
+  kcal,
+  protein_g,
+  fat_g,
+  carbs_g,
+});
 
 const response = (over: Partial<EstimateResponse> = {}): EstimateResponse => ({
   input: "x",
   totals: { kcal: 582.4, protein_g: 33.7, fat_g: 26.0, carbs_g: 54.1 },
   lines: [
-    { name: "steamed sticky rice", grams: 90, kcal: 207.2 },
-    { name: "grilled pork skewer", grams: 150, kcal: 375 },
+    { name: "steamed sticky rice", grams: 90, kcal: 207.2, per_100g: per100(230, 4.2, 0.5, 51.8) },
+    { name: "grilled pork skewer", grams: 150, kcal: 375, per_100g: per100(250, 20, 17, 5) },
   ],
   assumptions: [],
   warnings: [],
@@ -15,32 +29,53 @@ const response = (over: Partial<EstimateResponse> = {}): EstimateResponse => ({
   ...over,
 });
 
-describe("toView", () => {
-  it("rounds totals, sums the weight and shows a range of about +/-14% to the nearest 10", () => {
-    const v = toView(response());
-    expect([v.kcal, v.protein, v.fat, v.carbs, v.grams]).toEqual([582, 34, 26, 54, 240]);
-    expect([v.low, v.high]).toEqual([500, 660]);
-  });
-
-  it("turns lines into ingredient rows with grams and kcal", () => {
-    const [rice, pork] = toView(response()).parts;
-    expect(rice).toMatchObject({ name: "steamed sticky rice", amount: "90 g", kcal: 207 });
-    expect(pork.amount).toBe("150 g");
+describe("toDish", () => {
+  it("keeps each food with its amount and per-100 g nutrients", () => {
+    const [rice, pork] = toDish(response()).ingredients;
+    expect(rice).toMatchObject({ name: "steamed sticky rice", grams: 90, per100: { kcal: 230, protein: 4.2, fat: 0.5, carbs: 51.8 } });
+    expect(pork.grams).toBe(150);
     expect(rice.dot).not.toBe(pork.dot);
   });
 
-  it("keeps one decimal for small amounts and de-duplicates assumptions", () => {
-    const v = toView(response({
-      lines: [{ name: "parmesan", grams: 5.04, kcal: 21 }],
-      assumptions: ["assumed 1 serving", "assumed 1 serving"],
-    }));
-    expect(v.parts[0].amount).toBe("5 g");
-    expect(v.assumptions).toEqual(["assumed 1 serving"]);
+  it("de-duplicates assumptions and flags an estimate with no lines as empty", () => {
+    const d = toDish(response({ assumptions: ["assumed 1 serving", "assumed 1 serving"] }));
+    expect(d.assumptions).toEqual(["assumed 1 serving"]);
+    expect(d.empty).toBe(false);
+    expect(toDish(response({ lines: [], complete: false })).empty).toBe(true);
+  });
+});
+
+describe("summarize", () => {
+  const dish = toDish(response());
+  const asEstimated = dish.ingredients.map((i) => i.grams);
+
+  it("with the AI's amounts reproduces the backend's totals", () => {
+    const s = summarize(dish, asEstimated);
+    expect([s.kcal, s.protein, s.fat, s.carbs, s.weight]).toEqual([582, 34, 26, 54, 240]);
+    expect([s.low, s.high]).toEqual([500, 660]);
+    expect(s.edited).toBe(false);
+    expect(s.rows.map((r) => r.kcal)).toEqual([207, 375]);
   });
 
-  it("flags an estimate with no lines as empty", () => {
-    expect(toView(response({ lines: [], complete: false })).empty).toBe(true);
-    expect(toView(response()).empty).toBe(false);
+  it("rescales a food's nutrients when its amount changes and marks the row edited", () => {
+    const s = summarize(dish, [90, 75]);                    // half the pork
+    expect(s.rows[1]).toMatchObject({ grams: 75, kcal: 188, edited: true });
+    expect(s.rows[0].edited).toBe(false);
+    expect(s.kcal).toBe(Math.round(230 * 0.9 + 250 * 0.75));
+    expect(s.weight).toBe(165);
+    expect(s.edited).toBe(true);
+  });
+
+  it("treats 0 g as taking the food out, and can bring it back from 0", () => {
+    expect(summarize(dish, [0, 150]).rows[0]).toMatchObject({ grams: 0, kcal: 0 });
+    expect(summarize(dish, [0, 150]).kcal).toBe(375);
+    expect(summarize(dish, [0, 0]).kcal).toBe(0);
+    expect(summarize(dish, [200, 150]).rows[0].kcal).toBe(460);   // per-100 g values never lose precision
+  });
+
+  it("recomputes the +/-14% range from the new total", () => {
+    const s = summarize(dish, [90, 0]);
+    expect([s.kcal, s.low, s.high]).toEqual([207, 180, 240]);
   });
 });
 
