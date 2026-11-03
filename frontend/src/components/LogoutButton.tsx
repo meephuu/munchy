@@ -20,7 +20,7 @@ export function LogoutButton() {
       type="button"
       onClick={logOut}
       disabled={busy}
-      className="flex h-11 cursor-pointer items-center rounded-full border-[1.5px] border-teal px-[18px] text-sm font-semibold text-teal disabled:opacity-50"
+      className="flex h-11 cursor-pointer items-center rounded-full border-[1.5px] border-green px-[18px] text-sm font-semibold text-green disabled:opacity-50"
     >
       {busy ? "Logging out…" : "Log out"}
     </button>

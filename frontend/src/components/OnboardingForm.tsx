@@ -6,6 +6,7 @@ import { Brand } from "@/components/Brand";
 import { OptionButton, PrimaryButton } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { Screen } from "@/components/Screen";
+import { Eyebrow, Title } from "@/components/Type";
 import { DEFAULT_PROFILE, saveDraft, targetOf, toProfile, toRow, type Profile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/client";
 import { ACTIVITIES, GOALS, LIMITS, SEXES, type Activity, type Goal, type Sex } from "@/lib/target";
@@ -61,14 +62,12 @@ export function OnboardingForm({ member, saved }: { member: boolean; saved: Prof
 
   return (
     <Screen>
-      <div className="flex flex-col gap-4 pt-1">
+      <div className="flex flex-col gap-3.5 pt-1">
         <Brand />
-        <p className="text-sm leading-normal">
-          Tell me a bit about you, and I&apos;ll set a daily target that fits your body and your day.
-        </p>
+        <Title lead="How much should you eat," accent="every day?" className="text-[26px]" />
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs text-ink-muted">Your goal</span>
+          <Eyebrow tone="muted">Your goal</Eyebrow>
           <div className="grid grid-cols-2 gap-2">
             {GOALS.map((g) => (
               <OptionButton key={g.id} selected={goal === g.id} onClick={() => setGoal(g.id)}>
@@ -79,7 +78,7 @@ export function OnboardingForm({ member, saved }: { member: boolean; saved: Prof
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs text-ink-muted">Sex (the calorie formula differs a little)</span>
+          <Eyebrow tone="muted">Sex · used in the formula</Eyebrow>
           <div className="grid grid-cols-3 gap-2">
             {SEXES.map((s) => (
               <OptionButton key={s.id} selected={sex === s.id} onClick={() => setSex(s.id)} className="px-1">
@@ -91,18 +90,18 @@ export function OnboardingForm({ member, saved }: { member: boolean; saved: Prof
 
         <div className="grid grid-cols-3 gap-2">
           <Field id="age" label="Age" type="number" inputMode="numeric" value={age} onChange={(e) => setAge(e.target.value)} />
-          <Field id="height" label="Height (cm)" type="number" inputMode="decimal" value={height} onChange={(e) => setHeight(e.target.value)} />
-          <Field id="weight" label="Weight (kg)" type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} />
+          <Field id="height" label="Height cm" type="number" inputMode="decimal" value={height} onChange={(e) => setHeight(e.target.value)} />
+          <Field id="weight" label="Weight kg" type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} />
         </div>
         {anyTyped && !profile && (
-          <p role="alert" className="-mt-2 text-xs text-fat-ink">
+          <p role="alert" className="-mt-1.5 text-xs text-terracotta-text">
             Age {LIMITS.age.min}–{LIMITS.age.max}, height {LIMITS.heightCm.min}–{LIMITS.heightCm.max} cm and
             weight {LIMITS.weightKg.min}–{LIMITS.weightKg.max} kg, please.
           </p>
         )}
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs text-ink-muted">Your typical day</span>
+          <Eyebrow tone="muted">Your typical day</Eyebrow>
           <div className="flex gap-2">
             {ACTIVITIES.map((a) => (
               <OptionButton key={a.id} selected={activity === a.id} onClick={() => setActivity(a.id)} className="flex-1">
@@ -112,49 +111,51 @@ export function OnboardingForm({ member, saved }: { member: boolean; saved: Prof
           </div>
         </div>
 
-        <section className="flex flex-col gap-2.5 rounded-hero bg-olive px-[18px] py-4">
-          <span className="text-xs">Your daily target</span>
+        <section className="flex flex-col gap-2.5 rounded-hero bg-surface px-[18px] py-4 shadow-card">
+          <Eyebrow>Your daily target</Eyebrow>
           <div className="flex items-baseline gap-1.5">
             <span
               aria-live="polite"
-              className={`leading-none ${target ? "font-display text-[34px] text-ink-strong" : "text-[34px] text-ink-muted"}`}
+              className={`leading-none ${target ? "font-brand text-4xl text-green" : "text-4xl text-ink-muted"}`}
             >
               {target ? target.kcal.toLocaleString("en-US") : "—"}
             </span>
-            <span className="text-sm">kcal</span>
+            <span className="text-sm font-semibold">kcal</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {[
-              ["Protein", target?.proteinG],
-              ["Carbs", target?.carbsG],
-              ["Fat", target?.fatG],
-            ].map(([label, grams]) => (
-              <span key={label} className="rounded-full bg-cream px-2.5 py-1 text-xs">
-                {label} {grams ?? "—"} g
-              </span>
-            ))}
+            <Badge tone="bg-green-tint text-green" label="Protein" grams={target?.proteinG} />
+            <Badge tone="bg-bronze-tint text-bronze" label="Carbs" grams={target?.carbsG} />
+            <Badge tone="bg-terracotta-tint text-terracotta-text" label="Fat" grams={target?.fatG} />
           </div>
-          <span className="text-[11px]">
-            {target?.floored
-              ? "I kept this at a safe minimum: eating less than this isn't a good idea."
-              : "I'll fine-tune this as your weight trend comes in."}
-          </span>
+          {target?.floored && (
+            <span className="text-[11px] text-ink-muted">
+              I kept this at a safe minimum: eating less than this isn&apos;t a good idea.
+            </span>
+          )}
         </section>
       </div>
 
-      <div className="sticky bottom-5 mt-6 flex flex-col items-center gap-2 bg-cream pt-2">
+      <div className="sticky bottom-5 mt-6 flex flex-col items-center gap-2 bg-bg pt-2">
         {error && (
-          <p role="alert" className="text-xs text-fat-ink">
+          <p role="alert" className="text-xs text-terracotta-text">
             {error}
           </p>
         )}
         <PrimaryButton type="button" disabled={!profile || saving} onClick={submit}>
           {saving ? "Saving…" : member ? "Save my profile" : "Let's munch"}
         </PrimaryButton>
-        <span className="text-[10px] text-ink-muted">
-          Not medical advice. Have a health condition? Check with a pro.
+        <span className="text-center font-mono text-[9px] tracking-[0.5px] text-ink-muted uppercase">
+          Not medical advice · check with a pro if you have a condition
         </span>
       </div>
     </Screen>
+  );
+}
+
+function Badge({ tone, label, grams }: { tone: string; label: string; grams: number | undefined }) {
+  return (
+    <span className={`rounded-badge px-2.5 py-1 text-xs font-semibold ${tone}`}>
+      {label} {grams ?? "—"} g
+    </span>
   );
 }

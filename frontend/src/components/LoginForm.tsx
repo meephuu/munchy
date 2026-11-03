@@ -7,6 +7,7 @@ import { Brand } from "@/components/Brand";
 import { PrimaryButton } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { Screen } from "@/components/Screen";
+import { Title } from "@/components/Type";
 import { friendlyAuthError, validateCredentials } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 
@@ -53,16 +54,16 @@ export function LoginForm() {
     <Screen>
       <form onSubmit={submit} noValidate className="flex flex-col gap-4 pt-1">
         <Brand />
-        <h1 className="font-display text-2xl font-normal">Welcome back</h1>
+        <Title lead="Welcome" accent="back" className="text-[26px]" />
         {notice && (
-          <p role="status" className="rounded-card bg-swap-bg px-3.5 py-3 text-[13px]">
+          <p role="status" className="rounded-card bg-terracotta-tint px-3.5 py-3 text-[13px]">
             {notice}
           </p>
         )}
         <Field id="email" label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Field id="password" label="Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && (
-          <p role="alert" className="text-sm text-fat-ink">
+          <p role="alert" className="text-sm text-terracotta-text">
             {error}
           </p>
         )}

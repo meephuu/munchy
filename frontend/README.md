@@ -1,7 +1,8 @@
 # Munchy frontend
 
-Next.js (App Router) + Tailwind v4. The UI follows `../design/DESIGN.md`; the `.dc.html` files in
-`../design/screens/` are the visual reference (rebuilt as components, never shipped).
+Next.js (App Router) + Tailwind v4. The UI follows `../design/DESIGN.md` (V2, "Forest & Bronze"); the
+`.dc.html` files in `../design/screens/` are the visual reference (rebuilt as components, never shipped).
+The previous olive/teal design (V1) is kept in `../design/v1/` for reference only.
 
 ## Run it (two terminals)
 ```powershell
@@ -19,8 +20,10 @@ npm run dev                      # http://localhost:3000
 `npm run build` makes a production build and type-checks; `npm run lint`; `npm test` runs the unit tests.
 
 ## Where things are
-- `src/app/globals.css` – design tokens (colors, radii, font families) as Tailwind `@theme` variables
-- `src/app/layout.tsx` – fonts via `next/font` (Climate Crisis, Figtree, Anuphan with Thai)
+- `src/app/globals.css` – design tokens (colors, shadows, radii, the four font roles) as Tailwind `@theme` variables
+- `src/app/layout.tsx` – fonts via `next/font`: Climate Crisis (logo and big numbers only), Fraunces (headings),
+  Space Mono (eyebrows, amounts), Figtree + Anuphan for Thai (body)
+- `src/components/Type.tsx` – `Eyebrow` (mono label), `Title` (serif heading, second half italic green), `Wordmark`
 - `src/app/page.tsx` – Guest home (`/`)
 - `src/app/dish/page.tsx` – Guest dish result (`/dish?q=...`): asks the backend, shows loading / error / empty states
 - `src/lib/estimate.ts` – `POST /estimate` client (run on the server, so no CORS needed) and the mapping to what the screen shows

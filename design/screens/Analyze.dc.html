@@ -2,35 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Munchy — Dish analysis</title>
+<title>Munchy — Bite check</title>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&amp;family=Space+Mono:wght@400;700&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#0E4A43}a:hover{color:#08332E}
+a{color:#1D5C3A}a:hover{color:#164A2E}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F2F3D3; font-family: 'Figtree', 'Anuphan', sans-serif; color: #2F3212">
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F7F2EA; font-family: 'Figtree', 'Anuphan', sans-serif; color: #1E1C18">
   <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 14px">
     <header style="display: flex; align-items: center; gap: 12px; padding-top: 8px">
-      <a href="Main.dc.html" aria-label="Back to home" style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #2F3212">
+      <a href="Main.dc.html" aria-label="Back to home" style="width: 44px; height: 44px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #1E1C18; box-shadow: 0 4px 14px rgba(70,50,20,0.08)">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
       </a>
-      <h1 style="margin: 0; font-family: 'Climate Crisis', sans-serif; font-size: 20px; font-weight: 400; color: #2F3212">Bite check</h1>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Bite check</span>
+        <h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 20px; line-height: 1.2">Pad kra pao, <span style="font-style: italic; color: #1D5C3A">fried egg, rice</span></h1>
+      </div>
     </header>
 
-    <div style="background: #FFFFFF; border: 1px solid #E1E2B8; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
-      <img src="../assets/bowl.png" alt="" style="width: 36px; height: 36px">
-      <span style="flex: 1; font-size: 15px">Pad kra pao, minced pork, fried egg, rice</span>
-      <span style="font-size: 11px; color: #5E6128">Edit</span>
-    </div>
-
     <div style="display: flex; flex-direction: column; gap: 8px">
-      <span style="font-size: 12px; color: #5E6128">Quick question — where's it from?</span>
+      <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #6B6457">Where's it from?</span>
       <div style="display: flex; gap: 8px">
         <sc-for list="{{places}}" as="p" hint-placeholder-count="3">
           <button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="{{p.style}}">{{p.label}}</button>
@@ -38,25 +35,24 @@ a{color:#0E4A43}a:hover{color:#08332E}
       </div>
     </div>
 
-    <section style="background: #BCBE7B; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end">
-        <div style="display: flex; flex-direction: column; gap: 4px">
-          <span style="font-size: 12px">Estimated</span>
-          <div style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Climate Crisis', sans-serif; font-size: 44px; line-height: 1; color: #1F2209">{{kcal}}</span><span style="font-size: 14px">kcal</span></div>
-          <span style="font-size: 12px">Range {{low}}–{{high}}</span>
-        </div>
-        <span style="background: #0E4A43; color: #F2F3D3; font-size: 11px; padding: 6px 10px; border-radius: 999px">Medium confidence</span>
+    <section style="background: #FFFFFF; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 6px 20px rgba(70,50,20,0.08)">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Estimated</span>
+        <span style="font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; background: #E6EFE8; color: #1D5C3A; padding: 4px 8px; border-radius: 6px">Medium confidence</span>
       </div>
+      <div style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Climate Crisis', sans-serif; font-size: 46px; line-height: 1; color: #1D5C3A">{{kcal}}</span><span style="font-size: 15px; font-weight: 600">kcal</span></div>
+      <div style="height: 10px; border-radius: 5px; background: #EFE6D6; overflow: hidden"><div style="width: {{pct}}%; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #1D5C3A, #B7893A)"></div></div>
+      <span style="font-size: 13px; color: #6B6457">Range <b style="color: #1E1C18">{{low}}–{{high}}</b> · about <b style="color: #1E1C18">{{pct}} %</b> of your day</span>
       <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
-        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Protein</span><span style="font-size: 15px; color: #0E4A43">{{protein}}g</span></div>
-        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Carbs</span><span style="font-size: 15px; color: #7A5600">{{carbs}}g</span></div>
-        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Fat</span><span style="font-size: 15px; color: #A63E0D">{{fat}}g</span></div>
-        <div style="background: #F2F3D3; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 10px; color: #5E6128">Sodium</span><span style="font-size: 15px">1.3g</span></div>
+        <div style="background: #F7F2EA; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: #6B6457">Protein</span><span style="font-size: 16px; font-weight: 600; color: #1D5C3A">{{protein}}g</span></div>
+        <div style="background: #F7F2EA; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: #6B6457">Carbs</span><span style="font-size: 16px; font-weight: 600; color: #8A5F1A">{{carbs}}g</span></div>
+        <div style="background: #F7F2EA; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: #6B6457">Fat</span><span style="font-size: 16px; font-weight: 600; color: #A5452A">{{fat}}g</span></div>
+        <div style="background: #F7F2EA; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: #6B6457">Sodium</span><span style="font-size: 16px; font-weight: 600">1.3g</span></div>
       </div>
     </section>
 
     <div style="display: flex; flex-direction: column; gap: 8px">
-      <span style="font-size: 12px; color: #5E6128">Tweak it</span>
+      <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #6B6457">Tweak it</span>
       <div style="display: flex; flex-wrap: wrap; gap: 8px">
         <sc-for list="{{mods}}" as="m" hint-placeholder-count="4">
           <button type="button" onClick="{{m.toggle}}" aria-pressed="{{m.on}}" style="{{m.style}}">{{m.label}}</button>
@@ -64,24 +60,24 @@ a{color:#0E4A43}a:hover{color:#08332E}
       </div>
     </div>
 
-    <section style="background: #FFFFFF; border-radius: 16px; padding: 6px 14px; display: flex; flex-direction: column">
+    <section style="background: #FFFFFF; border-radius: 16px; padding: 4px 14px; display: flex; flex-direction: column; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
       <sc-for list="{{parts}}" as="it" hint-placeholder-count="4">
-        <div style="display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #EEEFD0">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F0EADF">
           <span style="width: 8px; height: 8px; border-radius: 50%; background: {{it.dot}}"></span>
           <span style="flex: 1; font-size: 13px">{{it.name}}</span>
-          <span style="font-size: 12px; color: #5E6128">{{it.amt}}</span>
-          <span style="width: 44px; text-align: right; font-size: 13px">{{it.kcal}}</span>
+          <span style="font-family: 'Space Mono', monospace; font-size: 11px; color: #6B6457">{{it.amt}}</span>
+          <span style="width: 40px; text-align: right; font-size: 13px; font-weight: 600">{{it.kcal}}</span>
         </div>
       </sc-for>
-      <span style="font-size: 11px; color: #5E6128; padding: 8px 0">Matched to Thai Food Composition Table</span>
+      <span style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #8A8272; padding: 8px 0">Source · Thai Food Composition Table</span>
     </section>
   </div>
 
   <div style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; gap: 10px">
-    <button type="button" aria-label="Save to favorites" style="width: 56px; height: 56px; border: 0; border-radius: 18px; background: #FFFFFF; color: #E05A1C; display: flex; align-items: center; justify-content: center; cursor: pointer">
+    <button type="button" aria-label="Save to favorites" style="width: 56px; height: 56px; border: 0; border-radius: 18px; background: #FFFFFF; color: #8A5F1A; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 14px rgba(70,50,20,0.1)">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg>
     </button>
-    <a href="Main.dc.html" style="flex: 1; height: 56px; border-radius: 18px; background: #0E4A43; color: #F2F3D3; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 15px">Log to lunch · {{kcal}} kcal</a>
+    <a href="Main.dc.html" style="flex: 1; height: 56px; border-radius: 18px; background: #1D5C3A; color: #F7F2EA; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 15px; font-weight: 600">Log to dinner · {{kcal}} kcal</a>
   </div>
 </div>
 </x-dc>
@@ -89,32 +85,30 @@ a{color:#0E4A43}a:hover{color:#08332E}
 class Component extends DCLogic {
   constructor(p) { super(p); this.state = { place: 'stall', mods: {} }; }
   renderVals() {
-    var s = this.state;
+    var s = this.state, self = this;
     var chip = function (on) {
-      return 'height: 34px; padding: 0 14px; border-radius: 999px; font-family: inherit; font-size: 13px; cursor: pointer; ' +
-        (on ? 'background: #0E4A43; color: #F2F3D3; border: 1px solid #0E4A43' : 'background: #FFFFFF; color: #2F3212; border: 1px solid #DADBAE');
+      return 'height: 34px; padding: 0 14px; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; ' +
+        (on ? 'background: #1D5C3A; color: #F7F2EA; border: 1px solid #1D5C3A' : 'background: #FFFFFF; color: #1E1C18; border: 1px solid #E2D8C6');
     };
-    var self = this;
     var placeDefs = [['stall', 'Street stall', 0], ['resto', 'Restaurant', 40], ['home', 'Home-cooked', -60]];
+    var kcal = 650, protein = 32, carbs = 78, fat = 24;
     var places = placeDefs.map(function (d) {
-      var on = s.place === d[0];
+      var on = s.place === d[0]; if (on) { kcal += d[2]; fat += Math.round(d[2] / 9); }
       return { label: d[1], on: on ? 'true' : 'false', style: chip(on), pick: function () { self.setState({ place: d[0] }); } };
     });
     var modDefs = [['oil', 'Less oil', -60, 0, 0, -7], ['egg', 'No egg', -110, -7, 0, -9], ['rice', 'Half rice', -125, -2, -28, 0], ['pork', 'Extra pork', 80, 8, 0, 6]];
-    var kcal = 650, protein = 32, carbs = 78, fat = 24;
-    placeDefs.forEach(function (d) { if (d[0] === s.place) { kcal += d[2]; fat += Math.round(d[2] / 9); } });
     var mods = modDefs.map(function (d) {
       var on = !!s.mods[d[0]];
       if (on) { kcal += d[2]; protein += d[3]; carbs += d[4]; fat += d[5]; }
       return { label: d[1], on: on ? 'true' : 'false', style: chip(on), toggle: function () { var m = Object.assign({}, self.state.mods); m[d[0]] = !m[d[0]]; self.setState({ mods: m }); } };
     });
     var parts = [
-      { name: 'Jasmine rice', amt: s.mods.rice ? '100 g' : '200 g', kcal: s.mods.rice ? 125 : 250, dot: '#F5B41C' },
-      { name: 'Minced pork', amt: s.mods.pork ? '130 g' : '90 g', kcal: s.mods.pork ? 240 : 160, dot: '#E05A1C' },
-      { name: 'Fried egg', amt: s.mods.egg ? '—' : '1 egg', kcal: s.mods.egg ? 0 : 110, dot: '#E8C35A' },
-      { name: 'Oil, basil & sauce', amt: s.mods.oil ? '½ tbsp' : '1 tbsp', kcal: s.mods.oil ? 70 : 130, dot: '#0E4A43' }
+      { name: 'Jasmine rice', amt: s.mods.rice ? '100 g' : '200 g', kcal: s.mods.rice ? 125 : 250, dot: '#B7893A' },
+      { name: 'Minced pork', amt: s.mods.pork ? '130 g' : '90 g', kcal: s.mods.pork ? 240 : 160, dot: '#B5532F' },
+      { name: 'Fried egg', amt: s.mods.egg ? '—' : '1 egg', kcal: s.mods.egg ? 0 : 110, dot: '#E3C27A' },
+      { name: 'Oil, basil & sauce', amt: s.mods.oil ? '½ tbsp' : '1 tbsp', kcal: s.mods.oil ? 70 : 130, dot: '#1D5C3A' }
     ];
-    return { places: places, mods: mods, parts: parts, kcal: kcal, low: Math.round(kcal * 0.86 / 10) * 10, high: Math.round(kcal * 1.14 / 10) * 10, protein: protein, carbs: carbs, fat: fat };
+    return { places: places, mods: mods, parts: parts, kcal: kcal, pct: Math.round(kcal / 2150 * 100), low: Math.round(kcal * 0.86 / 10) * 10, high: Math.round(kcal * 1.14 / 10) * 10, protein: protein, carbs: carbs, fat: fat };
   }
 }
 </script>

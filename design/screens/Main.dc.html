@@ -8,106 +8,108 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&amp;family=Space+Mono:wght@400;700&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#0E4A43}a:hover{color:#08332E}
-input::placeholder{color:#7C7F45}
+a{color:#1D5C3A}a:hover{color:#164A2E}
+input::placeholder{color:#8A8272}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F2F3D3; font-family: 'Figtree', 'Anuphan', sans-serif; color: #2F3212">
-  <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 18px">
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F7F2EA; font-family: 'Figtree', 'Anuphan', sans-serif; color: #1E1C18">
+  <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 16px">
     <header style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px">
-      <div style="display: flex; flex-direction: column; gap: 2px">
-        <span style="font-family: 'Climate Crisis', sans-serif; font-size: 30px; line-height: 1; color: #8E9045">Munchy</span>
-        <span style="font-size: 11px; color: #5E6128; letter-spacing: 0.5px">Your Bite Buddy</span>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-family: 'Climate Crisis', sans-serif; font-size: 28px; line-height: 1; color: #1D5C3A">Munchy</span>
+        <span style="font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Your Bite Buddy</span>
       </div>
-      <a href="Onboarding.dc.html" aria-label="Your profile" style="width: 40px; height: 40px; border-radius: 50%; background: #0E4A43; color: #F5B41C; display: flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Climate Crisis', sans-serif; font-size: 16px">M</a>
+      <a href="Onboarding.dc.html" aria-label="Your profile" style="width: 40px; height: 40px; border-radius: 50%; background: #EFE6D6; color: #1D5C3A; display: flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px">M</a>
     </header>
 
-    <div style="display: flex; flex-direction: column; gap: 8px">
-      <label for="dish" style="font-size: 13px; color: #5E6128">What did you munch?</label>
-      <div style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: 1px solid #E1E2B8; border-radius: 16px; padding: 6px 6px 6px 14px; height: 56px; box-sizing: border-box">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C7F45" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-        <input id="dish" type="text" placeholder="e.g. pad kra pao with fried egg" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 14px; color: #2F3212">
-        <button type="button" aria-label="Snap a photo" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: #F2F3D3; color: #5E6128; display: flex; align-items: center; justify-content: center; cursor: pointer">
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
-        </button>
-        <a href="Analyze.dc.html" aria-label="Analyze dish" style="width: 44px; height: 44px; border-radius: 12px; background: #0E4A43; color: #F2F3D3; display: flex; align-items: center; justify-content: center">
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-        </a>
+    <h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; line-height: 1.15; color: #1E1C18">Good evening, <span style="font-style: italic; color: #1D5C3A">what did you munch?</span></h1>
+
+    <div style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border-radius: 16px; padding: 6px 6px 6px 14px; height: 56px; box-sizing: border-box; box-shadow: 0 4px 16px rgba(70,50,20,0.08)">
+      <label for="v2dish" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Dish name</label>
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8272" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+      <input id="v2dish" type="text" placeholder="e.g. pad kra pao with fried egg" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 14px; color: #1E1C18">
+      <button type="button" aria-label="Snap a photo" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: #EFE6D6; color: #6B6457; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+      </button>
+      <a href="Analyze.dc.html" aria-label="Analyze dish" style="width: 44px; height: 44px; border-radius: 12px; background: #1D5C3A; color: #F7F2EA; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
+
+    <section style="background: #FFFFFF; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 6px 20px rgba(70,50,20,0.08)">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Today · Sun 1 Nov</span>
+          <span style="font-family: 'Climate Crisis', sans-serif; font-size: 42px; line-height: 1; color: #1D5C3A">1,240</span>
+          <span style="font-size: 13px; color: #1E1C18">kcal left of <b>2,150</b></span>
+        </div>
+        <div style="position: relative; width: 120px; height: 120px; flex: none">
+          <svg role="img" aria-label="42% of daily calories eaten" width="120" height="120" viewBox="0 0 120 120" style="position: absolute; inset: 0; transform: rotate(-90deg)">
+            <defs><linearGradient id="v2ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1D5C3A"></stop><stop offset="1" stop-color="#B7893A"></stop></linearGradient></defs>
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#EFE6D6" stroke-width="9"></circle>
+            <circle cx="60" cy="60" r="54" fill="none" stroke="url(#v2ring)" stroke-width="9" stroke-linecap="round" stroke-dasharray="339" stroke-dashoffset="197"></circle>
+          </svg>
+          <img src="../assets/bowl.png" alt="" style="position: absolute; left: 16px; top: 16px; width: 88px; height: 88px">
+        </div>
+      </div>
+      <div style="height: 10px; border-radius: 5px; background: #EFE6D6; overflow: hidden"><div style="width: 42%; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #1D5C3A, #B7893A)"></div></div>
+      <span style="font-size: 12px; color: #6B6457">910 eaten · 2 meals · <b style="color: #1E1C18">42 %</b> of your day</span>
+    </section>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+      <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
+        <span style="font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8A5F1A">Protein</span>
+        <span style="font-size: 18px; font-weight: 600; color: #1D5C3A">62<span style="font-size: 12px; font-weight: 400; color: #6B6457"> / 120 g</span></span>
+        <div style="height: 6px; border-radius: 3px; background: #EFE6D6; overflow: hidden"><div style="width: 52%; height: 6px; background: #1D5C3A"></div></div>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
+        <span style="font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8A5F1A">Carbs</span>
+        <span style="font-size: 18px; font-weight: 600; color: #8A5F1A">180<span style="font-size: 12px; font-weight: 400; color: #6B6457"> / 260 g</span></span>
+        <div style="height: 6px; border-radius: 3px; background: #EFE6D6; overflow: hidden"><div style="width: 69%; height: 6px; background: #B7893A"></div></div>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
+        <span style="font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8A5F1A">Fat</span>
+        <span style="font-size: 18px; font-weight: 600; color: #A5452A">38<span style="font-size: 12px; font-weight: 400; color: #6B6457"> / 70 g</span></span>
+        <div style="height: 6px; border-radius: 3px; background: #EFE6D6; overflow: hidden"><div style="width: 54%; height: 6px; background: #B5532F"></div></div>
       </div>
     </div>
 
-    <section style="background: #BCBE7B; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 18px">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-        <div style="display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 12px; color: #2F3212">Today · Sun 1 Nov</span>
-          <span style="font-family: 'Climate Crisis', sans-serif; font-size: 40px; line-height: 1; color: #1F2209">1,240</span>
-          <span style="font-size: 13px; color: #2F3212">kcal left of 2,150</span>
-          <span style="margin-top: 6px; align-self: flex-start; background: #0E4A43; color: #F2F3D3; font-size: 11px; padding: 5px 10px; border-radius: 999px">910 eaten · 2 meals</span>
-        </div>
-        <div style="position: relative; width: 150px; height: 150px; flex: none">
-          <svg role="img" aria-label="42% of daily calories eaten" width="150" height="150" viewBox="0 0 150 150" style="position: absolute; inset: 0; transform: rotate(-90deg)">
-            <circle cx="75" cy="75" r="70" fill="none" stroke="#E6E7C2" stroke-width="10"></circle>
-            <circle cx="75" cy="75" r="70" fill="none" stroke="#E05A1C" stroke-width="10" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="255"></circle>
-          </svg>
-          <img src="../assets/bowl.png" alt="" style="position: absolute; left: 17px; top: 17px; width: 116px; height: 116px">
-        </div>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
-        <div style="display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 12px">Protein</span>
-          <div style="height: 8px; border-radius: 4px; background: #E6E7C2; overflow: hidden"><div style="width: 52%; height: 8px; background: #0E4A43"></div></div>
-          <span style="font-size: 11px; color: #2F3212">62 / 120 g</span>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 12px">Carbs</span>
-          <div style="height: 8px; border-radius: 4px; background: #E6E7C2; overflow: hidden"><div style="width: 69%; height: 8px; background: #F5B41C"></div></div>
-          <span style="font-size: 11px; color: #2F3212">180 / 260 g</span>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 12px">Fat</span>
-          <div style="height: 8px; border-radius: 4px; background: #E6E7C2; overflow: hidden"><div style="width: 54%; height: 8px; background: #E05A1C"></div></div>
-          <span style="font-size: 11px; color: #2F3212">38 / 70 g</span>
-        </div>
-      </div>
-    </section>
-
-    <section style="display: flex; flex-direction: column; gap: 10px">
+    <section style="display: flex; flex-direction: column; gap: 8px">
       <div style="display: flex; justify-content: space-between; align-items: baseline">
-        <h2 style="margin: 0; font-family: 'Climate Crisis', sans-serif; font-size: 16px; font-weight: 400; color: #2F3212">Today's bites</h2>
-        <a href="Progress.dc.html" style="font-size: 12px">See week</a>
+        <h2 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; color: #1E1C18">Today's bites</h2>
+        <a href="Progress.dc.html" style="font-size: 12px; font-weight: 600">See week</a>
       </div>
-      <div style="background: #FFFFFF; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
-        <div style="width: 40px; height: 40px; border-radius: 12px; background: #FCE6B0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #6A4B00">8:10</div>
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px">Pork congee + egg</span><span style="font-size: 11px; color: #5E6128">Breakfast · P 18g · C 42g · F 9g</span></div>
-        <span style="font-size: 14px; color: #0E4A43">314</span>
+      <div style="background: #FFFFFF; border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
+        <span style="font-family: 'Space Mono', monospace; font-size: 11px; color: #8A5F1A; width: 40px">08:10</span>
+        <span style="flex: 1; font-size: 14px">Pork congee + egg</span>
+        <span style="font-size: 14px; font-weight: 600; color: #1D5C3A">314</span>
       </div>
-      <div style="background: #FFFFFF; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
-        <div style="width: 40px; height: 40px; border-radius: 12px; background: #F9D3BF; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #7A2A06">12:30</div>
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px">Khao man gai (boiled)</span><span style="font-size: 11px; color: #5E6128">Lunch · P 44g · C 78g · F 21g</span></div>
-        <span style="font-size: 14px; color: #0E4A43">596</span>
+      <div style="background: #FFFFFF; border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
+        <span style="font-family: 'Space Mono', monospace; font-size: 11px; color: #8A5F1A; width: 40px">12:30</span>
+        <span style="flex: 1; font-size: 14px">Khao man gai (boiled)</span>
+        <span style="font-size: 14px; font-weight: 600; color: #1D5C3A">596</span>
       </div>
-      <a href="Coach.dc.html" style="border: 1.5px dashed #9EA05A; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #2F3212">
-        <div style="width: 40px; height: 40px; border-radius: 12px; background: #0E4A43; color: #F5B41C; display: flex; align-items: center; justify-content: center">
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
-        </div>
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px">Dinner — need ideas?</span><span style="font-size: 11px; color: #5E6128">Room for ~600 kcal and 40g protein</span></div>
+      <a href="Coach.dc.html" style="border: 1.5px dashed #C9B48A; border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #1E1C18">
+        <span style="font-family: 'Space Mono', monospace; font-size: 11px; color: #8A5F1A; width: 40px">NEXT</span>
+        <span style="flex: 1; font-size: 14px">Dinner — need ideas? <span style="color: #6B6457">~600 kcal left</span></span>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D5C3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
       </a>
     </section>
   </div>
 
-  <nav aria-label="Main" style="position: absolute; left: 12px; right: 12px; bottom: 16px; height: 68px; background: #0E4A43; border-radius: 22px; display: flex; align-items: center; justify-content: space-around">
-    <a href="Main.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #F5B41C; text-decoration: none; font-size: 10px; min-width: 52px">
+  <nav aria-label="Main" style="position: absolute; left: 12px; right: 12px; bottom: 16px; height: 68px; background: #FFFFFF; border-radius: 22px; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 8px 24px rgba(70,50,20,0.14)">
+    <a href="Main.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #1D5C3A; text-decoration: none; font-size: 10px; font-weight: 600; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
-    <a href="Coach.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #DCDDB4; text-decoration: none; font-size: 10px; min-width: 52px">
+    <a href="Coach.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #6B6457; text-decoration: none; font-size: 10px; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path></svg>Coach</a>
-    <a href="Analyze.dc.html" aria-label="Log a dish" style="width: 52px; height: 52px; border-radius: 50%; background: #E05A1C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-top: -26px; border: 4px solid #F2F3D3">
+    <a href="Analyze.dc.html" aria-label="Log a dish" style="width: 52px; height: 52px; border-radius: 50%; background: #1D5C3A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-top: -26px; border: 4px solid #F7F2EA">
       <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></a>
-    <a href="Progress.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #DCDDB4; text-decoration: none; font-size: 10px; min-width: 52px">
+    <a href="Progress.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #6B6457; text-decoration: none; font-size: 10px; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20v-7M12 20V5M19 20v-11"></path></svg>Progress</a>
-    <a href="Onboarding.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #DCDDB4; text-decoration: none; font-size: 10px; min-width: 52px">
+    <a href="Onboarding.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #6B6457; text-decoration: none; font-size: 10px; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Me</a>
   </nav>
 </div>

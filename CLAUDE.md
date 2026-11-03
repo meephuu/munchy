@@ -108,3 +108,4 @@ backend/
 ## UI design
 The frontend UI must follow `design/DESIGN.md` (tokens, fonts, components, screens, guest vs logged-in rules).
 `design/screens/*.dc.html` are the visual reference for each screen (design-tool markup: rebuild as real components, do not ship them).
+`design/v1/` is the old V1 design, kept for reference only. Build the V2 design in `design/`.

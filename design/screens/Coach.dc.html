@@ -8,25 +8,25 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&amp;family=Space+Mono:wght@400;700&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
 <style>
 body{margin:0}
-a{color:#0E4A43}a:hover{color:#08332E}
+a{color:#1D5C3A}a:hover{color:#164A2E}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F2F3D3; font-family: 'Figtree', 'Anuphan', sans-serif; color: #2F3212">
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F7F2EA; font-family: 'Figtree', 'Anuphan', sans-serif; color: #1E1C18">
   <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 14px">
-    <header style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px">
-      <h1 style="margin: 0; font-family: 'Climate Crisis', sans-serif; font-size: 22px; font-weight: 400; color: #2F3212">Coach</h1>
-      <span style="font-size: 12px; color: #5E6128">Dinner · 18:40</span>
+    <header style="display: flex; flex-direction: column; gap: 4px; padding-top: 8px">
+      <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Coach · Dinner · 18:40</span>
+      <h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; line-height: 1.15">What should I eat, <span style="font-style: italic; color: #1D5C3A">and how much?</span></h1>
     </header>
 
-    <section style="background: #0E4A43; color: #F2F3D3; border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px">
-      <img src="../assets/bowl.png" alt="" style="width: 72px; height: 72px; flex: none">
+    <section style="background: #FFFFFF; border-radius: 20px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 6px 20px rgba(70,50,20,0.08)">
+      <img src="../assets/bowl.png" alt="" style="width: 64px; height: 64px; flex: none">
       <div style="display: flex; flex-direction: column; gap: 4px">
-        <span style="font-size: 12px; color: #DCDDB4">You still have room for</span>
-        <span style="font-family: 'Climate Crisis', sans-serif; font-size: 26px; line-height: 1.1; color: #F5B41C">600 kcal</span>
-        <span style="font-size: 12px">and 40 g protein — let's hit it.</span>
+        <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Room left today</span>
+        <div style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Climate Crisis', sans-serif; font-size: 30px; line-height: 1; color: #1D5C3A">600</span><span style="font-size: 13px; font-weight: 600">kcal</span></div>
+        <span style="font-size: 12px; color: #6B6457">and <b style="color: #1E1C18">40 g protein</b> to go</span>
       </div>
     </section>
 
@@ -36,46 +36,41 @@ a{color:#0E4A43}a:hover{color:#08332E}
       </sc-for>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
       <sc-for list="{{ideas}}" as="i" hint-placeholder-count="3">
-        <div style="background: #FFFFFF; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+        <div style="background: #FFFFFF; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
           <div style="flex: 1; display: flex; flex-direction: column; gap: 3px">
-            <span style="font-size: 14px">{{i.name}}</span>
-            <span style="font-size: 11px; color: #5E6128">{{i.where}}</span>
+            <span style="font-size: 14px; font-weight: 600">{{i.name}}</span>
+            <span style="font-family: 'Space Mono', monospace; font-size: 10px; color: #6B6457">{{i.where}}</span>
             <div style="display: flex; gap: 6px; margin-top: 4px">
-              <span style="font-size: 11px; background: #F2F3D3; padding: 3px 8px; border-radius: 999px">{{i.kcal}} kcal</span>
-              <span style="font-size: 11px; background: #D9ECE8; color: #0E4A43; padding: 3px 8px; border-radius: 999px">P {{i.p}} g</span>
+              <span style="font-size: 11px; font-weight: 600; background: #F3ECDF; color: #8A5F1A; padding: 3px 8px; border-radius: 6px">{{i.kcal}} kcal</span>
+              <span style="font-size: 11px; font-weight: 600; background: #E6EFE8; color: #1D5C3A; padding: 3px 8px; border-radius: 6px">P {{i.p}} g</span>
             </div>
           </div>
-          <a href="Analyze.dc.html" aria-label="Log this dish" style="width: 44px; height: 44px; border-radius: 12px; background: #E05A1C; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+          <a href="Analyze.dc.html" aria-label="Log this dish" style="width: 44px; height: 44px; border-radius: 12px; background: #1D5C3A; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
           </a>
         </div>
       </sc-for>
     </div>
 
-    <section style="background: #FCE6B0; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
-      <span style="font-size: 11px; color: #6A4B00; letter-spacing: 0.5px">SMART SWAP</span>
-      <span style="font-size: 14px">Fried chicken rice → Khao man gai (boiled)</span>
-      <span style="font-size: 12px; color: #4D3600">Saves about 200 kcal, same protein.</span>
+    <section style="background: #FFFFFF; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 14px rgba(70,50,20,0.06)">
+      <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #A5452A">Smart swap</span>
+      <span style="font-size: 14px">Fried chicken rice → <b style="color: #1D5C3A">Khao man gai (boiled)</b></span>
+      <span style="font-size: 12px; color: #6B6457">Saves about <b style="color: #1E1C18">200 kcal</b>, same protein.</span>
     </section>
-
-    <div style="display: flex; gap: 10px; align-items: flex-start">
-      <div aria-hidden="true" style="width: 32px; height: 32px; border-radius: 50%; background: #BCBE7B; flex: none; display: flex; align-items: center; justify-content: center; font-family: 'Climate Crisis', sans-serif; font-size: 12px; color: #1F2209">M</div>
-      <p style="margin: 0; background: #FFFFFF; border-radius: 4px 16px 16px 16px; padding: 10px 12px; font-size: 13px; line-height: 1.5">Protein's been low 3 days in a row. An egg or soy milk at breakfast would close the gap.</p>
-    </div>
   </div>
 
-  <nav aria-label="Main" style="position: absolute; left: 12px; right: 12px; bottom: 16px; height: 68px; background: #0E4A43; border-radius: 22px; display: flex; align-items: center; justify-content: space-around">
-    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #DCDDB4; text-decoration: none; font-size: 10px; min-width: 52px">
+  <nav aria-label="Main" style="position: absolute; left: 12px; right: 12px; bottom: 16px; height: 68px; background: #FFFFFF; border-radius: 22px; display: flex; align-items: center; justify-content: space-around; box-shadow: 0 8px 24px rgba(70,50,20,0.14)">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #6B6457; text-decoration: none; font-size: 10px; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
-    <a href="Coach.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #F5B41C; text-decoration: none; font-size: 10px; min-width: 52px">
+    <a href="Coach.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #1D5C3A; text-decoration: none; font-size: 10px; font-weight: 600; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path></svg>Coach</a>
-    <a href="Analyze.dc.html" aria-label="Log a dish" style="width: 52px; height: 52px; border-radius: 50%; background: #E05A1C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-top: -26px; border: 4px solid #F2F3D3">
+    <a href="Analyze.dc.html" aria-label="Log a dish" style="width: 52px; height: 52px; border-radius: 50%; background: #1D5C3A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-top: -26px; border: 4px solid #F7F2EA">
       <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></a>
-    <a href="Progress.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #DCDDB4; text-decoration: none; font-size: 10px; min-width: 52px">
+    <a href="Progress.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #6B6457; text-decoration: none; font-size: 10px; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20v-7M12 20V5M19 20v-11"></path></svg>Progress</a>
-    <a href="Onboarding.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #DCDDB4; text-decoration: none; font-size: 10px; min-width: 52px">
+    <a href="Onboarding.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 3px; color: #6B6457; text-decoration: none; font-size: 10px; min-width: 52px">
       <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Me</a>
   </nav>
 </div>
@@ -86,8 +81,8 @@ class Component extends DCLogic {
   renderVals() {
     var self = this, tab = this.state.tab;
     var chip = function (on) {
-      return 'height: 34px; padding: 0 14px; border-radius: 999px; font-family: inherit; font-size: 13px; cursor: pointer; ' +
-        (on ? 'background: #2F3212; color: #F2F3D3; border: 1px solid #2F3212' : 'background: #FFFFFF; color: #2F3212; border: 1px solid #DADBAE');
+      return 'height: 34px; padding: 0 14px; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; ' +
+        (on ? 'background: #1D5C3A; color: #F7F2EA; border: 1px solid #1D5C3A' : 'background: #FFFFFF; color: #1E1C18; border: 1px solid #E2D8C6');
     };
     var defs = [['near', 'Near me'], ['seven', '7-Eleven'], ['home', 'Cook at home']];
     var tabs = defs.map(function (d) {
@@ -96,19 +91,19 @@ class Component extends DCLogic {
     });
     var data = {
       near: [
-        { name: 'Chicken suki soup', where: 'Food court · 350 m', kcal: 380, p: 34 },
-        { name: 'Clear tom yum + half rice', where: 'Street stall · 200 m', kcal: 420, p: 32 },
-        { name: 'Som tam + grilled chicken', where: 'Street stall · 500 m', kcal: 480, p: 38 }
+        { name: 'Chicken suki soup', where: 'FOOD COURT · 350 M', kcal: 380, p: 34 },
+        { name: 'Clear tom yum + half rice', where: 'STREET STALL · 200 M', kcal: 420, p: 32 },
+        { name: 'Som tam + grilled chicken', where: 'STREET STALL · 500 M', kcal: 480, p: 38 }
       ],
       seven: [
-        { name: 'Chicken breast + onigiri', where: '7-Eleven · 2 items', kcal: 360, p: 36 },
-        { name: 'Greek yogurt + boiled eggs', where: '7-Eleven · 3 items', kcal: 290, p: 28 },
-        { name: 'Tuna sandwich + soy milk', where: '7-Eleven · 2 items', kcal: 410, p: 26 }
+        { name: 'Chicken breast + onigiri', where: '7-ELEVEN · 2 ITEMS', kcal: 360, p: 36 },
+        { name: 'Greek yogurt + boiled eggs', where: '7-ELEVEN · 3 ITEMS', kcal: 290, p: 28 },
+        { name: 'Tuna sandwich + soy milk', where: '7-ELEVEN · 2 ITEMS', kcal: 410, p: 26 }
       ],
       home: [
-        { name: 'Tofu & veggie stir-fry + rice', where: '15 min · 4 ingredients', kcal: 450, p: 26 },
-        { name: 'Pork omelette (less oil)', where: '10 min · 3 ingredients', kcal: 520, p: 30 },
-        { name: 'Chicken & veg clear soup', where: '20 min · 5 ingredients', kcal: 340, p: 35 }
+        { name: 'Tofu & veggie stir-fry + rice', where: '15 MIN · 4 INGREDIENTS', kcal: 450, p: 26 },
+        { name: 'Pork omelette (less oil)', where: '10 MIN · 3 INGREDIENTS', kcal: 520, p: 30 },
+        { name: 'Chicken & veg clear soup', where: '20 MIN · 5 INGREDIENTS', kcal: 340, p: 35 }
       ]
     };
     return { tabs: tabs, ideas: data[tab] };

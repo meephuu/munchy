@@ -50,8 +50,8 @@ export function IngredientSearch({
 
   return (
     <div className="flex flex-col gap-1 pb-3">
-      <div className="flex h-11 items-center gap-2 rounded-field border border-border bg-white pr-1 pl-3">
-        <SearchIcon size={16} className="shrink-0 text-ink-faint" />
+      <div className="flex h-11 items-center gap-2 rounded-field border border-border bg-surface pr-1 pl-3">
+        <SearchIcon size={16} className="shrink-0 text-placeholder" />
         <input
           type="text"
           autoFocus
@@ -60,7 +60,7 @@ export function IngredientSearch({
           placeholder="Search a food, e.g. fried egg"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="min-w-0 flex-1 scroll-mb-32 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-faint"
+          className="min-w-0 flex-1 scroll-mb-32 bg-transparent text-[15px] text-ink outline-none"
         />
         <button
           type="button"
@@ -96,7 +96,7 @@ export function IngredientSearch({
               >
                 <span className="flex-1 text-sm first-letter:uppercase">{hit.name}</span>
                 <span className="text-xs text-ink-muted">{Math.round(hit.per_100g.kcal)} kcal / 100 g</span>
-                <PlusIcon size={16} className="shrink-0 text-teal" />
+                <PlusIcon size={16} className="shrink-0 text-green" />
               </button>
             </li>
           ))}

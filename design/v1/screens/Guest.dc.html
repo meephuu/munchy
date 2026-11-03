@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Munchy — Guest home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E4A43}a:hover{color:#08332E}
+input::placeholder{color:#7C7F45}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F2F3D3; font-family: 'Figtree', 'Anuphan', sans-serif; color: #2F3212">
+  <div style="padding: 20px 20px 0; display: flex; flex-direction: column; gap: 18px">
+    <header style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-family: 'Climate Crisis', sans-serif; font-size: 30px; line-height: 1; color: #8E9045">Munchy</span>
+        <span style="font-size: 12px; color: #5E6128">Your Bite Buddy</span>
+      </div>
+      <a href="Onboarding.dc.html" style="height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #0E4A43; display: flex; align-items: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #0E4A43">Log in</a>
+    </header>
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 6px; text-align: center">
+      <img src="../../assets/bowl.png" alt="" style="width: 150px; height: 150px">
+      <h1 style="margin: 0; font-family: 'Climate Crisis', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.2; color: #2F3212">What's on your plate?</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5E6128">Type any dish and get calories &amp; nutrients in seconds. No account needed.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <label for="gdish" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Dish name</label>
+      <div style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: 1px solid #E1E2B8; border-radius: 16px; padding: 6px 6px 6px 14px; height: 56px; box-sizing: border-box">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C7F45" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <input id="gdish" type="text" placeholder="e.g. pad kra pao with fried egg" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 15px; color: #2F3212">
+        <a href="GuestDish.dc.html" aria-label="Analyze dish" style="width: 44px; height: 44px; border-radius: 12px; background: #0E4A43; color: #F2F3D3; display: flex; align-items: center; justify-content: center">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <span style="font-size: 12px; color: #5E6128; align-self: center">Try:</span>
+        <a href="GuestDish.dc.html" style="height: 36px; padding: 0 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADBAE; display: flex; align-items: center; text-decoration: none; font-size: 13px; color: #2F3212">Pad kra pao</a>
+        <a href="GuestDish.dc.html" style="height: 36px; padding: 0 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADBAE; display: flex; align-items: center; text-decoration: none; font-size: 13px; color: #2F3212">Khao man gai</a>
+        <a href="GuestDish.dc.html" style="height: 36px; padding: 0 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADBAE; display: flex; align-items: center; text-decoration: none; font-size: 13px; color: #2F3212">Som tam</a>
+        <a href="GuestDish.dc.html" style="height: 36px; padding: 0 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADBAE; display: flex; align-items: center; text-decoration: none; font-size: 13px; color: #2F3212">Tom yum</a>
+      </div>
+    </div>
+  </div>
+
+  <section style="position: absolute; left: 20px; right: 20px; bottom: 20px; background: #BCBE7B; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'Climate Crisis', sans-serif; font-size: 15px; color: #1F2209">Unlock your Bite Buddy</span>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="display: flex; align-items: center; gap: 10px; font-size: 13px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4A43" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Daily target built for your body</span>
+      <span style="display: flex; align-items: center; gap: 10px; font-size: 13px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4A43" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Meal log, streaks &amp; progress</span>
+      <span style="display: flex; align-items: center; gap: 10px; font-size: 13px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4A43" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Coach ideas for what to eat next</span>
+    </div>
+    <a href="Onboarding.dc.html" style="height: 52px; border-radius: 16px; background: #0E4A43; color: #F2F3D3; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 15px; font-weight: 600">Create free account</a>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

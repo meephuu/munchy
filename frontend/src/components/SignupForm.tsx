@@ -7,6 +7,7 @@ import { Brand } from "@/components/Brand";
 import { PrimaryButton, PrimaryLink } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { Screen } from "@/components/Screen";
+import { Title } from "@/components/Type";
 import { friendlyAuthError, MIN_PASSWORD, validateCredentials } from "@/lib/auth";
 import { clearDraft, DRAFT_KEY, parseDraft, targetOf, toRow } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/client";
@@ -74,7 +75,7 @@ export function SignupForm() {
       <Screen>
         <div className="flex flex-col gap-4 pt-1">
           <Brand />
-          <h1 className="font-display text-2xl font-normal">Check your email</h1>
+          <Title lead="Check your" accent="email" className="text-[26px]" />
           <p className="text-sm">
             We sent a link to <strong>{email.trim()}</strong>. Open it to confirm your account, then log in.
           </p>
@@ -91,7 +92,7 @@ export function SignupForm() {
       <Screen>
         <div className="flex flex-col gap-4 pt-1">
           <Brand />
-          <h1 className="font-display text-2xl font-normal">First, a few quick questions</h1>
+          <Title lead="First, a few quick" accent="questions" className="text-[26px]" />
           <p className="text-sm">So your daily target fits you, tell me a bit about yourself before you sign up.</p>
           <PrimaryLink href="/onboarding">Get started</PrimaryLink>
         </div>
@@ -104,8 +105,8 @@ export function SignupForm() {
     <Screen>
       <form onSubmit={submit} noValidate className="flex flex-col gap-4 pt-1">
         <Brand />
-        <h1 className="font-display text-2xl font-normal">Create your account</h1>
-        <p className="rounded-card bg-olive px-3.5 py-3 text-sm">
+        <Title lead="Create your" accent="account" className="text-[26px]" />
+        <p className="rounded-card bg-green-tint px-3.5 py-3 text-sm">
           Your daily target: <strong>{target.kcal.toLocaleString("en-US")} kcal</strong> · Protein{" "}
           {target.proteinG} g · Carbs {target.carbsG} g · Fat {target.fatG} g
         </p>
@@ -119,7 +120,7 @@ export function SignupForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {error && (
-          <p role="alert" className="text-sm text-fat-ink">
+          <p role="alert" className="text-sm text-terracotta-text">
             {error}
           </p>
         )}

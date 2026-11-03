@@ -70,11 +70,11 @@ export function AmountEditor({
           aria-label={`Less ${name}`}
           disabled={grams <= 0}
           onClick={() => set(grams - stepG)}
-          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-field bg-cream text-teal disabled:opacity-40"
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-field bg-sand text-green disabled:opacity-40"
         >
           <MinusIcon size={20} />
         </button>
-        <label className="flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-field border border-border bg-white">
+        <label className="flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-field border border-border bg-surface">
           <input
             type="text"
             inputMode="decimal"
@@ -97,7 +97,7 @@ export function AmountEditor({
           type="button"
           aria-label={`More ${name}`}
           onClick={() => set(grams + stepG)}
-          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-field bg-cream text-teal"
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-field bg-sand text-green"
         >
           <PlusIcon size={20} />
         </button>
@@ -105,7 +105,7 @@ export function AmountEditor({
 
       {units.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-ink-muted">
+          <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
             {unit ? `= ${round1(grams)} g · measure in` : "Measure in"}
           </span>
           <div className="flex flex-wrap gap-2">
@@ -135,7 +135,7 @@ export function AmountEditor({
           <button
             type="button"
             onClick={onRemove}
-            className="ml-auto min-h-11 cursor-pointer px-1 text-[13px] font-semibold text-fat-ink"
+            className="ml-auto min-h-11 cursor-pointer px-1 text-[13px] font-semibold text-terracotta-text"
           >
             Remove
           </button>

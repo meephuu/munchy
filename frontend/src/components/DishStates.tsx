@@ -1,16 +1,6 @@
-import Image from "next/image";
 import { DishHeader } from "@/components/DishHeader";
 import { Screen } from "@/components/Screen";
-
-/** What the guest typed, in the same card the result uses. */
-export function DishEcho({ text }: { text: string }) {
-  return (
-    <div className="flex items-center gap-2.5 rounded-card border border-line-soft bg-white px-3.5 py-3">
-      <Image src="/bowl.png" alt="" width={36} height={36} />
-      <span className="flex-1 text-[15px] wrap-break-word">{text}</span>
-    </div>
-  );
-}
+import { Eyebrow, Title } from "@/components/Type";
 
 /** Shown while the backend works (a fresh parse can take a few seconds). */
 export function DishLoading() {
@@ -19,9 +9,9 @@ export function DishLoading() {
       <div className="flex flex-col gap-3.5">
         <DishHeader />
         <div role="status" className="flex flex-col gap-3.5">
-          <span className="text-[13px] text-ink-muted">Estimating your bite…</span>
-          <div className="h-[170px] animate-pulse rounded-hero bg-olive/60" />
-          <div className="h-[132px] animate-pulse rounded-card bg-white/70" />
+          <Eyebrow tone="muted">Estimating your bite…</Eyebrow>
+          <div className="h-[190px] animate-pulse rounded-hero bg-sand" />
+          <div className="h-[150px] animate-pulse rounded-card bg-sand/70" />
         </div>
       </div>
     </Screen>
@@ -43,10 +33,10 @@ export function DishProblem({
   return (
     <Screen>
       <div className="flex flex-col gap-3.5">
-        <DishHeader />
-        <DishEcho text={query} />
-        <section role="alert" className="flex flex-col gap-2 rounded-hero bg-swap-bg p-[18px]">
-          <h2 className="font-display text-[15px] font-normal text-ink-strong">{title}</h2>
+        <DishHeader dish={query} />
+        <section role="alert" className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]">
+          <Eyebrow tone="terracotta">Hmm</Eyebrow>
+          <Title as="h2" lead={title} className="text-lg" />
           <p className="text-sm">{message}</p>
           {details.length > 0 && (
             <ul className="list-disc pl-4 text-xs text-ink-muted">
@@ -59,7 +49,7 @@ export function DishProblem({
         {/* a plain <a>: a full reload makes sure the backend is asked again */}
         <a
           href={`/dish?q=${encodeURIComponent(query)}`}
-          className="flex h-[52px] items-center justify-center rounded-card border-[1.5px] border-teal text-[15px] font-semibold"
+          className="flex h-[52px] items-center justify-center rounded-card border-[1.5px] border-green text-[15px] font-semibold"
         >
           Try again
         </a>

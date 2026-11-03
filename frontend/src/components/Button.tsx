@@ -1,11 +1,10 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-// The primary action: 56px, teal, radius 18 (DESIGN.md), set in the display font like the design's
-// "Let's munch" button.
+// The primary action: 56px, green, radius 18, Figtree 600 (DESIGN.md).
 const primary =
-  "flex h-14 w-full cursor-pointer items-center justify-center rounded-btn bg-teal font-display text-base " +
-  "text-cream disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-14 w-full cursor-pointer items-center justify-center rounded-btn bg-green text-base font-semibold " +
+  "text-bg hover:bg-green-dark disabled:cursor-not-allowed disabled:opacity-50";
 
 export function PrimaryButton({ className = "", ...rest }: ComponentProps<"button">) {
   return <button className={`${primary} ${className}`} {...rest} />;
@@ -15,7 +14,7 @@ export function PrimaryLink({ className = "", ...rest }: ComponentProps<typeof L
   return <Link className={`${primary} ${className}`} {...rest} />;
 }
 
-/** Square-ish choice button (goal, activity, sex): 48px, radius 14, teal when chosen. */
+/** Choice button on the Get started screen (goal, typical day, sex): 44px, radius 12, green when chosen. */
 export function OptionButton({
   selected,
   className = "",
@@ -25,8 +24,8 @@ export function OptionButton({
     <button
       type="button"
       aria-pressed={selected}
-      className={`h-12 cursor-pointer rounded-row border px-3 text-[13px] ${
-        selected ? "border-teal bg-teal text-cream" : "border-border bg-white text-ink"
+      className={`h-11 cursor-pointer rounded-field border px-3 text-[13px] font-medium ${
+        selected ? "border-green bg-green text-bg" : "border-border bg-surface text-ink"
       } ${className}`}
       {...rest}
     />

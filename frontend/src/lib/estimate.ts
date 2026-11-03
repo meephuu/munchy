@@ -82,8 +82,8 @@ export type Dish = {
 
 const NO_MATCH = "no match found"; // how the backend starts the warning for an input it left out
 
-// Dots in the ingredient list cycle through the macro colors.
-const DOTS = ["var(--color-yolk)", "var(--color-orange)", "var(--color-egg)", "var(--color-teal)"];
+// Dots in the ingredient list cycle through the palette (bronze, terracotta, gold, green).
+const DOTS = ["var(--color-bronze-light)", "var(--color-terracotta)", "var(--color-gold)", "var(--color-green)"];
 export const dotFor = (position: number) => DOTS[position % DOTS.length];
 
 const round10 = (n: number) => Math.round(n / 10) * 10;

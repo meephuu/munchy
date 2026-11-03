@@ -1,49 +1,67 @@
 @import "tailwindcss";
 
 /*
- * Munchy design tokens (design/DESIGN.md). Tailwind v4 reads them from here instead of a
- * tailwind.config file: every --color-*, --radius-* and --font-* below becomes a utility
- * (bg-cream, text-ink-muted, rounded-hero, font-display ...).
+ * Munchy design tokens, V2 "Forest & Bronze" (design/DESIGN.md). Tailwind v4 reads them from here
+ * instead of a tailwind.config file: every --color-*, --radius-*, --shadow-* and --font-* below becomes
+ * a utility (bg-bg, text-ink-muted, rounded-hero, shadow-card, font-heading ...).
  */
 @theme {
-  /* Spec colors */
-  --color-cream: #f2f3d3;          /* app background, inner tiles */
-  --color-olive: #bcbe7b;          /* hero cards */
-  --color-olive-logo: #8e9045;     /* "Munchy" wordmark */
-  --color-ink: #2f3212;            /* primary text */
-  --color-ink-strong: #1f2209;     /* big numbers on olive */
-  --color-ink-muted: #5e6128;      /* secondary text, labels */
-  --color-teal: #0e4a43;           /* primary buttons, nav, selected chips, protein */
-  --color-orange: #e05a1c;         /* accent / log button, calorie ring, fat, over target */
-  --color-yolk: #f5b41c;           /* active nav item, carbs, today */
-  --color-border: #dadbae;         /* unselected chip / input border */
-  --color-track: #e6e7c2;          /* progress bar & ring tracks */
-  --color-swap-bg: #fce6b0;        /* smart swap card */
-  --color-nav-inactive: #dcddb4;   /* inactive nav items on teal */
+  /* Surfaces and text */
+  --color-bg: #f7f2ea; /* app background (warm off-white), inner tiles */
+  --color-surface: #ffffff; /* cards, inputs, bottom nav */
+  --color-sand: #efe6d6; /* progress tracks, avatar, secondary icon buttons */
+  --color-ink: #1e1c18; /* primary text */
+  --color-ink-muted: #6b6457; /* secondary text, inactive nav, small labels */
+  --color-placeholder: #8a8272; /* input placeholder and search icon */
 
-  /* Shades the screens use that the spec table does not list */
-  --color-line-soft: #e1e2b8;      /* white card / search input outline */
-  --color-ink-faint: #7c7f45;      /* placeholder text and search icon */
-  --color-divider: #eeefd0;        /* rows inside a white list card */
-  --color-teal-deep: #08332e;      /* link hover */
-  --color-carbs-ink: #7a5600;      /* carbs figure as text: darker yolk, readable on cream */
-  --color-fat-ink: #a63e0d;        /* fat figure as text: darker orange, readable on cream */
-  --color-egg: #e8c35a;            /* fried-egg dot in ingredient lists */
+  /* Green: primary (logo, big numbers, buttons, selected chips, protein, italic heading accent) */
+  --color-green: #1d5c3a;
+  --color-green-dark: #164a2e; /* hover / pressed */
+  --color-green-tint: #e6efe8; /* protein / confidence badges */
+
+  /* Bronze: mono labels (eyebrows), carbs */
+  --color-bronze: #8a5f1a;
+  --color-bronze-light: #b7893a; /* carbs bar, gradient end */
+  --color-bronze-tint: #f3ecdf; /* kcal / carbs badges */
+
+  /* Terracotta: fat, over target, warnings */
+  --color-terracotta: #b5532f;
+  --color-terracotta-text: #a5452a;
+  --color-terracotta-tint: #f6e4dc;
+
+  /* Lines */
+  --color-border: #e2d8c6; /* unselected chips, inputs */
+  --color-divider: #f0eadf; /* list row dividers */
+  --color-dash: #c9b48a; /* dashed "next meal" row */
+
+  /* Used by the screens but not in the spec table */
+  --color-gold: #e3c27a; /* fried-egg dot, lock icon on green */
+  --color-green-soft: #d6e2d9; /* small text on a green button */
+
+  /* Shadows: cards have no borders, only these */
+  --shadow-card: 0 6px 20px rgb(70 50 20 / 0.08);
+  --shadow-row: 0 4px 14px rgb(70 50 20 / 0.06);
+  --shadow-search: 0 4px 16px rgb(70 50 20 / 0.08);
+  --shadow-panel: 0 8px 24px rgb(70 50 20 / 0.12);
+  --shadow-nav: 0 8px 24px rgb(70 50 20 / 0.14);
 
   /* Radii */
-  --radius-hero: 20px;             /* calorie / dish / target cards */
-  --radius-panel: 22px;            /* floating panels: nav bar, "Unlock" card */
-  --radius-card: 16px;             /* cards, search input */
-  --radius-row: 14px;              /* list rows, square icon buttons */
-  --radius-field: 12px;            /* form fields, small inner tiles */
-  --radius-btn: 18px;              /* primary buttons */
+  --radius-hero: 20px; /* estimate / target cards */
+  --radius-panel: 22px; /* floating panels: bottom nav, "Unlock" card */
+  --radius-card: 16px; /* cards, search input */
+  --radius-row: 14px; /* small cards, list rows, square icon buttons */
+  --radius-field: 12px; /* form fields, option buttons, inner tiles */
+  --radius-btn: 18px; /* primary buttons */
+  --radius-badge: 6px; /* small badges */
 
   /* Screens at least this wide get the phone frame (see .app-shell below). */
   --breakpoint-frame: 600px;
 
-  /* Fonts: the --font-* variables below come from next/font in layout.tsx */
-  --font-display: var(--font-climate), sans-serif;
-  --font-body: var(--font-figtree), var(--font-anuphan), sans-serif;
+  /* Four font roles. The --font-* variables on the right come from next/font in layout.tsx. */
+  --font-brand: var(--font-climate), sans-serif; /* ONLY the logo and big numbers */
+  --font-heading: var(--font-fraunces), serif; /* titles; the second half in italic green */
+  --font-mono: var(--font-space-mono), monospace; /* eyebrows, amounts, times, meta */
+  --font-sans: var(--font-figtree), var(--font-anuphan), sans-serif; /* everything else, Thai via Anuphan */
 }
 
 :root {
@@ -51,9 +69,9 @@
 }
 
 body {
-  background: var(--color-cream);
+  background: var(--color-bg);
   color: var(--color-ink);
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
 }
 
 /*
@@ -81,7 +99,7 @@ body {
     overflow-y: auto;
     scrollbar-width: none;
     border-radius: 40px;
-    background: var(--color-cream);
+    background: var(--color-bg);
     box-shadow: 0 0 0 8px #242424, 0 24px 60px rgb(0 0 0 / 0.5);
   }
 
@@ -90,13 +108,17 @@ body {
   }
 }
 
-/* In @layer base so utilities like text-cream on a button-link still win. */
+/* In @layer base so utilities like text-bg on a button-link still win. */
 @layer base {
   a {
-    color: var(--color-teal);
+    color: var(--color-green);
   }
 
   a:hover {
-    color: var(--color-teal-deep);
+    color: var(--color-green-dark);
+  }
+
+  input::placeholder {
+    color: var(--color-placeholder);
   }
 }
