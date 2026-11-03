@@ -38,6 +38,22 @@ describe("toDish", () => {
     expect(rice.dot).not.toBe(pork.dot);
   });
 
+  it("keeps technical uncertain-match warnings with the assumptions, not as notices", () => {
+    const d = toDish(response({ warnings: ["uncertain match: 'x' -> y (0.71); other candidates: z"] }));
+    expect(d.notices).toEqual([]);
+    expect(d.assumptions).toEqual(["uncertain match: 'x' -> y (0.71); other candidates: z"]);
+  });
+
+  it("turns an input that could not be found into a plain-language notice", () => {
+    const d = toDish(response({
+      complete: false,
+      unmatched: ["beer"],
+      warnings: ["no match found for 'beer': not counted, so the totals are incomplete"],
+    }));
+    expect(d.notices).toEqual(["We couldn't find “beer” in our food list, so it isn't in the total."]);
+    expect(d.assumptions).toEqual([]);                          // not repeated in the technical list
+  });
+
   it("de-duplicates assumptions and flags an estimate with no lines as empty", () => {
     const d = toDish(response({ assumptions: ["assumed 1 serving", "assumed 1 serving"] }));
     expect(d.assumptions).toEqual(["assumed 1 serving"]);

@@ -55,8 +55,10 @@ This is `.app-shell` in `src/app/globals.css`; remove it when real responsive la
 
 ## How the numbers get on screen
 The backend returns totals, per-food lines, assumptions and warnings. The screen shows kcal with a
-range of about ±14%, protein / carbs / fat, total weight, the ingredient list, every warning, and the
-assumptions behind a "How we estimated this" fold. Confidence is derived from what the backend had to
+range of about ±14%, protein / carbs / fat, total weight and the ingredient list. A short yellow notice
+appears only when part of the input could not be found (so the total is partial); everything else the
+backend had to guess or was unsure about (assumed amounts, typical parts, uncertain matches) is in the
+collapsed "How we estimated this" fold. A new search always starts from a clean result. Confidence is derived from what the backend had to
 guess: **Low** if part of the input could not be matched, **Medium** if there were uncertain matches or
 assumed amounts, **High** if neither.
 

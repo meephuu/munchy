@@ -88,10 +88,10 @@ export function DishResult({ query, dish }: { query: string; dish: Dish }) {
           </div>
         </section>
 
-        {dish.warnings.length > 0 && (
+        {dish.notices.length > 0 && (
           <section role="note" className="rounded-card bg-swap-bg px-3.5 py-3">
             <ul className="flex flex-col gap-1 text-[13px]">
-              {dish.warnings.map((w) => (
+              {dish.notices.map((w) => (
                 <li key={w}>{w}</li>
               ))}
             </ul>
@@ -174,8 +174,7 @@ export function DishResult({ query, dish }: { query: string; dish: Dish }) {
         {assumptions.length > 0 && (
           <details className="rounded-card bg-white px-3.5 py-3">
             <summary className="cursor-pointer text-[13px] text-ink-muted">
-              How we estimated this · {assumptions.length}{" "}
-              {assumptions.length === 1 ? "assumption" : "assumptions"}
+              How we estimated this · {assumptions.length} {assumptions.length === 1 ? "note" : "notes"}
             </summary>
             <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs text-ink-muted">
               {assumptions.map((a) => (

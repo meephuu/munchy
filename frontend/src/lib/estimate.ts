@@ -72,11 +72,15 @@ export type Ingredient = {
 export type Dish = {
   ingredients: Ingredient[];
   confidence: Confidence;
-  warnings: string[];
+  /** Input the backend could not find, so it is missing from the total. Worth showing up front. */
+  notices: string[];
+  /** How the number was reached: assumed amounts, typical parts, and matches that were uncertain. */
   assumptions: string[];
   /** Nothing in the input matched the food database. */
   empty: boolean;
 };
+
+const NO_MATCH = "no match found"; // how the backend starts the warning for an input it left out
 
 // Dots in the ingredient list cycle through the macro colors.
 const DOTS = ["var(--color-yolk)", "var(--color-orange)", "var(--color-egg)", "var(--color-teal)"];
@@ -110,8 +114,10 @@ export function toDish(res: EstimateResponse): Dish {
       dot: dotFor(i),
     })),
     confidence: confidenceOf(res),
-    warnings: res.warnings,
-    assumptions: [...new Set(res.assumptions)],
+    notices: res.unmatched.map((n) => `We couldn't find “${n}” in our food list, so it isn't in the total.`),
+    // Uncertain-match warnings are technical (scores, runner-up names): they live with the
+    // assumptions instead of in the main view. "no match found" ones are covered by `notices`.
+    assumptions: [...new Set([...res.assumptions, ...res.warnings.filter((w) => !w.startsWith(NO_MATCH))])],
     empty: res.lines.length === 0,
   };
 }

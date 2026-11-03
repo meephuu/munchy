@@ -36,10 +36,11 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
         query={query}
         title="Not in our food list yet"
         message="We couldn't match anything in that to a food we know. Try a simpler name, like “fried egg” or “pad thai”."
-        details={dish.warnings}
+        details={dish.notices}
       />
     );
   }
 
-  return <DishResult query={query} dish={dish} />;
+  // key: a new search must start from a clean result (no ingredients or edits from the last dish)
+  return <DishResult key={query} query={query} dish={dish} />;
 }
