@@ -134,3 +134,35 @@ def test_cors_allows_the_frontend_origin_only(client):
     assert ok.headers["access-control-allow-origin"] == "http://localhost:3000"
     other = client.get("/health", headers={"Origin": "http://evil.example"})
     assert "access-control-allow-origin" not in other.headers
+
+
+# --- food search (for "add an ingredient") ----------------------------------------------
+
+def search_matcher(db_path):
+    from tests.test_matcher import BigramEmbedder
+    from src.api import get_matcher
+    m = Matcher(db_path, BigramEmbedder(), cache_dir=None)
+    app.dependency_overrides[get_matcher] = lambda: m
+
+
+def test_food_search_returns_nutrients_and_a_serving(client, db_path):
+    search_matcher(db_path)
+    r = client.get("/foods/search", params={"q": "boiled egg"})
+    assert r.status_code == 200
+    egg = next(f for f in r.json() if f["name"] == "boiled egg")
+    assert egg["per_100g"] == {"kcal": 155.0, "protein_g": 12.6, "fat_g": 10.6, "carbs_g": 1.1}
+    assert egg["default_serving_g"] == 50 and isinstance(egg["id"], int)
+
+
+def test_food_search_limit_and_short_queries(client, db_path):
+    search_matcher(db_path)
+    assert len(client.get("/foods/search", params={"q": "ch", "limit": 3}).json()) == 3
+    assert client.get("/foods/search", params={"q": "a"}).json() == []
+    assert client.get("/foods/search", params={"q": ""}).json() == []
+
+
+def test_food_search_validates_its_parameters(client, db_path):
+    search_matcher(db_path)
+    assert client.get("/foods/search").status_code == 422                      # q is required
+    assert client.get("/foods/search", params={"q": "egg", "limit": 99}).status_code == 422
+    assert client.get("/foods/search", params={"q": "x" * 101}).status_code == 422

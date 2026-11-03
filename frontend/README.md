@@ -24,7 +24,8 @@ npm run dev                      # http://localhost:3000
 - `src/app/page.tsx` – Guest home (`/`)
 - `src/app/dish/page.tsx` – Guest dish result (`/dish?q=...`): asks the backend, shows loading / error / empty states
 - `src/lib/estimate.ts` – `POST /estimate` client (run on the server, so no CORS needed) and the mapping to what the screen shows
-- `src/components/` – `DishResult`, `AmountEditor`, `DishStates`, `DishHeader`, `Chip`, icons
+- `src/components/` – `DishResult`, `AmountEditor`, `IngredientSearch`, `DishStates`, `DishHeader`, `Chip`, icons
+- `src/app/api/foods/route.ts` + `src/lib/foods.ts` – ingredient search proxy and client
 - `src/app/onboarding/` – placeholder until the Onboarding screen is built
 
 ## Editing amounts
@@ -33,6 +34,15 @@ amount in grams, or Half / As estimated / Double. 0 g leaves the food out. Total
 range follow instantly: the backend sends each food's per-100 g values (`lines[].per_100g`), so this is
 plain arithmetic in the browser (`summarize` in `src/lib/estimate.ts`), with no new request. "Reset to
 the estimate" undoes all edits. Edits live only in the open page for now (nothing is saved).
+
+## Adding an ingredient
+"Add an ingredient" under the list opens a search box. As you type (after a short pause) it asks
+`GET /api/foods?q=...`, a small route in this app that forwards to the backend's `/foods/search`, so the
+browser never needs the backend address. Name matches come first (whole word before part of a longer
+word), then similar foods by meaning (it also finds Thai names). Picking one adds it at its typical
+serving, marked "added", with its amount editor open and a Remove button; picking a food that is already
+in the meal just opens it. Added foods are listed under "How we estimated this", and "Reset to the
+estimate" removes them.
 
 ## Phone frame
 Everything is built for phone size only for now. On screens 600px and wider the app is shown as a fixed

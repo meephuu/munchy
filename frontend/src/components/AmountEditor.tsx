@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chip } from "@/components/Chip";
 import { MinusIcon, PlusIcon } from "@/components/Icons";
 
@@ -17,17 +17,28 @@ export function AmountEditor({
   name,
   grams,
   estimated,
+  baseLabel = "As estimated",
   onChange,
+  onRemove,
 }: {
   id: string;
   name: string;
   grams: number;
-  /** The AI's estimate, for the shortcuts. */
+  /** The amount the shortcuts are relative to (the AI's estimate, or a serving for an added food). */
   estimated: number;
+  baseLabel?: string;
   onChange: (grams: number) => void;
+  /** Given for foods the user added: shows a Remove button. */
+  onRemove?: () => void;
 }) {
   // While the user is typing, show exactly what they typed ("1." or ""); otherwise show the value.
   const [draft, setDraft] = useState<string | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+
+  // Opening the editor near the bottom would leave it under the floating sign-up button.
+  useEffect(() => {
+    root.current?.scrollIntoView({ block: "nearest" });
+  }, []);
 
   const set = (g: number) => {
     setDraft(null);
@@ -36,12 +47,12 @@ export function AmountEditor({
 
   const shortcuts = [
     { label: "Half", grams: clamp(estimated / 2) },
-    { label: "As estimated", grams: clamp(estimated) },
+    { label: baseLabel, grams: clamp(estimated) },
     { label: "Double", grams: clamp(estimated * 2) },
   ];
 
   return (
-    <div id={id} className="flex flex-col gap-2.5 pb-3">
+    <div id={id} ref={root} className="flex scroll-mb-32 flex-col gap-2.5 pb-3">
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -86,6 +97,15 @@ export function AmountEditor({
             {s.label}
           </Chip>
         ))}
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="ml-auto min-h-11 cursor-pointer px-1 text-[13px] font-semibold text-fat-ink"
+          >
+            Remove
+          </button>
+        )}
       </div>
     </div>
   );

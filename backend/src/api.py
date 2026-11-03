@@ -4,15 +4,16 @@ Run:  uvicorn src.api:app --reload      (docs at http://127.0.0.1:8000/docs)
 The future Next.js frontend calls POST /estimate. The embedding model is loaded once at
 startup and shared by all requests.
 """
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, closing
 from typing import Callable
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from google.genai import errors as genai_errors
 from pydantic import BaseModel, Field, field_validator
 
 from src import config
+from src.db import connect
 from src.matcher import Matcher
 from src.nutrition import CalcError, Estimate, Line
 from src.parser import ParseError
@@ -50,6 +51,13 @@ class LineOut(Totals):
     from_input: str
     part_of: str | None = Field(description="Combo dish this line is a component of, if any")
     assumptions: list[str]
+
+
+class FoodOut(BaseModel):
+    id: int
+    name: str
+    per_100g: Totals
+    default_serving_g: float = Field(description="Grams of one typical serving, a sensible amount to start from")
 
 
 class MatchOut(BaseModel):
@@ -124,9 +132,34 @@ def get_estimator() -> Estimator:
     return estimator
 
 
+def get_matcher() -> Matcher:
+    """Dependency so tests can swap the food index."""
+    return app.state.matcher
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/foods/search", response_model=list[FoodOut])
+def search_foods(q: str = Query(max_length=100), limit: int = Query(8, ge=1, le=20),
+                 matcher: Matcher = Depends(get_matcher)) -> list[FoodOut]:
+    """Foods to add to a meal, for a search box: name matches first, then similar foods.
+    Fewer than 2 characters gives an empty list."""
+    hits = matcher.search(q, limit)
+    if not hits:
+        return []
+    with closing(connect(matcher.db_path)) as conn:
+        marks = ",".join("?" * len(hits))
+        rows = {r["id"]: r for r in conn.execute(
+            f"SELECT id, kcal_100g, protein_100g, fat_100g, carbs_100g, default_serving_g "
+            f"FROM foods WHERE id IN ({marks})", [m.food_id for m in hits])}
+    return [FoodOut(id=m.food_id, name=m.name,
+                    per_100g=Totals(kcal=rows[m.food_id]["kcal_100g"], protein_g=rows[m.food_id]["protein_100g"],
+                                    fat_g=rows[m.food_id]["fat_100g"], carbs_g=rows[m.food_id]["carbs_100g"]),
+                    default_serving_g=rows[m.food_id]["default_serving_g"] or 100.0)
+            for m in hits]
 
 
 @app.post("/estimate", response_model=EstimateOut)

@@ -34,6 +34,7 @@ LOW = 0.68       # embedding confidence below this -> no_match (lowest real food
 HIGH = 0.80      # below this (but >= LOW) -> uncertain
 MARGIN = 0.08    # top-1 minus top-2 below this -> uncertain even if confident
 FUZZY_MIN = 0.85  # fuzzy only wins if the strings are nearly identical
+SEARCH_MIN = 0.65  # embedding score a food needs to show up in search suggestions
 # Ordering helpers. The embedding score alone cannot tell "Yogurt, Greek, plain" from "Yogurt, Greek,
 # fruit", and prefers a short seed name over the entry that contains the query's exact words. So
 # candidates are ranked by score plus these small bonuses. The two word bonuses count as evidence
@@ -124,6 +125,8 @@ class Matcher:
         self._owner: list[int] = []                    # food id per string
         self._load(db_path)
         self._exact = {n: i for i, n in enumerate(self._norm)}   # normalised text -> index
+        self._raw_words = [re.findall(r"\w+", n) for n in self._norm]   # for prefix search
+        self.db_path = db_path
         self._vectors: np.ndarray | None = None
         self._bonus = np.array([PLAIN_BONUS if PLAIN_WORDS.search(n) else 0.0 for n in self._norm],
                                dtype=np.float32)
@@ -198,6 +201,52 @@ class Matcher:
             if head & _DERIVED and not head & qw:       # 'Oil, avocado' is not an avocado
                 out[i] -= DERIVED_PENALTY
         return out
+
+    def search(self, query: str, limit: int = 8, semantic: bool = True) -> list[Match]:
+        """Suggestions for a search box. Name matches first, best kind first (the whole name, the
+        query as a whole word at the start, as a whole word elsewhere, the start of a longer word,
+        anywhere inside, every query word as a word prefix), shortest names first within a kind;
+        then, if there is room and semantic is on, foods the embedding finds close to it. One entry
+        per food; combos are left out because they have no nutrients of their own to scale."""
+        q = normalize(query)
+        if len(q) < 2:
+            return []
+        qwords = re.findall(r"\w+", q)
+
+        whole = re.compile(rf"(?<!\w){re.escape(q)}(?!\w)")      # q as a whole word / phrase
+        best: dict[int, tuple[tuple[int, int], int]] = {}     # food id -> (rank, string index)
+        for i, text in enumerate(self._norm):
+            food_id = self._owner[i]
+            if self._foods[food_id][1] == "combo":
+                continue
+            if text == q:
+                tier = 0
+            elif whole.search(text):
+                tier = 1 if text.startswith(q) else 2
+            elif text.startswith(q):
+                tier = 3
+            elif q in text:
+                tier = 4
+            elif qwords and all(any(w.startswith(qw) for w in self._raw_words[i]) for qw in qwords):
+                tier = 5
+            else:
+                continue
+            rank = (tier, len(text))
+            if food_id not in best or rank < best[food_id][0]:
+                best[food_id] = (rank, i)
+        results = [self._make(i, 1.0, "lexical") for _, i in sorted(best.values())[:limit]]
+
+        if semantic and len(results) < limit and len(q) >= 3:
+            have = {m.food_id for m in results}
+            sims = self._embeddings() @ np.asarray(self.embedder.encode([query])[0], dtype=np.float32)
+            for i in self._best_per_food(sims):
+                if sims[i] < SEARCH_MIN or len(results) >= limit:
+                    break
+                food_id = self._owner[i]
+                if food_id not in have and self._foods[food_id][1] != "combo":
+                    have.add(food_id)
+                    results.append(self._make(i, sims[i], "embedding"))
+        return results
 
     def match(self, query: str, top_k: int = 3) -> list[Match]:
         q = normalize(query)

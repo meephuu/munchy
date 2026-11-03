@@ -3,24 +3,54 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
+import { IngredientSearch } from "@/components/IngredientSearch";
 import { DishHeader } from "@/components/DishHeader";
 import { DishEcho } from "@/components/DishStates";
-import { ArrowRightIcon, EditIcon, LockIcon } from "@/components/Icons";
+import { ArrowRightIcon, EditIcon, LockIcon, PlusIcon } from "@/components/Icons";
 import { Screen } from "@/components/Screen";
-import { summarize, type Dish } from "@/lib/estimate";
+import { summarize, type Dish, type Ingredient } from "@/lib/estimate";
+import { toIngredient, type FoodHit } from "@/lib/foods";
 
 // Guest dish result (design/screens/GuestDish.dc.html), filled with the backend's estimate.
 // Same content as the logged-in Bite check, but the bottom call to action sends the guest to
-// sign up instead of logging. Tap an ingredient to change its amount; totals follow.
+// sign up instead of logging. Tap an ingredient to change its amount, or add one from the food
+// search; totals follow.
 // The design's place and tweak chips are left out until the backend can really answer them.
 
 export function DishResult({ query, dish }: { query: string; dish: Dish }) {
-  const estimated = dish.ingredients.map((i) => i.grams);
-  const [grams, setGrams] = useState(estimated);
+  const aiGrams = dish.ingredients.map((i) => i.grams);
+  const [extra, setExtra] = useState<Ingredient[]>([]);      // foods the user added
+  const [grams, setGrams] = useState(aiGrams);               // one amount per ingredient, AI's first
   const [openRow, setOpenRow] = useState<number | null>(null);
-  const view = summarize(dish, grams);
+  const [adding, setAdding] = useState(false);
+
+  const ingredients = [...dish.ingredients, ...extra];
+  const view = summarize({ ...dish, ingredients }, grams);
+  const assumptions = [
+    ...dish.assumptions,
+    ...extra.map((e) => `Added by you: ${e.name}, starting from a typical serving of ${e.grams} g`),
+  ];
 
   const setAmount = (i: number, g: number) => setGrams((all) => all.map((v, j) => (j === i ? g : v)));
+
+  const addFood = (hit: FoodHit) => {
+    setAdding(false);
+    const same = ingredients.findIndex((i) => i.name.toLowerCase() === hit.name.toLowerCase());
+    if (same >= 0) {
+      setOpenRow(same);                                       // already in the meal: just edit it
+      return;
+    }
+    const ingredient = toIngredient(hit, ingredients.length);
+    setExtra((all) => [...all, ingredient]);
+    setGrams((all) => [...all, ingredient.grams]);
+    setOpenRow(ingredients.length);                           // open its amount editor
+  };
+
+  const removeAdded = (i: number) => {
+    setExtra((all) => all.filter((_, j) => j !== i - dish.ingredients.length));
+    setGrams((all) => all.filter((_, j) => j !== i));
+    setOpenRow(null);
+  };
 
   return (
     <Screen>
@@ -84,7 +114,10 @@ export function DishResult({ query, dish }: { query: string; dish: Dish }) {
                   className="size-2 shrink-0 rounded-full"
                   style={{ background: row.dot }}
                 />
-                <span className="flex-1 text-sm first-letter:uppercase">{row.name}</span>
+                <span className="flex-1 text-sm first-letter:uppercase">
+                  {row.name}{" "}
+                  {row.added && <span className="ml-1.5 text-[11px] text-ink-muted">added</span>}
+                </span>
                 <span
                   className={`flex items-center gap-1 text-xs ${row.edited ? "font-semibold text-teal" : "text-ink-muted"}`}
                 >
@@ -98,18 +131,37 @@ export function DishResult({ query, dish }: { query: string; dish: Dish }) {
                   id={`amount-${i}`}
                   name={row.name}
                   grams={row.grams}
-                  estimated={estimated[i]}
+                  estimated={ingredients[i].grams}
+                  baseLabel={row.added ? "Typical serving" : "As estimated"}
                   onChange={(g) => setAmount(i, g)}
+                  onRemove={row.added ? () => removeAdded(i) : undefined}
                 />
               )}
             </div>
           ))}
+          {adding ? (
+            <IngredientSearch onPick={addFood} onClose={() => setAdding(false)} />
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setAdding(true);
+                setOpenRow(null);
+              }}
+              className="flex min-h-11 cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-teal"
+            >
+              <PlusIcon size={16} />
+              Add an ingredient
+            </button>
+          )}
           {view.edited && (
             <button
               type="button"
               onClick={() => {
-                setGrams(estimated);
+                setExtra([]);
+                setGrams(aiGrams);
                 setOpenRow(null);
+                setAdding(false);
               }}
               className="min-h-11 cursor-pointer text-left text-[13px] font-semibold text-teal"
             >
@@ -118,14 +170,14 @@ export function DishResult({ query, dish }: { query: string; dish: Dish }) {
           )}
         </section>
 
-        {dish.assumptions.length > 0 && (
+        {assumptions.length > 0 && (
           <details className="rounded-card bg-white px-3.5 py-3">
             <summary className="cursor-pointer text-[13px] text-ink-muted">
-              How we estimated this · {dish.assumptions.length}{" "}
-              {dish.assumptions.length === 1 ? "assumption" : "assumptions"}
+              How we estimated this · {assumptions.length}{" "}
+              {assumptions.length === 1 ? "assumption" : "assumptions"}
             </summary>
             <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs text-ink-muted">
-              {dish.assumptions.map((a) => (
+              {assumptions.map((a) => (
                 <li key={a}>{a}</li>
               ))}
             </ul>

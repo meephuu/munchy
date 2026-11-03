@@ -2,7 +2,7 @@
 // the dish screen shows. fetchEstimate runs in server components only, so the browser never
 // needs the backend URL and no CORS setup is required for this path.
 
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
+import { BACKEND_URL } from "./backend";
 
 type ApiTotals = { kcal: number; protein_g: number; fat_g: number; carbs_g: number };
 
@@ -56,7 +56,14 @@ export type Confidence = "Low" | "Medium" | "High";
 export type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
 /** One food in the meal, as the AI estimated it. `per100` is what lets the user change `grams`. */
-export type Ingredient = { name: string; grams: number; per100: Macros; dot: string };
+export type Ingredient = {
+  name: string;
+  grams: number;
+  per100: Macros;
+  dot: string;
+  /** Added by the user from the food search, not found by the AI. */
+  added?: boolean;
+};
 
 /** What the backend found, before the user changes anything. Plain data, safe to pass to the client. */
 export type Dish = {
@@ -70,6 +77,7 @@ export type Dish = {
 
 // Dots in the ingredient list cycle through the macro colors.
 const DOTS = ["var(--color-yolk)", "var(--color-orange)", "var(--color-egg)", "var(--color-teal)"];
+export const dotFor = (position: number) => DOTS[position % DOTS.length];
 
 const round10 = (n: number) => Math.round(n / 10) * 10;
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -95,7 +103,7 @@ export function toDish(res: EstimateResponse): Dish {
         carbs: l.per_100g.carbs_g,
         fat: l.per_100g.fat_g,
       },
-      dot: DOTS[i % DOTS.length],
+      dot: dotFor(i),
     })),
     confidence: confidenceOf(res),
     warnings: res.warnings,
@@ -104,14 +112,14 @@ export function toDish(res: EstimateResponse): Dish {
   };
 }
 
-export type Row = { name: string; grams: number; kcal: number; dot: string; edited: boolean };
+export type Row = { name: string; grams: number; kcal: number; dot: string; edited: boolean; added: boolean };
 
 export type Summary = Macros & {
   weight: number;
   low: number;
   high: number;
   rows: Row[];
-  /** True if any amount differs from the AI's estimate. */
+  /** True if the user changed an amount or added a food. */
   edited: boolean;
 };
 
@@ -129,7 +137,14 @@ export function summarize(dish: Dish, grams: number[]): Summary {
     total.carbs += ing.per100.carbs * k;
     total.fat += ing.per100.fat * k;
     weight += g;
-    return { name: ing.name, grams: g, kcal: Math.round(ing.per100.kcal * k), dot: ing.dot, edited: g !== ing.grams };
+    return {
+      name: ing.name,
+      grams: g,
+      kcal: Math.round(ing.per100.kcal * k),
+      dot: ing.dot,
+      edited: g !== ing.grams,
+      added: !!ing.added,
+    };
   });
   const kcal = Math.round(total.kcal);
   return {
@@ -142,6 +157,6 @@ export function summarize(dish: Dish, grams: number[]): Summary {
     low: round10(kcal * 0.86),
     high: round10(kcal * 1.14),
     rows,
-    edited: rows.some((r) => r.edited),
+    edited: rows.some((r) => r.edited || r.added),
   };
 }

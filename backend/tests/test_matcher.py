@@ -160,3 +160,77 @@ def test_real_model_finds_the_right_food(real, query, expected):
 ])
 def test_real_model_classification(real, query, status):
     assert classify(real.match(query)) == status
+
+
+# --- search() for a search box ----------------------------------------------------------
+
+def test_search_finds_names_containing_the_query_shortest_first(db_path):
+    m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+    hits = m.search("chick", semantic=False)
+    names = [x.name for x in hits]
+    assert "grilled chicken breast" in names and "boiled chicken breast" in names
+    texts = [x.matched_text.lower() for x in hits]                 # the name or alias that matched
+    assert all("chick" in t for t in texts)
+    assert texts == sorted(texts, key=lambda t: (not t.startswith("chick"), len(t)))   # starts-with first, then short
+
+
+def test_search_works_in_thai_too(db_path):
+    m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+    assert "boiled egg" in [x.name for x in m.search("ไข่", semantic=False)]
+
+
+def test_search_matches_word_prefixes_in_any_order(db_path):
+    m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+    assert "grilled chicken breast" in [x.name for x in m.search("breast chick", semantic=False)]
+
+
+def test_search_never_offers_a_combo_and_gives_one_entry_per_food(db_path):
+    m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+    hits = m.search("sticky rice", semantic=False)
+    assert all(x.kind != "combo" for x in hits)
+    assert "steamed sticky rice" in [x.name for x in hits]
+    assert len({x.food_id for x in hits}) == len(hits)
+
+
+def test_search_needs_two_characters_and_respects_the_limit(db_path):
+    m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+    assert m.search("e", semantic=False) == [] and m.search("   ", semantic=False) == []
+    assert len(m.search("e", limit=3, semantic=False)) == 0
+    assert len(m.search("ch", limit=3, semantic=False)) == 3
+
+
+def test_search_tops_up_with_similar_foods_but_not_unrelated_ones(db_path):
+    m = Matcher(db_path, BigramEmbedder(), cache_dir=None)
+    hits = m.search("mashed potatos", limit=5)                      # typo: no name contains it
+    assert hits and hits[0].name == "mashed potato" and hits[0].method == "embedding"
+    assert m.search("zzzzqq", limit=5) == []                          # nothing is similar enough
+
+
+def test_search_lexical_hits_come_before_embedding_hits_without_repeats(db_path):
+    m = Matcher(db_path, BigramEmbedder(), cache_dir=None)
+    hits = m.search("egg", limit=8)
+    methods = [x.method for x in hits]
+    assert methods == sorted(methods, key=lambda s: s != "lexical")
+    assert len({x.food_id for x in hits}) == len(hits)
+
+
+def test_search_puts_whole_word_matches_before_longer_words_that_merely_start_with_the_query(db_path, tmp_path):
+    import shutil
+    from contextlib import closing
+    from src.db import connect
+    path = tmp_path / "foods.db"
+    shutil.copy(db_path, path)
+    with closing(connect(path)) as conn, conn:
+        for name in ("eggplant", "eggnog", "egg, hen, raw", "scrambled egg"):
+            conn.execute("INSERT INTO foods (name_en, kcal_100g, protein_100g, fat_100g, carbs_100g, "
+                         "default_serving_g, source) VALUES (?, 100, 1, 1, 1, 50, 'test')", (name,))
+    names = [x.name for x in Matcher(path, ExplodingEmbedder(), cache_dir=None).search("egg", semantic=False)]
+    whole = [names.index(n) for n in ("egg, hen, raw", "scrambled egg", "boiled egg")]
+    longer = [names.index(n) for n in ("eggplant", "eggnog")]
+    assert max(whole) < min(longer)
+    assert names.index("egg, hen, raw") < names.index("scrambled egg")      # whole word at the start beats later
+
+
+def test_search_ranks_an_exact_name_first(db_path):
+    m = Matcher(db_path, ExplodingEmbedder(), cache_dir=None)
+    assert m.search("boiled egg", semantic=False)[0].name == "boiled egg"
