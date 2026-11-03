@@ -15,6 +15,9 @@ Open **SQL Editor**, paste the contents of `migrations/20261103000000_profiles.s
 the `profiles` table with row-level security (people can only see and change their own row) and a trigger
 that builds the profile from the sign-up form.
 
+Then run `migrations/20261104000000_meals.sql` the same way: it creates the `meals` table (logged meals,
+with the same "own rows only" security, plus delete).
+
 ## 3. Choose how sign-up confirms
 **Authentication → Providers → Email**:
 - For development, turn **Confirm email** off: people are signed in right after sign-up.

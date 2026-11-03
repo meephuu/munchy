@@ -21,7 +21,7 @@ step list (steps 1–15, all done) stays in [`backend/ROADMAP.md`](backend/ROADM
 | A | Guest polish: installable app (manifest, icons), 390px check | done | `f925016` |
 | B | Get started screen + daily target formula + Supabase accounts (sign-up, log-in, log-out, profile) | done | `da4c259`, `f8e38e1` |
 | — | Redesign to V2 "Forest & Bronze" | done | `da639bd` |
-| **C** | **Home + meal logging** | **next** | |
+| C | Home + meal logging | done, checked against the real Supabase project | `2029751`, `a547113`, `c81596a` |
 | D | Logged-in Bite check (tweak chips, "where's it from") | planned | |
 | E | Progress | planned | |
 | F | Coach | planned, least defined | |
@@ -30,9 +30,15 @@ Not in any phase yet (backlog): see the end of this file.
 
 ---
 
-## Phase C — Home and meal logging (next)
+## Phase C — Home and meal logging (done)
 
 **Goal:** a logged-in person can log what they ate, and Home shows how much of today's target is left.
+
+**Result:** built as planned (option 1: Supabase straight from the app; slots breakfast / lunch / snack / dinner;
+"today" ends at the person's local midnight). Checked end to end against the real project with test users:
+sign up, log a meal with edited amounts from the dish page, see it on Home with the right totals, delete it
+with a confirm; and at the database level: another user sees nothing, cannot insert a meal for someone else,
+cannot delete someone else's, an invalid slot is refused. Details below are the plan as written.
 
 ### C.0 Decision needed first: where meals are stored
 | Option | Good | Bad |
@@ -107,10 +113,10 @@ search. Coach and Progress show a "coming soon" screen until phases E and F.
 ### C.8 Out of scope for C (on purpose)
 Editing a logged meal (delete and re-log instead), favorites, photos, notes, sharing.
 
-### C.9 Questions for you
-1. Option 1 or 2 in C.0?
-2. Slots: breakfast / lunch / dinner / snack: enough? (The design says "Log to dinner" / "Log to lunch".)
-3. Should "today" end at midnight, or at a time you choose (e.g. 04:00 for late-night eaters)? Default: midnight.
+### C.9 Decisions (answered)
+1. Meals are stored in Supabase, written from the app.
+2. Slots: breakfast / lunch / dinner / snack are enough (the nav and the log button use them; a snack sits between lunch and dinner).
+3. "Today" ends at midnight (local).
 
 ---
 
@@ -147,6 +153,8 @@ streak, weight trend, protein average, a "Buddy's note".
 - **Housekeeping:** delete the test user `munchy-test-1793713114@example.com` in Supabase (Authentication → Users).
 
 ## Decisions log
+- Meals live in Supabase (table `meals`, row-level security); the backend never sees them. Revisit if Coach needs them.
+- "Today" is the person's local day, so today's meals are loaded in the browser (the server cannot know the timezone).
 - Hybrid pipeline: the LLM only parses or names parts of a dish; nutrition numbers come from our database + code.
 - Accounts: Supabase (email + password); the estimation engine and food database stay in `backend/` (SQLite).
 - Profile is saved from the sign-up metadata by a database trigger (works with or without email confirmation).

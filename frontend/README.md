@@ -42,7 +42,7 @@ fill the rest. Weight loss is never targeted below the resting needs or 1,200 kc
 when that floor applies. The answers wait in the browser until the person signs up.
 
 **Accounts** use Supabase (email + password): `/signup` (needs the Get started answers first), `/login`,
-`/home` (members only: their daily target and a dish search; the real Home comes with meal logging) and
+`/home` (members only, see "Home and meal logging" below) and
 `/auth/callback` (the link in the confirmation email). The proxy sends logged-in people from `/`, `/login`
 and `/signup` to `/home`, and guests who open `/home` to `/login`. The profile is stored in one row per
 account with row-level security; sign-up sends it along as metadata and a database trigger creates the row,
@@ -51,6 +51,17 @@ so it works with or without email confirmation. A logged-in person can reopen `/
 Setup is in [`../supabase/README.md`](../supabase/README.md): create the project, run the SQL, put the URL
 and anon key in `.env.local`. Without them the guest screens work and these pages say accounts are not
 switched on.
+
+## Home and meal logging
+**Home** (`/home`) shows how many of today's calories are left (big number, gradient ring around the bowl,
+terracotta when more than 5% over), the three macros against the daily target, and *Today's bites* (with
+delete) plus a dashed NEXT row. "Today" is the person's own local day, so the meals are loaded in the browser
+(`HomeToday`); `src/lib/meals.ts` holds the logic (slot from the time of day, day totals, next meal), all tested.
+**Logging:** on a dish result a logged-in person gets "Log as" chips (breakfast / lunch / snack / dinner, from
+their clock) and "Log to dinner · 392 kcal", which saves the meal with the amounts as edited and the foods as
+added. Meals are rows in the Supabase `meals` table (run `supabase/migrations/20261104000000_meals.sql`).
+The bottom nav (Home, Coach, "+", Progress, Me) is on the member screens; Coach and Progress are "coming
+soon" pages. The proxy sends guests who open any member page to log in.
 
 ## Editing amounts
 Tap an ingredient on the result to change how much of it is in the meal: - / + , a typed amount, or
@@ -87,8 +98,7 @@ guess: **Low** if part of the input could not be matched, **Medium** if there we
 assumed amounts, **High** if neither.
 
 ## Not built yet
-- The logged-in Home (calories left today, today's bites), meal logging and the dish result's "Log" button
-  (it still shows the guest sign-up button to members).
+- Coach and Progress (placeholders for now), favorites, editing a logged meal (delete and log again instead).
 - The design's place chips (Street stall / Restaurant / Home-cooked) and tweak chips (Less oil, …) are
   left out: the backend cannot answer them yet.
 - Sodium: the database has none, so the fourth tile shows total weight instead.
