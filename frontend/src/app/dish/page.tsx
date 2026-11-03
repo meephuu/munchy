@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { DishResult } from "@/components/DishResult";
 import { DishLoading, DishProblem } from "@/components/DishStates";
 import { EstimateError, fetchEstimate, toDish } from "@/lib/estimate";
+import { isMember } from "@/lib/supabase/session";
 
 // Guest dish result. Public. `?q=` is the dish the guest typed; it is sent to the backend
 // (POST /estimate). Without it there is nothing to show, so go back to search. With Cache
@@ -21,6 +22,7 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
   const query = (Array.isArray(q) ? q[0] : q)?.trim();
   if (!query) redirect("/");
 
+  const memberLookup = isMember(); // runs while the estimate is being worked out
   let dish;
   try {
     dish = toDish(await fetchEstimate(query));
@@ -42,5 +44,5 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
   }
 
   // key: a new search must start from a clean result (no ingredients or edits from the last dish)
-  return <DishResult key={query} query={query} dish={dish} />;
+  return <DishResult key={query} query={query} dish={dish} member={await memberLookup} />;
 }

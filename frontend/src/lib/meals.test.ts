@@ -3,6 +3,7 @@ import type { Summary } from "./estimate";
 import {
   dayLabel,
   dayTotals,
+  friendlyMealError,
   defaultSlot,
   greetingPart,
   localDate,
@@ -166,5 +167,20 @@ describe("nextSlot", () => {
   });
   it("skips earlier slots that were never logged (no nagging about breakfast at 7pm)", () => {
     expect(nextSlot(at(19), [])).toBe("dinner");
+  });
+});
+
+describe("friendlyMealError", () => {
+  it("explains a missing table, an expired login and a network failure in plain words", () => {
+    expect(friendlyMealError({ code: "42P01" })).toMatch(/meals table is missing/);
+    expect(friendlyMealError({ code: "PGRST205", message: "Could not find the table 'public.meals'" })).toMatch(/meals table/);
+    expect(friendlyMealError({ code: "PGRST301" })).toMatch(/log in again/);
+    expect(friendlyMealError({ status: 401 })).toMatch(/log in again/);
+    expect(friendlyMealError({ message: "Failed to fetch" })).toMatch(/Can't reach/);
+  });
+  it("never shows raw error text it does not recognise", () => {
+    expect(friendlyMealError({ code: "23514", message: 'violates check constraint "meals_kcal_check"' })).toBe(
+      "We couldn't save that. Please try again.",
+    );
   });
 });

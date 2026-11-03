@@ -176,3 +176,19 @@ export function nextSlot(now: Date, meals: Meal[]): MealSlot | null {
 }
 
 export const slotLabel = (slot: MealSlot) => SLOTS.find((s) => s.id === slot)!.label;
+
+/** What to tell the person when saving or deleting a meal fails: never the raw database error. */
+export function friendlyMealError(err: { code?: string; message?: string; status?: number }): string {
+  const code = err.code ?? "";
+  const text = (err.message ?? "").toLowerCase();
+  if (code === "42P01" || code === "PGRST205" || text.includes("could not find the table")) {
+    return "Meal logging isn't set up yet: the meals table is missing from the database.";
+  }
+  if (code === "PGRST301" || code === "42501" || err.status === 401 || err.status === 403 || text.includes("jwt")) {
+    return "Please log in again, then try once more.";
+  }
+  if (text.includes("failed to fetch") || text.includes("network")) {
+    return "Can't reach the server. Check your connection and try again.";
+  }
+  return "We couldn't save that. Please try again.";
+}
