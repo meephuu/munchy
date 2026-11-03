@@ -105,6 +105,10 @@ backend/
 - Keep `foods.db` rebuildable from code/CSV (seed scripts), never hand-edited only.
 - Add/keep pytest cases for the three reference inputs as the pipeline comes together.
 
+## Plan
+`PLAN.md` (repo root) is the plan for the frontend and accounts: what is done, the next phase in detail, and the backlog.
+The backend's own step list is `backend/ROADMAP.md`.
+
 ## UI design
 The frontend UI must follow `design/DESIGN.md` (tokens, fonts, components, screens, guest vs logged-in rules).
 `design/screens/*.dc.html` are the visual reference for each screen (design-tool markup: rebuild as real components, do not ship them).
