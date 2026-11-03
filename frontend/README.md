@@ -26,7 +26,28 @@ npm run dev                      # http://localhost:3000
 - `src/lib/estimate.ts` – `POST /estimate` client (run on the server, so no CORS needed) and the mapping to what the screen shows
 - `src/components/` – `DishResult`, `AmountEditor`, `IngredientSearch`, `DishStates`, `DishHeader`, `Chip`, icons
 - `src/app/api/foods/route.ts` + `src/lib/foods.ts` – ingredient search proxy and client
-- `src/app/onboarding/` – placeholder until the Onboarding screen is built
+- `src/app/onboarding/`, `src/components/OnboardingForm.tsx` – Get started: goal, body, typical day and the live daily target
+- `src/lib/target.ts` – the target formula (pure, tested); `src/lib/profile.ts` – profile validation and database rows
+- `src/app/login`, `src/app/signup`, `src/app/home`, `src/app/auth/callback` – accounts (see below)
+- `src/proxy.ts`, `src/lib/supabase/` – keeps the login fresh and sends people to the right side of the app
+
+## Daily target and accounts
+**Get started** (`/onboarding`) asks goal, sex (optional; the formula needs it), age, height, weight and
+typical day, and shows the daily target live: Mifflin-St Jeor resting needs x an activity factor (1.2 / 1.4 /
+1.6), adjusted for the goal (-15% / 0 / +12% / +8%), protein by body weight, 28% of calories from fat, carbs
+fill the rest. Weight loss is never targeted below the resting needs or 1,200 kcal, and the screen says so
+when that floor applies. The answers wait in the browser until the person signs up.
+
+**Accounts** use Supabase (email + password): `/signup` (needs the Get started answers first), `/login`,
+`/home` (members only: their daily target and a dish search; the real Home comes with meal logging) and
+`/auth/callback` (the link in the confirmation email). The proxy sends logged-in people from `/`, `/login`
+and `/signup` to `/home`, and guests who open `/home` to `/login`. The profile is stored in one row per
+account with row-level security; sign-up sends it along as metadata and a database trigger creates the row,
+so it works with or without email confirmation. A logged-in person can reopen `/onboarding` to edit it.
+
+Setup is in [`../supabase/README.md`](../supabase/README.md): create the project, run the SQL, put the URL
+and anon key in `.env.local`. Without them the guest screens work and these pages say accounts are not
+switched on.
 
 ## Editing amounts
 Tap an ingredient on the result to change how much of it is in the meal: - / + , a typed amount, or
@@ -63,6 +84,8 @@ guess: **Low** if part of the input could not be matched, **Medium** if there we
 assumed amounts, **High** if neither.
 
 ## Not built yet
+- The logged-in Home (calories left today, today's bites), meal logging and the dish result's "Log" button
+  (it still shows the guest sign-up button to members).
 - The design's place chips (Street stall / Restaurant / Home-cooked) and tweak chips (Less oil, …) are
   left out: the backend cannot answer them yet.
 - Sodium: the database has none, so the fourth tile shows total weight instead.

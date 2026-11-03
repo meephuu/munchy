@@ -15,7 +15,7 @@ export function DishHeader() {
         </Link>
         <h1 className="font-display text-xl font-normal text-ink">Bite check</h1>
       </div>
-      <Link href="/onboarding" className="text-sm font-semibold">
+      <Link href="/login" className="text-sm font-semibold">
         Log in
       </Link>
     </header>

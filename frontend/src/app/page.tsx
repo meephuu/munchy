@@ -25,7 +25,7 @@ export default function GuestHome() {
             <span className="text-xs text-ink-muted">Your Bite Buddy</span>
           </div>
           <Link
-            href="/onboarding"
+            href="/login"
             className="flex h-11 items-center rounded-full border-[1.5px] border-teal px-[18px] text-sm font-semibold"
           >
             Log in

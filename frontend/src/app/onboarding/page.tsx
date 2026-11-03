@@ -1,18 +1,26 @@
-import Link from "next/link";
+import { Suspense } from "react";
+import { OnboardingForm } from "@/components/OnboardingForm";
 import { Screen } from "@/components/Screen";
+import { fromRow } from "@/lib/profile";
+import { createClient } from "@/lib/supabase/server";
 
-// Placeholder so "Log in" / "Create free account" do not 404. The real screen is
-// design/screens/Onboarding.dc.html and comes after the guest screens.
-export default function OnboardingPlaceholder() {
+// Get started (design/screens/Onboarding.dc.html). Open to everyone: a guest's answers wait for
+// sign-up; a logged-in person edits and saves their own profile. Reading the login is request-time
+// work, so it sits behind <Suspense>; the screen stays blank until we know which form to show, so nobody
+// types into a form that is about to be replaced.
+export default function OnboardingPage() {
   return (
-    <Screen>
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-        <h1 className="font-display text-2xl font-normal">Accounts are coming soon</h1>
-        <p className="text-sm text-ink-muted">Sign-up and your daily target are the next screens.</p>
-        <Link href="/" className="text-sm font-semibold">
-          Back to search
-        </Link>
-      </div>
-    </Screen>
+    <Suspense fallback={<Screen>{null}</Screen>}>
+      <Onboarding />
+    </Suspense>
   );
+}
+
+async function Onboarding() {
+  const supabase = await createClient();
+  const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
+  if (!supabase || !data.user) return <OnboardingForm member={false} saved={null} />;
+
+  const { data: row } = await supabase.from("profiles").select("*").eq("id", data.user.id).maybeSingle();
+  return <OnboardingForm member saved={fromRow(row)} />;
 }
