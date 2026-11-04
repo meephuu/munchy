@@ -7,7 +7,6 @@ import { DishSearchBar } from "@/components/DishSearchBar";
 import { FavoritesList } from "@/components/FavoritesList";
 import { Greeting } from "@/components/Greeting";
 import { HomeToday } from "@/components/HomeToday";
-import { LogoutButton } from "@/components/LogoutButton";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { fromRow, targetOf } from "@/lib/profile";
@@ -52,13 +51,6 @@ async function Home() {
         )}
 
         <HomeToday target={target} />
-
-        <div className="flex flex-col items-center gap-2 pt-1">
-          <LogoutButton />
-          <p className="max-w-full truncate font-mono text-[10px] tracking-[0.5px] text-ink-muted uppercase">
-            Signed in as {data.user.email}
-          </p>
-        </div>
       </div>
       <BottomNav />
     </Screen>
