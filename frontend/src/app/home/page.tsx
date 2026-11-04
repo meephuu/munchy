@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AccountsOff } from "@/components/AccountsOff";
 import { BottomNav } from "@/components/BottomNav";
 import { DishSearchBar } from "@/components/DishSearchBar";
+import { FavoritesList } from "@/components/FavoritesList";
 import { Greeting } from "@/components/Greeting";
 import { HomeToday } from "@/components/HomeToday";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -52,6 +53,7 @@ async function Home() {
 
         <Greeting />
         <DishSearchBar />
+        <FavoritesList />
 
         {!target && (
           <section className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]">

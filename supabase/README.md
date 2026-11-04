@@ -18,6 +18,9 @@ that builds the profile from the sign-up form.
 Then run `migrations/20261104000000_meals.sql` the same way: it creates the `meals` table (logged meals,
 with the same "own rows only" security, plus delete).
 
+Then run `migrations/20261105000000_favorites_weights_dishes.sql`: it creates `favorites` (the heart on a dish),
+`weights` (the weight log on Progress) and `custom_dishes` (a person's own dishes), all own-rows-only.
+
 ## 3. Choose how sign-up confirms
 **Authentication → Providers → Email**:
 - For development, turn **Confirm email** off: people are signed in right after sign-up.

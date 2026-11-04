@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { ArrowLeftIcon } from "@/components/Icons";
 import { Eyebrow, Title } from "@/components/Type";
 
 /** Top bar of the dish screens (design "Bite check"): back button, eyebrow, and the dish as the title.
  *  The last word of the dish is set in italic green like the design's "Pad kra pao, *fried egg*". */
-export function DishHeader({ dish }: { dish?: string }) {
+export function DishHeader({ dish, member = false }: { dish?: string; member?: boolean }) {
   const words = dish?.trim().split(/\s+/) ?? [];
   const accent = words.length > 1 ? words.pop() : undefined;
   const lead = words.join(" ") || undefined;
@@ -29,9 +30,13 @@ export function DishHeader({ dish }: { dish?: string }) {
           {title}
         </div>
       </div>
-      <Link href="/login" className="shrink-0 text-sm font-semibold">
-        Log in
-      </Link>
+      {member && dish ? (
+        <FavoriteButton title={dish} />
+      ) : (
+        <Link href="/login" className="shrink-0 text-sm font-semibold">
+          Log in
+        </Link>
+      )}
     </header>
   );
 }

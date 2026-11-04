@@ -32,6 +32,7 @@
   /* Lines */
   --color-border: #e2d8c6; /* unselected chips, inputs */
   --color-divider: #f0eadf; /* list row dividers */
+  --color-sand-dark: #d9c8a4; /* today's bar on Progress */
   --color-dash: #c9b48a; /* dashed "next meal" row */
 
   /* Used by the screens but not in the spec table */

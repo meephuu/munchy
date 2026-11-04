@@ -1,5 +1,7 @@
 import { BottomNav } from "@/components/BottomNav";
 import { DishSearchBar } from "@/components/DishSearchBar";
+import { FavoritesList } from "@/components/FavoritesList";
+import { MyDishes } from "@/components/MyDishes";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 
@@ -16,6 +18,8 @@ export default function AddPage() {
         <p className="text-sm text-ink-muted">
           Type any dish, adjust the amounts if you like, then log it to breakfast, lunch, dinner or a snack.
         </p>
+        <FavoritesList />
+        <MyDishes />
       </div>
       <BottomNav />
     </Screen>

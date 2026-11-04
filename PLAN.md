@@ -22,8 +22,9 @@ step list (steps 1–15, all done) stays in [`backend/ROADMAP.md`](backend/ROADM
 | B | Get started screen + daily target formula + Supabase accounts (sign-up, log-in, log-out, profile) | done | `da4c259`, `f8e38e1` |
 | — | Redesign to V2 "Forest & Bronze" | done | `da639bd` |
 | C | Home + meal logging | done, checked against the real Supabase project | `2029751`, `a547113`, `c81596a` |
-| D | Logged-in Bite check (tweak chips, "where's it from") | planned | |
-| E | Progress | planned | |
+| D | Logged-in Bite check (tweak chips, "where's it from", favorites) | built; needs the new SQL run, then a real-project check | |
+| E | Progress (week bars, streak, weight log + trend, rule-based note) | built; needs the new SQL run, then a real-project check | |
+| — | My dishes: custom dishes with typed nutrition, ingredients optional | built; same SQL | |
 | F | Coach | planned, least defined | |
 
 Not in any phase yet (backlog): see the end of this file.
@@ -153,6 +154,10 @@ streak, weight trend, protein average, a "Buddy's note".
 - **Housekeeping:** delete the test user `munchy-test-1793713114@example.com` in Supabase (Authentication → Users).
 
 ## Decisions log
+- Phase D: "where's it from" = fixed rules (restaurant +6% oil, home-cooked oil x0.7); tweak chips are built from the
+  dish's real ingredients and only change amounts. No sodium anywhere (we cannot measure it).
+- Phase E: last 7 days (rolling), weight kept one per day and smoothed (moving average); Buddy's note from rules.
+- Custom dishes: one serving, calories required, macros optional, ingredients optional (they sum into the fields).
 - Meals live in Supabase (table `meals`, row-level security); the backend never sees them. Revisit if Coach needs them.
 - "Today" is the person's local day, so today's meals are loaded in the browser (the server cannot know the timezone).
 - Hybrid pipeline: the LLM only parses or names parts of a dish; nutrition numbers come from our database + code.

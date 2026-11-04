@@ -60,8 +60,21 @@ delete) plus a dashed NEXT row. "Today" is the person's own local day, so the me
 **Logging:** on a dish result a logged-in person gets "Log as" chips (breakfast / lunch / snack / dinner, from
 their clock) and "Log to dinner · 392 kcal", which saves the meal with the amounts as edited and the foods as
 added. Meals are rows in the Supabase `meals` table (run `supabase/migrations/20261104000000_meals.sql`).
-The bottom nav (Home, Coach, "+", Progress, Me) is on the member screens; Coach and Progress are "coming
-soon" pages. The proxy sends guests who open any member page to log in.
+The bottom nav (Home, Coach, "+", Progress, Me) is on the member screens; Coach is a "coming soon" page.
+The proxy sends guests who open any member page to log in.
+
+**Bite check extras (phase D):** "Where's it from?" (street stall / restaurant / home-cooked) and "Tweak it" chips
+(less oil, no egg, half rice, extra protein; only the ones the dish has an ingredient for). They are plain rules in
+`src/lib/tweaks.ts` that change amounts, so totals stay arithmetic and every change is listed under "How we estimated
+this". Logged-in people also get a heart (favorites, shown on Home and the Log screen).
+
+**Progress (phase E):** last 7 days of calories against the target (terracotta when over by more than 5%), streak,
+protein average, a smoothed weight trend with a daily weight log, and "Buddy's note" written from rules in
+`src/lib/progress.ts` (no LLM, no sodium).
+
+**My dishes:** on the Log screen ("+") a person can create their own dish: type calories and macros for one
+serving, and/or add ingredients (optional) that add up into those numbers. Saved in `custom_dishes`, loggable in one tap.
+Needs `supabase/migrations/20261105000000_favorites_weights_dishes.sql`.
 
 ## Editing amounts
 Tap an ingredient on the result to change how much of it is in the meal: - / + , a typed amount, or
@@ -98,7 +111,6 @@ guess: **Low** if part of the input could not be matched, **Medium** if there we
 assumed amounts, **High** if neither.
 
 ## Not built yet
-- Coach and Progress (placeholders for now), favorites, editing a logged meal (delete and log again instead).
-- The design's place chips (Street stall / Restaurant / Home-cooked) and tweak chips (Less oil, …) are
-  left out: the backend cannot answer them yet.
+- Coach (placeholder for now), editing a logged meal or a saved dish (delete and create again instead).
+- Place and tweak chips are approximations (fixed rules), not data from the backend.
 - Sodium: the database has none, so the fourth tile shows total weight instead.

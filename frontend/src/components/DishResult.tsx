@@ -6,20 +6,41 @@ import { useState, useSyncExternalStore } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
 import { Chip } from "@/components/Chip";
 import { DishHeader } from "@/components/DishHeader";
-import { ArrowRightIcon, EditIcon, LockIcon, PlusIcon } from "@/components/Icons";
+import {
+  ArrowRightIcon,
+  EditIcon,
+  LockIcon,
+  PlusIcon,
+} from "@/components/Icons";
 import { IngredientSearch } from "@/components/IngredientSearch";
 import { Screen } from "@/components/Screen";
 import { Eyebrow } from "@/components/Type";
 import { summarize, type Dish, type Ingredient } from "@/lib/estimate";
 import { toIngredient, type FoodHit } from "@/lib/foods";
-import { defaultSlot, friendlyMealError, mealToInsert, SLOTS, slotLabel, type MealSlot } from "@/lib/meals";
+import {
+  adjustmentNotes,
+  availableTweaks,
+  multipliers,
+  PLACES,
+  placeExtra,
+  type Place,
+  type TweakId,
+} from "@/lib/tweaks";
+import {
+  defaultSlot,
+  friendlyMealError,
+  mealToInsert,
+  SLOTS,
+  slotLabel,
+  type MealSlot,
+} from "@/lib/meals";
 import { createClient } from "@/lib/supabase/client";
 
 // Guest dish result (design/screens/GuestDish.dc.html), filled with the backend's estimate.
 // Same content as the logged-in Bite check, but the bottom call to action sends the guest to
 // sign up; for a logged-in person it logs the meal (with the amounts as edited) instead. Tap an ingredient to change its amount, or add one from the food
 // search; totals follow.
-// The design's "Where's it from?" and "Tweak it" chips are left out until the backend can really answer them.
+// "Where's it from?" and "Tweak it" are plain rules in lib/tweaks.ts (amount multipliers), not backend data.
 
 // The slot for the person's own clock. The server cannot know it, so it renders "lunch" and the browser
 // swaps in the real one after hydration (that is what useSyncExternalStore's server snapshot is for).
@@ -27,7 +48,15 @@ const noSubscribe = () => () => {};
 const clientSlot = (): MealSlot => defaultSlot(new Date());
 const serverSlot = (): MealSlot => "lunch";
 
-export function DishResult({ query, dish, member }: { query: string; dish: Dish; member: boolean }) {
+export function DishResult({
+  query,
+  dish,
+  member,
+}: {
+  query: string;
+  dish: Dish;
+  member: boolean;
+}) {
   const router = useRouter();
   const aiGrams = dish.ingredients.map((i) => i.grams);
   const [extra, setExtra] = useState<Ingredient[]>([]); // foods the user added
@@ -39,19 +68,49 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
   const [logError, setLogError] = useState<string | null>(null);
   const timeSlot = useSyncExternalStore(noSubscribe, clientSlot, serverSlot);
   const slot = slotChoice ?? timeSlot;
+  const [place, setPlace] = useState<Place>("stall");
+  const [active, setActive] = useState<TweakId[]>([]);
 
   const ingredients = [...dish.ingredients, ...extra];
-  const view = summarize({ ...dish, ingredients }, grams);
+  const names = ingredients.map((i) => i.name);
+  const tweaks = availableTweaks(names);
+  const mult = multipliers(names, place, active);
+  // what is really eaten: the amount the person set, times what the tweaks and the place do to it
+  const eaten = ingredients.map(
+    (ing, i) => Math.round((grams[i] ?? ing.grams) * mult[i] * 10) / 10,
+  );
+  const placeRow = placeExtra(
+    place,
+    summarize({ ...dish, ingredients }, eaten).kcal,
+  );
+  const view = placeRow
+    ? summarize({ ...dish, ingredients: [...ingredients, placeRow] }, [
+        ...eaten,
+        placeRow.grams,
+      ])
+    : summarize({ ...dish, ingredients }, eaten);
+  const adjusted = place !== "stall" || active.length > 0;
   const assumptions = [
     ...dish.assumptions,
-    ...extra.map((e) => `Added by you: ${e.name}, starting from a typical serving of ${e.grams} g`),
+    ...adjustmentNotes(place, active, tweaks),
+    ...extra.map(
+      (e) =>
+        `Added by you: ${e.name}, starting from a typical serving of ${e.grams} g`,
+    ),
   ];
 
-  const setAmount = (i: number, g: number) => setGrams((all) => all.map((v, j) => (j === i ? g : v)));
+  const setAmount = (i: number, g: number) =>
+    setGrams((all) =>
+      all.map((v, j) =>
+        j === i && mult[i] > 0 ? Math.round((g / mult[i]) * 10) / 10 : v,
+      ),
+    );
 
   const addFood = (hit: FoodHit) => {
     setAdding(false);
-    const same = ingredients.findIndex((i) => i.name.toLowerCase() === hit.name.toLowerCase());
+    const same = ingredients.findIndex(
+      (i) => i.name.toLowerCase() === hit.name.toLowerCase(),
+    );
     if (same >= 0) {
       setOpenRow(same); // already in the meal: just edit it
       return;
@@ -69,9 +128,13 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
     const supabase = createClient();
     if (!supabase) {
       setLogging(false);
-      return setLogError("Accounts aren't switched on, so meals can't be logged.");
+      return setLogError(
+        "Accounts aren't switched on, so meals can't be logged.",
+      );
     }
-    const { error } = await supabase.from("meals").insert(mealToInsert(query, view, slot, new Date()));
+    const { error } = await supabase
+      .from("meals")
+      .insert(mealToInsert(query, view, slot, new Date()));
     if (error) {
       setLogging(false);
       return setLogError(friendlyMealError(error));
@@ -91,17 +154,39 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
   return (
     <Screen>
       <div className="flex flex-col gap-3.5">
-        <DishHeader dish={query} />
+        <DishHeader dish={query} member={member} />
+
+        <div className="flex flex-col gap-2">
+          <Eyebrow tone="muted">Where&apos;s it from?</Eyebrow>
+          <div className="flex flex-wrap gap-2">
+            {PLACES.map((p) => (
+              <Chip
+                key={p.id}
+                selected={place === p.id}
+                onClick={() => setPlace(p.id)}
+              >
+                {p.label}
+              </Chip>
+            ))}
+          </div>
+        </div>
 
         <section className="flex flex-col gap-3 rounded-hero bg-surface p-[18px] shadow-card">
           <div className="flex items-center justify-between gap-2">
-            <Eyebrow>{view.edited ? "Estimated · your amounts" : "Estimated"}</Eyebrow>
+            <Eyebrow>
+              {view.edited || adjusted
+                ? "Estimated · your changes"
+                : "Estimated"}
+            </Eyebrow>
             <span className="shrink-0 rounded-badge bg-green-tint px-2 py-1 font-mono text-[10px] tracking-[1px] text-green uppercase">
               {dish.confidence} confidence
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span aria-live="polite" className="font-brand text-[46px] leading-none text-green">
+            <span
+              aria-live="polite"
+              className="font-brand text-[46px] leading-none text-green"
+            >
               {view.kcal}
             </span>
             <span className="text-[15px] font-semibold">kcal</span>
@@ -115,15 +200,30 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
           </span>
 
           <div className="grid grid-cols-4 gap-2">
-            <MacroTile label="Protein" value={`${view.protein}g`} valueClass="text-green" />
-            <MacroTile label="Carbs" value={`${view.carbs}g`} valueClass="text-bronze" />
-            <MacroTile label="Fat" value={`${view.fat}g`} valueClass="text-terracotta-text" />
+            <MacroTile
+              label="Protein"
+              value={`${view.protein}g`}
+              valueClass="text-green"
+            />
+            <MacroTile
+              label="Carbs"
+              value={`${view.carbs}g`}
+              valueClass="text-bronze"
+            />
+            <MacroTile
+              label="Fat"
+              value={`${view.fat}g`}
+              valueClass="text-terracotta-text"
+            />
             <MacroTile label="Weight" value={`${view.weight}g`} />
           </div>
         </section>
 
         {dish.notices.length > 0 && (
-          <section role="note" className="rounded-card bg-terracotta-tint px-3.5 py-3">
+          <section
+            role="note"
+            className="rounded-card bg-terracotta-tint px-3.5 py-3"
+          >
             <ul className="flex flex-col gap-1 text-[13px]">
               {dish.notices.map((w) => (
                 <li key={w}>{w}</li>
@@ -132,53 +232,92 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
           </section>
         )}
 
+        {tweaks.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Eyebrow tone="muted">Tweak it</Eyebrow>
+            <div className="flex flex-wrap gap-2">
+              {tweaks.map((t) => (
+                <Chip
+                  key={t.id}
+                  selected={active.includes(t.id)}
+                  onClick={() =>
+                    setActive((all) =>
+                      all.includes(t.id)
+                        ? all.filter((x) => x !== t.id)
+                        : [...all, t.id],
+                    )
+                  }
+                >
+                  {t.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
           <Eyebrow tone="muted">Ingredients · tap to change</Eyebrow>
           <section className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row">
-            {view.rows.map((row, i) => (
-              <div key={i} className="border-b border-divider last:border-b-0">
-                <button
-                  type="button"
-                  aria-expanded={openRow === i}
-                  aria-controls={`amount-${i}`}
-                  onClick={() => setOpenRow(openRow === i ? null : i)}
-                  className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 py-2 text-left"
+            {view.rows.map((row, i) => {
+              const locked = i >= ingredients.length || mult[i] === 0; // the place's extra oil, or left out by a tweak
+              return (
+                <div
+                  key={i}
+                  className="border-b border-divider last:border-b-0"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="size-2 shrink-0 rounded-full"
-                    style={{ background: row.dot }}
-                  />
-                  <span className="flex-1 text-[13px] first-letter:uppercase">
-                    {row.name}{" "}
-                    {row.added && (
-                      <span className="font-mono text-[9px] tracking-[1px] text-bronze uppercase">added</span>
-                    )}
-                  </span>
-                  <span
-                    className={`flex items-center gap-1 font-mono text-[11px] ${row.edited ? "font-bold text-green" : "text-ink-muted"}`}
+                  <button
+                    type="button"
+                    disabled={locked}
+                    aria-expanded={openRow === i}
+                    aria-controls={`amount-${i}`}
+                    onClick={() => setOpenRow(openRow === i ? null : i)}
+                    className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 py-2 text-left disabled:cursor-default"
                   >
-                    {row.grams} g
-                    <EditIcon size={12} aria-hidden />
-                  </span>
-                  <span className="w-10 text-right text-[13px] font-semibold">{row.kcal}</span>
-                </button>
-                {openRow === i && (
-                  <AmountEditor
-                    id={`amount-${i}`}
-                    name={row.name}
-                    grams={row.grams}
-                    units={ingredients[i].units}
-                    estimated={ingredients[i].grams}
-                    baseLabel={row.added ? "Typical serving" : "As estimated"}
-                    onChange={(g) => setAmount(i, g)}
-                    onRemove={row.added ? () => removeAdded(i) : undefined}
-                  />
-                )}
-              </div>
-            ))}
+                    <span
+                      aria-hidden="true"
+                      className="size-2 shrink-0 rounded-full"
+                      style={{ background: row.dot }}
+                    />
+                    <span className="flex-1 text-[13px] first-letter:uppercase">
+                      {row.name}{" "}
+                      {row.added && (
+                        <span className="font-mono text-[9px] tracking-[1px] text-bronze uppercase">
+                          added
+                        </span>
+                      )}
+                    </span>
+                    <span
+                      className={`flex items-center gap-1 font-mono text-[11px] ${row.edited ? "font-bold text-green" : "text-ink-muted"}`}
+                    >
+                      {mult[i] === 0 ? "left out" : `${row.grams} g`}
+                      {!locked && <EditIcon size={12} aria-hidden />}
+                    </span>
+                    <span className="w-10 text-right text-[13px] font-semibold">
+                      {row.kcal}
+                    </span>
+                  </button>
+                  {openRow === i && !locked && (
+                    <AmountEditor
+                      id={`amount-${i}`}
+                      name={row.name}
+                      grams={row.grams}
+                      units={ingredients[i].units}
+                      estimated={
+                        Math.round(ingredients[i].grams * mult[i] * 10) / 10
+                      }
+                      baseLabel={row.added ? "Typical serving" : "As estimated"}
+                      onChange={(g) => setAmount(i, g)}
+                      onRemove={row.added ? () => removeAdded(i) : undefined}
+                    />
+                  )}
+                </div>
+              );
+            })}
             {adding ? (
-              <IngredientSearch onPick={addFood} onClose={() => setAdding(false)} />
+              <IngredientSearch
+                onPick={addFood}
+                onClose={() => setAdding(false)}
+              />
             ) : (
               <button
                 type="button"
@@ -192,12 +331,14 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
                 Add an ingredient
               </button>
             )}
-            {view.edited && (
+            {(view.edited || adjusted) && (
               <button
                 type="button"
                 onClick={() => {
                   setExtra([]);
                   setGrams(aiGrams);
+                  setPlace("stall");
+                  setActive([]);
                   setOpenRow(null);
                   setAdding(false);
                 }}
@@ -212,7 +353,8 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
         {assumptions.length > 0 && (
           <details className="rounded-card bg-surface px-3.5 py-3 shadow-row">
             <summary className="cursor-pointer text-[13px] text-ink-muted">
-              How we estimated this · {assumptions.length} {assumptions.length === 1 ? "note" : "notes"}
+              How we estimated this · {assumptions.length}{" "}
+              {assumptions.length === 1 ? "note" : "notes"}
             </summary>
             <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs text-ink-muted">
               {assumptions.map((a) => (
@@ -227,7 +369,11 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
             <Eyebrow tone="muted">Log as</Eyebrow>
             <div className="flex flex-wrap gap-2">
               {SLOTS.map((o) => (
-                <Chip key={o.id} selected={slot === o.id} onClick={() => setSlotChoice(o.id)}>
+                <Chip
+                  key={o.id}
+                  selected={slot === o.id}
+                  onClick={() => setSlotChoice(o.id)}
+                >
                   {o.label}
                 </Chip>
               ))}
@@ -239,7 +385,10 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
       {member ? (
         <div className="sticky bottom-5 mt-6 flex flex-col gap-2">
           {logError && (
-            <p role="alert" className="rounded-card bg-terracotta-tint px-3.5 py-2.5 text-[13px]">
+            <p
+              role="alert"
+              className="rounded-card bg-terracotta-tint px-3.5 py-2.5 text-[13px]"
+            >
               {logError}
             </p>
           )}
@@ -249,7 +398,9 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
             disabled={logging || nothingToLog}
             className="flex h-14 w-full cursor-pointer items-center justify-center rounded-btn bg-green text-[15px] font-semibold text-bg hover:bg-green-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {logging ? "Logging…" : `Log to ${slotLabel(slot).toLowerCase()} · ${view.kcal} kcal`}
+            {logging
+              ? "Logging…"
+              : `Log to ${slotLabel(slot).toLowerCase()} · ${view.kcal} kcal`}
           </button>
         </div>
       ) : (
@@ -259,8 +410,12 @@ export function DishResult({ query, dish, member }: { query: string; dish: Dish;
         >
           <LockIcon size={22} className="shrink-0 text-gold" />
           <span className="flex flex-1 flex-col gap-0.5">
-            <span className="text-[15px] font-semibold">See how this fits your day</span>
-            <span className="text-xs text-green-soft">Free account · log meals &amp; get coached</span>
+            <span className="text-[15px] font-semibold">
+              See how this fits your day
+            </span>
+            <span className="text-xs text-green-soft">
+              Free account · log meals &amp; get coached
+            </span>
           </span>
           <ArrowRightIcon size={20} />
         </Link>
@@ -280,7 +435,9 @@ function MacroTile({
 }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-field bg-bg p-2">
-      <span className="font-mono text-[9px] text-ink-muted uppercase">{label}</span>
+      <span className="font-mono text-[9px] text-ink-muted uppercase">
+        {label}
+      </span>
       <span className={`text-base font-semibold ${valueClass}`}>{value}</span>
     </div>
   );
