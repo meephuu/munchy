@@ -2,16 +2,17 @@
 // the weight trend and the "Buddy's note". Pure functions over logged meals and weigh-ins. The note is
 // rules in code (never an LLM), so every number in it can be traced.
 
-import { localDate, type Meal, type TargetLike } from "./meals";
+import { dayOf, localDate, plainDate, type Meal, type TargetLike } from "./meals";
 
-const dateKey = (d: Date) => localDate(d);
+const dateKey = plainDate; // dates here are already days (see dayOf), so no 2 am shift
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 
 export const WEEK = 7;
 
 /** The 7 local days ending today, oldest first ("2026-10-26" ... "2026-11-01"). */
 export function lastDays(now: Date, count = WEEK): string[] {
-  return Array.from({ length: count }, (_, i) => dateKey(addDays(now, i - (count - 1))));
+  const today = dayOf(now);
+  return Array.from({ length: count }, (_, i) => dateKey(addDays(today, i - (count - 1))));
 }
 
 /** A day's meals as stored: the date it belongs to (eaten_on) with its totals. */
@@ -58,7 +59,7 @@ export function dayBars(meals: DayMeal[], days: string[], today: string, target:
  *  streak still counts through yesterday (the day is not over), so it does not show 0 every morning. */
 export function streak(loggedDates: Iterable<string>, now: Date): number {
   const set = new Set(loggedDates);
-  let day = now;
+  let day = dayOf(now);
   if (!set.has(dateKey(day))) day = addDays(day, -1);
   let n = 0;
   while (set.has(dateKey(day))) {

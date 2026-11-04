@@ -46,10 +46,17 @@ describe("defaultSlot", () => {
 });
 
 describe("dates and labels", () => {
-  it("localDate is the local calendar day, so a late-evening meal still belongs to that day", () => {
+  it("the day runs from 2 am to 2 am: a meal after midnight still belongs to the evening before", () => {
     expect(localDate(at(23, 59))).toBe("2026-11-01");
-    expect(localDate(new Date(2026, 10, 2, 0, 1))).toBe("2026-11-02");
+    expect(localDate(new Date(2026, 10, 2, 0, 1))).toBe("2026-11-01");
+    expect(localDate(new Date(2026, 10, 2, 1, 59))).toBe("2026-11-01");
+    expect(localDate(new Date(2026, 10, 2, 2, 0))).toBe("2026-11-02");
     expect(localDate(new Date(2026, 0, 5, 9))).toBe("2026-01-05"); // zero-padded
+    expect(localDate(new Date(2026, 0, 1, 1))).toBe("2025-12-31"); // across a year
+  });
+  it("the day label follows the same day", () => {
+    expect(dayLabel(new Date(2026, 10, 2, 1, 0))).toBe("Today · Sun 1 Nov");
+    expect(dayLabel(new Date(2026, 10, 2, 2, 0))).toBe("Today · Mon 2 Nov");
   });
   it("formats the time, the day line and the greeting", () => {
     expect(timeLabel(at(8, 5))).toBe("08:05");
@@ -212,6 +219,12 @@ describe("editing a logged meal", () => {
   it("uses the typed totals when there are no ingredients", () => {
     const u = mealUpdate(meal("snack", 300), { time: "16:00", slot: "snack", items: [], totals: { kcal: 320, protein: 5, carbs: 40, fat: 9 } })!;
     expect([u.kcal, u.protein_g, u.carbs_g, u.fat_g]).toEqual([320, 5, 40, 9]);
+  });
+  it("puts a time before 2 am on the next calendar date of the meal's day", () => {
+    const d = withTime(at(21), "01:30")!;
+    expect([d.getDate(), d.getHours(), d.getMinutes()]).toEqual([2, 1, 30]);
+    const e = withTime(new Date(2026, 10, 2, 0, 30), "23:00")!; // a meal logged at 00:30 belongs to 1 Nov
+    expect([e.getDate(), e.getHours()]).toEqual([1, 23]);
   });
   it("refuses a bad time", () => {
     expect(mealUpdate(base, { time: "99:99", slot: "lunch", items: [], totals: { kcal: 1, protein: 0, carbs: 0, fat: 0 } })).toBeNull();

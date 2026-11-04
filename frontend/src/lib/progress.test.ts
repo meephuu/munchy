@@ -13,6 +13,20 @@ describe("lastDays", () => {
   });
 });
 
+describe("the 2 am day change", () => {
+  it("at 1 am it is still yesterday: the last 7 days end yesterday and the streak counts from it", () => {
+    const night = new Date(2026, 10, 2, 1, 0);
+    expect(lastDays(night).at(-1)).toBe("2026-11-01");
+    expect(streak(["2026-11-01", "2026-10-31"], night)).toBe(2);
+  });
+  it("from 2 am it is the next day", () => {
+    expect(lastDays(new Date(2026, 10, 2, 2, 0)).at(-1)).toBe("2026-11-02");
+  });
+  it("a weigh-in at 1 am goes to the day before", () => {
+    expect(weighToInsert("68", new Date(2026, 10, 2, 1, 0))?.logged_on).toBe("2026-11-01");
+  });
+});
+
 describe("dayBars", () => {
   const days = lastDays(now);
   const bars = dayBars([m("2026-10-26", 1900), m("2026-10-27", 2300), m("2026-10-27", 100), m("2026-11-01", 3000)], days, "2026-11-01", target);

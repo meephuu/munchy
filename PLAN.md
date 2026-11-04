@@ -117,7 +117,7 @@ Editing a logged meal (delete and re-log instead), favorites, photos, notes, sha
 ### C.9 Decisions (answered)
 1. Meals are stored in Supabase, written from the app.
 2. Slots: breakfast / lunch / dinner / snack are enough (the nav and the log button use them; a snack sits between lunch and dinner).
-3. "Today" ends at midnight (local).
+3. "Today" ends at midnight (local). *Changed later: the day now ends at 2 am (see the decisions log).*
 
 ---
 
@@ -154,6 +154,7 @@ streak, weight trend, protein average, a "Buddy's note".
 - **Housekeeping:** delete the test user `munchy-test-1793713114@example.com` in Supabase (Authentication → Users).
 
 ## Decisions log
+- The day runs from 2 am to 2 am (local): a meal or weigh-in before 2 am counts for the evening before (`DAY_STARTS_AT` in `frontend/src/lib/meals.ts`). Meals logged before this change keep the day they were saved with.
 - Phase D: "where's it from" = fixed rules (restaurant +6% oil, home-cooked oil x0.7); tweak chips are built from the
   dish's real ingredients and only change amounts. No sodium anywhere (we cannot measure it).
 - Phase E: last 7 days (rolling), weight kept one per day and smoothed (moving average); Buddy's note from rules.

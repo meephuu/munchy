@@ -53,9 +53,22 @@ export function defaultSlot(now: Date): MealSlot {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/** The person's local calendar day as YYYY-MM-DD ("today" ends at their midnight). */
+/** The hour a new day starts at: a late dinner or a midnight snack still counts for the day before. */
+export const DAY_STARTS_AT = 2;
+
+/** A calendar date as YYYY-MM-DD, as it is (no day-start shift). */
+export function plainDate(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** The day this moment belongs to, as a Date at that day's midnight: before 2 am it is still yesterday. */
+export function dayOf(now: Date): Date {
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getHours() < DAY_STARTS_AT ? 1 : 0));
+}
+
+/** The person's day as YYYY-MM-DD in their own timezone ("today" ends at 2 am, not midnight). */
 export function localDate(now: Date): string {
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return plainDate(dayOf(now));
 }
 
 /** "08:10" in the person's local time. */
@@ -68,7 +81,8 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 /** "Today · Sun 1 Nov" */
 export function dayLabel(now: Date): string {
-  return `Today · ${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+  const day = dayOf(now);
+  return `Today · ${DAYS[day.getDay()]} ${day.getDate()} ${MONTHS[day.getMonth()]}`;
 }
 
 /** "morning" | "afternoon" | "evening", for "Good evening". */
@@ -193,14 +207,16 @@ export function friendlyMealError(err: { code?: string; message?: string; status
   return "We couldn't save that. Please try again.";
 }
 
-/** The same day as `day` at a typed "HH:MM" time, or null if the text is not a time. */
+/** The meal's own day (see dayOf) at a typed "HH:MM" time, or null if the text is not a time. Times before
+ *  2 am belong to the end of that day, so they land on the next calendar date. */
 export function withTime(day: Date, text: string): Date | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec(text.trim());
   if (!m) return null;
   const h = Number(m[1]);
   const min = Number(m[2]);
   if (h > 23 || min > 59) return null;
-  return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, min);
+  const own = dayOf(day);
+  return new Date(own.getFullYear(), own.getMonth(), own.getDate() + (h < DAY_STARTS_AT ? 1 : 0), h, min);
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
