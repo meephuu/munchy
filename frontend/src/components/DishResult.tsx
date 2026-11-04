@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
 import { Chip } from "@/components/Chip";
+import { TimePicker } from "@/components/TimePicker";
 import { DishHeader } from "@/components/DishHeader";
 import {
   ArrowRightIcon,
@@ -28,13 +29,16 @@ import {
   type TweakId,
 } from "@/lib/tweaks";
 import {
+  dayOf,
   defaultSlot,
   friendlyMealError,
   mealToInsert,
   SLOTS,
   slotLabel,
   type MealSlot,
+  withTime,
 } from "@/lib/meals";
+import { formatTime, parseTime } from "@/lib/time";
 import { createClient } from "@/lib/supabase/client";
 
 // Guest dish result (design/screens/GuestDish.dc.html), filled with the backend's estimate.
@@ -46,8 +50,21 @@ import { createClient } from "@/lib/supabase/client";
 // The slot for the person's own clock. The server cannot know it, so it renders "lunch" and the browser
 // swaps in the real one after hydration (that is what useSyncExternalStore's server snapshot is for).
 const noSubscribe = () => () => {};
-const clientSlot = (): MealSlot => defaultSlot(new Date());
-const serverSlot = (): MealSlot => "lunch";
+// the time on the person's own clock ("HH:MM"); the server renders noon first
+const clientTime = () => {
+  const d = new Date();
+  return formatTime(d.getHours(), d.getMinutes());
+};
+const serverTime = () => "12:00";
+
+/** The meal slot a time of day most likely is ("13:30" is lunch). */
+const slotAt = (time: string): MealSlot =>
+  defaultSlot(new Date(2000, 0, 1, ...(parseTime(time) ?? [12, 0])));
+
+/** The moment to log for a time picked today: the person's own day (see dayOf), so 01:30 after midnight is tonight's. */
+function mealMoment(time: string): Date {
+  return withTime(dayOf(new Date()), time) ?? new Date();
+}
 
 export function DishResult({
   query,
@@ -68,8 +85,11 @@ export function DishResult({
   const [slotChoice, setSlotChoice] = useState<MealSlot | null>(null);
   const [logging, setLogging] = useState(false);
   const [logError, setLogError] = useState<string | null>(null);
-  const timeSlot = useSyncExternalStore(noSubscribe, clientSlot, serverSlot);
-  const slot = slotChoice ?? timeSlot;
+  const nowTime = useSyncExternalStore(noSubscribe, clientTime, serverTime);
+  const [timeChoice, setTimeChoice] = useState<string | null>(null);
+  const time = timeChoice ?? nowTime;
+  // until a slot is picked it follows the time (08:00 is breakfast, 19:00 dinner)
+  const slot = slotChoice ?? slotAt(time);
   const [place, setPlace] = useState<Place>("stall");
   const [active, setActive] = useState<TweakId[]>([]);
 
@@ -139,7 +159,7 @@ export function DishResult({
     }
     const { error } = await supabase
       .from("meals")
-      .insert(mealToInsert(query, view, slot, new Date()));
+      .insert(mealToInsert(query, view, slot, mealMoment(time)));
     if (error) {
       setLogging(false);
       return setLogError(friendlyMealError(error));
@@ -409,6 +429,8 @@ export function DishResult({
                 </Chip>
               ))}
             </div>
+            <Eyebrow tone="muted">Time</Eyebrow>
+            <TimePicker value={time} onChange={setTimeChoice} up />
           </div>
         )}
       </div>

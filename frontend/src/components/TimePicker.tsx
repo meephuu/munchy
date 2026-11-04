@@ -12,9 +12,12 @@ const two = (n: number) => String(n).padStart(2, "0");
 export function TimePicker({
   value,
   onChange,
+  up = false,
 }: {
   value: string;
   onChange: (time: string) => void;
+  /** Open the wheel above the field (near the bottom of a screen). */
+  up?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [h, m] = parseTime(value) ?? [12, 0];
@@ -36,7 +39,7 @@ export function TimePicker({
         <div
           role="group"
           aria-label="Time eaten"
-          className="absolute top-full left-0 z-20 mt-1.5 grid w-32 grid-cols-2 overflow-hidden rounded-card border border-border bg-surface shadow-panel"
+          className={`absolute ${up ? "bottom-full mb-1.5" : "top-full mt-1.5"} left-0 z-20 grid w-32 grid-cols-2 overflow-hidden rounded-card border border-border bg-surface shadow-panel`}
           style={{ height: ROW * 3 }}
         >
           <div
