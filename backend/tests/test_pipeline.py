@@ -8,7 +8,7 @@ from src import config
 from src.db import connect, display_name, seed_db
 from src.matcher import BGEEmbedder, Match, Matcher
 from src.nutrition import CalcError
-from src.parser import ParsedItem, ParseError
+from src.parser import Decomposition, ParsedItem, ParseError, Part
 from src.pipeline import estimate
 from tests.test_matcher import ExplodingEmbedder
 
@@ -311,3 +311,60 @@ def test_parts_themselves_are_never_split_again(db_path):
     est = estimate("x", parse_fn=lambda t: [PLAIN_SALAD], matcher=parts_matcher(db_path), db_path=db_path,
                    decompose_fn=lambda d: asked.append(d) or SALAD.components)
     assert asked == ["caesar salad"] and len(est.lines) == 3
+
+
+# --- sensible weights: a dish rebuilt from parts is shared out from its own weight ---------------
+
+BREAD = ParsedItem(food="chocolate chip bread", qty=1, unit="slice")
+
+
+def bread_matcher(db_path):
+    return StubMatcher(db_path, {
+        "chocolate chip bread": [candidate(db_path, "เนย", 0.70)],             # nothing close: no clean dish
+        "flour": [candidate(db_path, "ผักสลัด", 1.0, "exact")],
+        "sugar": [candidate(db_path, "น้ำสลัดครีม", 1.0, "exact")],
+        "chocolate": [candidate(db_path, "อกไก่ย่าง", 1.0, "exact")],
+    })
+
+
+def bread_parts(similar=()):
+    return Decomposition(similar=list(similar), components=[
+        Part(name="flour", role="base"), Part(name="sugar", role="sauce"), Part(name="chocolate", role="filling")])
+
+
+def test_a_slice_of_an_unknown_dish_weighs_a_slice_not_a_serving_per_part(db_path):
+    est = estimate("x", parse_fn=lambda t: [BREAD], matcher=bread_matcher(db_path), db_path=db_path,
+                   decompose_fn=lambda d: bread_parts())
+    assert sum(l.grams for l in est.lines) == pytest.approx(40, abs=0.5)
+    base, sauce, filling = (l.grams for l in est.lines)
+    assert base > filling > sauce                       # shares follow the roles
+    assert any("about 40 g in all" in n and "per slice" in n for n in est.notes)
+
+
+def test_no_amount_means_a_typical_serving_and_grams_are_used_as_given(db_path):
+    one = estimate("x", parse_fn=lambda t: [ParsedItem(food="chocolate chip bread")],
+                   matcher=bread_matcher(db_path), db_path=db_path, decompose_fn=lambda d: bread_parts())
+    assert sum(l.grams for l in one.lines) == pytest.approx(250, abs=0.5)
+    grams = estimate("x", parse_fn=lambda t: [ParsedItem(food="chocolate chip bread", qty=100, unit="g")],
+                     matcher=bread_matcher(db_path), db_path=db_path, decompose_fn=lambda d: bread_parts())
+    assert sum(l.grams for l in grams.lines) == pytest.approx(100, abs=0.5)
+
+
+def test_a_close_single_food_is_used_instead_of_inventing_parts(db_path):
+    matcher = StubMatcher(db_path, {
+        "chocolate chip bread": [candidate(db_path, "เนย", 0.70)],
+        "sweet bread": [candidate(db_path, "ไข่ต้ม", 0.85)],                   # confident enough
+    })
+    est = estimate("x", parse_fn=lambda t: [BREAD], matcher=matcher, db_path=db_path,
+                   decompose_fn=lambda d: bread_parts(similar=["sweet bread"]))
+    assert [l.name for l in est.lines] == ["boiled egg"]
+    assert any("used the closest food, boiled egg" in n for n in est.notes)
+    assert [i.implied_for for i, _ in est.matches] == [None]
+
+
+def test_a_weak_close_food_is_not_used(db_path):
+    matcher = StubMatcher(db_path, {**bread_matcher(db_path)._canned,
+                                    "sweet bread": [candidate(db_path, "ไข่ต้ม", 0.72)]})
+    est = estimate("x", parse_fn=lambda t: [BREAD], matcher=matcher, db_path=db_path,
+                   decompose_fn=lambda d: bread_parts(similar=["sweet bread"]))
+    assert len(est.lines) == 3 and all(i.implied_for for i, _ in est.matches)

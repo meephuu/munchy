@@ -165,7 +165,7 @@ def parts_llm(monkeypatch):
 
 
 def test_decompose_cleans_the_names(parts_llm):
-    assert parser.decompose("caesar salad") == ["romaine lettuce", "caesar dressing"]
+    assert parser.decompose("caesar salad").names == ["romaine lettuce", "caesar dressing"]
 
 
 def test_decompose_retries_once_then_raises(parts_llm):
@@ -177,8 +177,8 @@ def test_decompose_retries_once_then_raises(parts_llm):
 
 def test_parts_are_cached_per_dish(cache, parts_llm):
     from src.parse_cache import cached_decompose
-    assert cached_decompose("Caesar salad", cache=cache) == ["romaine lettuce", "caesar dressing"]
-    assert cached_decompose("  caesar   SALAD ", cache=cache) == ["romaine lettuce", "caesar dressing"]
+    assert cached_decompose("Caesar salad", cache=cache).names == ["romaine lettuce", "caesar dressing"]
+    assert cached_decompose("  caesar   SALAD ", cache=cache).names == ["romaine lettuce", "caesar dressing"]
     assert parts_llm.calls == 1
     cached_decompose("caesar salad", use_cache=False)
     assert parts_llm.calls == 2
@@ -187,10 +187,28 @@ def test_parts_are_cached_per_dish(cache, parts_llm):
 def test_an_empty_answer_is_cached_too(cache, parts_llm):
     from src.parse_cache import cached_decompose
     parts_llm.output = '{"components": []}'
-    assert cached_decompose("banana", cache=cache) == [] and cached_decompose("banana", cache=cache) == []
+    assert cached_decompose("banana", cache=cache).components == [] and cached_decompose("banana", cache=cache).components == []
     assert parts_llm.calls == 1
 
 
 def test_a_parser_without_a_parts_backend_says_so():
     with pytest.raises(RuntimeError, match="decomposition"):
         LLMParser(lambda t: GOOD).decompose("caesar salad")
+
+
+def test_decompose_reads_roles_and_similar_foods_and_defaults_unknown_roles(parts_llm):
+    parts_llm.output = json.dumps({
+        "similar": [" sweet bread ", ""],
+        "components": [{"name": "wheat flour", "role": "Base"}, {"name": "sugar", "role": "weird"}, "butter"]})
+    d = parser.decompose("chocolate chip bread")
+    assert d.similar == ["sweet bread"]
+    assert d.names == ["wheat flour", "sugar", "butter"]
+    assert d.roles == ["base", "other", "other"]
+
+
+def test_roles_survive_the_parts_cache(cache, parts_llm):
+    from src.parse_cache import cached_decompose
+    parts_llm.output = json.dumps({"similar": ["sweet bread"], "components": [{"name": "flour", "role": "base"}]})
+    cached_decompose("x bread", cache=cache)
+    again = cached_decompose("x bread", cache=cache)
+    assert again.roles == ["base"] and again.similar == ["sweet bread"] and parts_llm.calls == 1

@@ -62,25 +62,25 @@ class ParseCache:
             conn.execute("INSERT OR REPLACE INTO parse_cache (key, text, result) VALUES (?, ?, ?)",
                          (key, text, result))
 
-    def get_parts(self, key: str) -> list[str] | None:
+    def get_parts(self, key: str) -> Decomposition | None:
         with closing(self._connect()) as conn:
             row = conn.execute("SELECT result FROM parts_cache WHERE key = ?", (key,)).fetchone()
         if row is None:
             return None
         try:
-            return Decomposition.model_validate_json(row[0]).components
+            return Decomposition.model_validate_json(row[0])
         except ValidationError:
             return None
 
-    def put_parts(self, key: str, dish: str, components: list[str]) -> None:
-        result = Decomposition(components=components).model_dump_json()
+    def put_parts(self, key: str, dish: str, parts: Decomposition) -> None:
+        result = parts.model_dump_json()
         with closing(self._connect()) as conn, conn:
             conn.execute("INSERT OR REPLACE INTO parts_cache (key, dish, result) VALUES (?, ?, ?)",
                          (key, dish, result))
 
 
 def cached_decompose(dish: str, *, use_cache: bool = True,
-                     cache: ParseCache | None = None) -> list[str]:
+                     cache: ParseCache | None = None) -> Decomposition:
     """parser.decompose() with a cache in front (a dish's typical parts do not change)."""
     if not use_cache:
         return parser.decompose(dish)

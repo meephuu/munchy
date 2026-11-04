@@ -51,22 +51,36 @@ Examples:
 # Second, separate call: what does a dish usually contain? Kept apart from the parse because a
 # small model follows one narrow task much better than two at once.
 PARTS_PROMPT = """\
-You are given the name of one dish or food (Thai or English). Decide whether it is a prepared dish
-made of several foods, and if so list the foods it usually contains.
+You are given the name of one dish or food (Thai or English). Decide what it is made of.
+Return JSON with two lists:
 
-- Return "components": 2 to 6 plain, generic English food names of the kind a nutrition table uses
-  ("romaine lettuce", "caesar dressing", "croutons"). Include the carbohydrate base, the main protein,
-  and the usual sauce, dressing or topping.
-- Return an empty list for a single food or drink (egg, banana, white rice, plain yogurt, chocolate
-  spread, beer, milk) and for anything that is not food.
-- Never return amounts, calories or any numbers.
+"similar": 0 to 3 generic English names of the SINGLE closest foods a nutrition table lists as one
+entry, most similar first. Use it only when the dish is a variation of a common food ("chocolate chip
+bread" -> "sweet bread", "iced latte" -> "latte"). Leave it empty for dishes made of separate foods
+and for plain single foods.
+
+"components": 2 to 6 parts the dish usually contains, each {"name", "role"}:
+- "name": the plainest common form, as a nutrition table names it ("wheat flour", "white sugar",
+  "butter", "romaine lettuce", "caesar dressing"). Not brand or compound product names.
+- "role": base (rice, noodles, bread, flour, dough, potato), protein (meat, fish, egg, tofu, beans),
+  vegetable, filling (fruit, chocolate, cheese, nuts, anything mixed in), sauce (sauce, dressing,
+  oil, butter, milk, sugar), topping (garnish, crumbs, seeds) or other.
+Include the carbohydrate base, the main protein, and the usual sauce, dressing or topping.
+Return an empty "components" list for a single food or drink (egg, banana, white rice, plain
+yogurt, chocolate spread, beer, milk) and for anything that is not food.
+Never return amounts, calories or any numbers.
 
 Examples:
-"caesar salad" -> {"components": ["romaine lettuce", "caesar dressing", "croutons", "parmesan cheese"]}
-"ผัดกะเพราไก่ไข่ดาว" -> {"components": ["stir-fried chicken with basil", "steamed rice", "fried egg"]}
-"chicken sandwich" -> {"components": ["bread", "chicken breast", "lettuce", "mayonnaise"]}
-"greek yogurt" -> {"components": []}
-"banana" -> {"components": []}
+"caesar salad" -> {"similar": [], "components": [{"name": "romaine lettuce", "role": "vegetable"},
+  {"name": "caesar dressing", "role": "sauce"}, {"name": "croutons", "role": "topping"},
+  {"name": "parmesan cheese", "role": "topping"}]}
+"chocolate chip bread" -> {"similar": ["sweet bread"], "components": [{"name": "wheat flour",
+  "role": "base"}, {"name": "white sugar", "role": "sauce"}, {"name": "butter", "role": "sauce"},
+  {"name": "semisweet chocolate", "role": "filling"}]}
+"ผัดกะเพราไก่ไข่ดาว" -> {"similar": [], "components": [{"name": "stir-fried chicken with basil",
+  "role": "protein"}, {"name": "steamed rice", "role": "base"}, {"name": "fried egg", "role": "protein"}]}
+"greek yogurt" -> {"similar": [], "components": []}
+"banana" -> {"similar": [], "components": []}
 """
 
 
@@ -74,6 +88,7 @@ class ParsedItem(BaseModel):
     food: str = Field(min_length=1)
     food_en: str | None = None   # English name, for display; matching tries `food` first
     components: SkipJsonSchema[list[str]] = Field(default_factory=list)   # typical parts of a dish; filled by the pipeline
+    part_roles: SkipJsonSchema[list[str]] = Field(default_factory=list)   # role of each part (same order), when known
     implied_for: SkipJsonSchema[str | None] = None   # set by the pipeline, never by the LLM: the dish this part was added for
     qty: float | None = None  # positivity checked below: Gemini's schema has no `gt`
     unit: str | None = None
@@ -110,13 +125,49 @@ class ParseResult(BaseModel):
     items: list[ParsedItem] = Field(min_length=1)
 
 
+PART_ROLES = ("base", "protein", "vegetable", "filling", "sauce", "topping", "other")
+
+
+class Part(BaseModel):
+    name: str
+    role: str = "other"   # one of PART_ROLES; anything else is read as "other" (a small model may slip)
+
+    @field_validator("role")
+    @classmethod
+    def _known_role(cls, v: str) -> str:
+        v = (v or "").strip().lower()
+        return v if v in PART_ROLES else "other"
+
+
 class Decomposition(BaseModel):
-    components: list[str] = Field(default_factory=list, max_length=8)
+    """What the second LLM call returns: closest single foods, and typical parts with a role each
+    (the role lets code split the dish's weight over its parts; the LLM gives no amounts)."""
+    similar: list[str] = Field(default_factory=list, max_length=3)
+    components: list[Part] = Field(default_factory=list, max_length=8)
+
+    @field_validator("components", mode="before")
+    @classmethod
+    def _bare_names(cls, v):
+        # a plain string is a part with no known role
+        return [{"name": x} if isinstance(x, str) else x for x in v] if isinstance(v, list) else v
 
     @field_validator("components")
     @classmethod
-    def _clean(cls, v: list[str]) -> list[str]:
+    def _clean_parts(cls, v: list[Part]) -> list[Part]:
+        return [Part(name=p.name.strip(), role=p.role) for p in v if p.name.strip()]
+
+    @field_validator("similar")
+    @classmethod
+    def _clean_similar(cls, v: list[str]) -> list[str]:
         return [c.strip() for c in v if c and c.strip()]
+
+    @property
+    def names(self) -> list[str]:
+        return [p.name for p in self.components]
+
+    @property
+    def roles(self) -> list[str]:
+        return [p.role for p in self.components]
 
 
 class ParseError(Exception):
@@ -132,14 +183,15 @@ class LLMParser:
         self._complete_parts = complete_parts
         self._retries = retries
 
-    def decompose(self, dish: str) -> list[str]:
-        """Typical parts of a dish as generic English food names; [] for a single food."""
+    def decompose(self, dish: str) -> Decomposition:
+        """Closest single foods and typical parts (generic English names with a role) of a dish;
+        no parts for a single food."""
         if self._complete_parts is None:
             raise RuntimeError("this parser has no decomposition backend")
         last_error: ValidationError | None = None
         for _ in range(self._retries + 1):
             try:
-                return Decomposition.model_validate_json(self._complete_parts(dish)).components
+                return Decomposition.model_validate_json(self._complete_parts(dish))
             except ValidationError as e:
                 last_error = e
         raise ParseError(f"LLM output failed validation: {last_error}")
@@ -230,5 +282,5 @@ def parse(text: str) -> list[ParsedItem]:
     return get_parser().parse(text)
 
 
-def decompose(dish: str) -> list[str]:
+def decompose(dish: str) -> Decomposition:
     return get_parser().decompose(dish)
