@@ -7,7 +7,7 @@ export function Brand() {
     <div className="flex items-center gap-3 pt-2">
       <Image src="/bowl.png" alt="Ramen bowl illustration" width={64} height={64} className="shrink-0" priority />
       <div className="flex flex-col gap-1">
-        <Wordmark className="text-[30px]" />
+        <Wordmark className="h-7" />
         <Eyebrow>Your Bite Buddy</Eyebrow>
       </div>
     </div>

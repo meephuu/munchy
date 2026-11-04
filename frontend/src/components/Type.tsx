@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ElementType, ReactNode } from "react";
 
 const TONES = { bronze: "text-bronze", muted: "text-ink-muted", terracotta: "text-terracotta-text" };
@@ -45,7 +46,7 @@ export function Title({
   );
 }
 
-/** The "Munchy" wordmark (Climate Crisis, green). */
-export function Wordmark({ className = "text-[28px]" }: { className?: string }) {
-  return <span className={`font-brand leading-none text-green ${className}`}>Munchy</span>;
+/** The "Munchy" logo (public/logo/logo-text.png, 6.3:1). Size it with the height class, e.g. "h-6". */
+export function Wordmark({ className = "h-6" }: { className?: string }) {
+  return <Image src="/logo/logo-text.png" alt="Munchy" width={1200} height={191} priority className={`w-auto ${className}`} />;
 }
