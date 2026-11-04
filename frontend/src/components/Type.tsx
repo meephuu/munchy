@@ -30,18 +30,21 @@ export function Title({
   lead,
   accent,
   as: Tag = "h1",
+  stacked = false,
   className = "",
 }: {
   lead?: string;
   accent?: string;
   as?: ElementType;
+  /** Put the accent on its own line. */
+  stacked?: boolean;
   className?: string;
 }) {
   return (
     <Tag className={`font-heading font-semibold leading-[1.15] text-ink ${className}`}>
       {lead}
       {lead && accent ? " " : ""}
-      {accent && <span className="text-green italic">{accent}</span>}
+      {accent && <span className={`text-green italic${stacked ? " block" : ""}`}>{accent}</span>}
     </Tag>
   );
 }

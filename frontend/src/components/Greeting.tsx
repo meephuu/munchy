@@ -12,5 +12,5 @@ const serverGreeting = () => "Hello,";
 
 export function Greeting() {
   const lead = useSyncExternalStore(noSubscribe, browserGreeting, serverGreeting);
-  return <Title lead={lead} accent="what did you munch?" className="text-[26px]" />;
+  return <Title lead={lead} accent="what did you munch?" stacked className="text-[26px]" />;
 }
