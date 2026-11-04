@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
 import { Chip } from "@/components/Chip";
 import { PlusIcon } from "@/components/Icons";
+import { MacroLine } from "@/components/MacroLine";
 import { IngredientSearch } from "@/components/IngredientSearch";
 import { Eyebrow } from "@/components/Type";
 import { itemsOf } from "@/lib/custom";
@@ -153,8 +154,15 @@ export function MealEditor({
                     onClick={() => setOpenRow(openRow === i ? null : i)}
                     className="flex min-h-11 w-full cursor-pointer items-center gap-2 py-2 text-left text-[13px]"
                   >
-                    <span className="flex-1 first-letter:uppercase">
-                      {r.orig.name}
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="first-letter:uppercase">
+                        {r.orig.name}
+                      </span>
+                      <MacroLine
+                        protein={now.protein}
+                        carbs={now.carbs}
+                        fat={now.fat}
+                      />
                     </span>
                     <span className="font-mono text-[11px] text-ink-muted">
                       {r.grams} g

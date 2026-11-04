@@ -12,6 +12,7 @@ import {
   LockIcon,
   PlusIcon,
 } from "@/components/Icons";
+import { MacroLine } from "@/components/MacroLine";
 import { IngredientSearch } from "@/components/IngredientSearch";
 import { Screen } from "@/components/Screen";
 import { Eyebrow } from "@/components/Type";
@@ -78,7 +79,10 @@ export function DishResult({
   const mult = multipliers(names, place, active);
   // what is really eaten: the amount the person set, times what the tweaks and the place do to it
   const eaten = ingredients.map(
-    (ing, i) => Math.round((removed.includes(i) ? 0 : (grams[i] ?? ing.grams) * mult[i]) * 10) / 10,
+    (ing, i) =>
+      Math.round(
+        (removed.includes(i) ? 0 : (grams[i] ?? ing.grams) * mult[i]) * 10,
+      ) / 10,
   );
   const placeRow = placeExtra(
     place,
@@ -280,12 +284,21 @@ export function DishResult({
                       className="size-2 shrink-0 rounded-full"
                       style={{ background: row.dot }}
                     />
-                    <span className="flex-1 text-[13px] first-letter:uppercase">
-                      {row.name}{" "}
-                      {row.added && (
-                        <span className="font-mono text-[9px] tracking-[1px] text-bronze uppercase">
-                          added
-                        </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="text-[13px] first-letter:uppercase">
+                        {row.name}{" "}
+                        {row.added && (
+                          <span className="font-mono text-[9px] tracking-[1px] text-bronze uppercase">
+                            added
+                          </span>
+                        )}
+                      </span>
+                      {mult[i] !== 0 && (
+                        <MacroLine
+                          protein={row.protein}
+                          carbs={row.carbs}
+                          fat={row.fat}
+                        />
                       )}
                     </span>
                     <span
@@ -298,6 +311,14 @@ export function DishResult({
                       {row.kcal}
                     </span>
                   </button>
+                  {openRow === i && !locked && (
+                    <p className="pb-1 font-mono text-[10px] text-ink-muted">
+                      Per 100 g · {Math.round(ingredients[i].per100.kcal)} kcal
+                      · P {Math.round(ingredients[i].per100.protein * 10) / 10}{" "}
+                      · C {Math.round(ingredients[i].per100.carbs * 10) / 10} ·
+                      F {Math.round(ingredients[i].per100.fat * 10) / 10} g
+                    </p>
+                  )}
                   {openRow === i && !locked && (
                     <AmountEditor
                       id={`amount-${i}`}
