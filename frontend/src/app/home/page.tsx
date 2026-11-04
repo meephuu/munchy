@@ -9,7 +9,7 @@ import { Greeting } from "@/components/Greeting";
 import { HomeToday } from "@/components/HomeToday";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Screen } from "@/components/Screen";
-import { Eyebrow, Title, Wordmark } from "@/components/Type";
+import { Eyebrow, Title } from "@/components/Type";
 import { fromRow, targetOf } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,25 +32,10 @@ async function Home() {
   const { data: row } = await supabase.from("profiles").select("*").eq("id", data.user.id).maybeSingle();
   const profile = fromRow(row);
   const target = profile ? targetOf(profile) : null;
-  const initial = (data.user.email ?? "?").charAt(0).toUpperCase();
 
   return (
     <Screen>
-      <div className="flex flex-col gap-4">
-        <header className="flex items-center justify-between pt-2">
-          <div className="flex flex-col gap-1">
-            <Wordmark />
-            <Eyebrow>Your Bite Buddy</Eyebrow>
-          </div>
-          <Link
-            href="/account"
-            aria-label="Your account"
-            className="flex size-10 items-center justify-center rounded-full bg-sand font-heading text-[17px] font-semibold text-green"
-          >
-            {initial}
-          </Link>
-        </header>
-
+      <div className="flex flex-col gap-4 pt-2">
         <Greeting />
         <DishSearchBar suggest goal={profile?.goal ?? null} />
         <FavoritesList />
