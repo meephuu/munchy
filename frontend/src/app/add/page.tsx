@@ -14,7 +14,7 @@ export default function AddPage() {
           <Eyebrow>Log a dish</Eyebrow>
           <Title lead="What did you" accent="munch?" className="text-[26px]" />
         </div>
-        <DishSearchBar />
+        <DishSearchBar suggest />
         <p className="text-sm text-ink-muted">
           Type any dish, adjust the amounts if you like, then log it to breakfast, lunch, dinner or a snack.
         </p>

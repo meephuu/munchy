@@ -43,8 +43,8 @@ async function Home() {
             <Eyebrow>Your Bite Buddy</Eyebrow>
           </div>
           <Link
-            href="/onboarding"
-            aria-label="Your profile"
+            href="/account"
+            aria-label="Your account"
             className="flex size-10 items-center justify-center rounded-full bg-sand font-heading text-[17px] font-semibold text-green"
           >
             {initial}
@@ -52,7 +52,7 @@ async function Home() {
         </header>
 
         <Greeting />
-        <DishSearchBar />
+        <DishSearchBar suggest goal={profile?.goal ?? null} />
         <FavoritesList />
 
         {!target && (

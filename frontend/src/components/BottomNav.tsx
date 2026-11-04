@@ -12,7 +12,7 @@ const ITEMS: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/home", label: "Home", icon: <HomeIcon size={22} /> },
   { href: "/coach", label: "Coach", icon: <ChatIcon size={22} /> },
   { href: "/progress", label: "Progress", icon: <BarsIcon size={22} /> },
-  { href: "/onboarding", label: "Me", icon: <UserIcon size={22} /> },
+  { href: "/account", label: "Me", icon: <UserIcon size={22} /> },
 ];
 
 export function BottomNav() {

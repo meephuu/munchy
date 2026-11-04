@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Brand } from "@/components/Brand";
 import { OptionButton, PrimaryButton } from "@/components/Button";
 import { Field } from "@/components/Field";
+import { ArrowLeftIcon } from "@/components/Icons";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { DEFAULT_PROFILE, saveDraft, targetOf, toProfile, toRow, type Profile } from "@/lib/profile";
@@ -56,15 +58,33 @@ export function OnboardingForm({ member, saved }: { member: boolean; saved: Prof
       setError("We couldn't save your profile. Please try again.");
       return;
     }
-    router.push("/home");
+    router.push("/account");
     router.refresh();
   }
 
   return (
     <Screen>
       <div className="flex flex-col gap-3.5 pt-1">
-        <Brand />
-        <Title lead="How much should you eat," accent="every day?" className="text-[26px]" />
+        {member ? (
+          <header className="flex items-center gap-3 pt-1">
+            <Link
+              href="/account"
+              aria-label="Back to Account"
+              className="flex size-11 shrink-0 items-center justify-center rounded-row bg-surface text-ink shadow-row"
+            >
+              <ArrowLeftIcon size={20} />
+            </Link>
+            <div className="flex flex-col gap-0.5">
+              <Eyebrow>Account</Eyebrow>
+              <Title lead="Edit your" accent="profile" className="text-xl" />
+            </div>
+          </header>
+        ) : (
+          <>
+            <Brand />
+            <Title lead="How much should you eat," accent="every day?" className="text-[26px]" />
+          </>
+        )}
 
         <div className="flex flex-col gap-2">
           <Eyebrow tone="muted">Your goal</Eyebrow>
@@ -142,7 +162,7 @@ export function OnboardingForm({ member, saved }: { member: boolean; saved: Prof
           </p>
         )}
         <PrimaryButton type="button" disabled={!profile || saving} onClick={submit}>
-          {saving ? "Saving…" : member ? "Save my profile" : "Let's munch"}
+          {saving ? "Saving…" : member ? "Save changes" : "Let's munch"}
         </PrimaryButton>
         <span className="text-center font-mono text-[9px] tracking-[0.5px] text-ink-muted uppercase">
           Not medical advice · check with a pro if you have a condition

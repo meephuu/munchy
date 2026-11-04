@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { supabaseConfig } from "./env";
 
 // Pages only for people who are logged in, and pages only for people who are not.
-const MEMBERS_ONLY = ["/home", "/add", "/coach", "/progress"];
+const MEMBERS_ONLY = ["/home", "/add", "/coach", "/progress", "/account"];
 const GUESTS_ONLY = ["/", "/login", "/signup"];
 
 const matches = (path: string, list: string[]) => list.some((p) => path === p || (p !== "/" && path.startsWith(p + "/")));
