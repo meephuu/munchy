@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ClockIcon } from "@/components/Icons";
 import { formatTime, parseTime } from "@/lib/time";
 
 const ROW = 44; // px per row; three rows are visible and the middle one is the chosen time
@@ -15,38 +16,55 @@ export function TimePicker({
   value: string;
   onChange: (time: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [h, m] = parseTime(value) ?? [12, 0];
   return (
-    <div
-      role="group"
-      aria-label="Time eaten"
-      className="relative mx-auto grid w-44 grid-cols-2"
-      style={{ height: ROW * 3 }}
-    >
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 rounded-field bg-sand"
-        style={{ top: ROW, height: ROW }}
-      />
-      <Wheel
-        label="Hour"
-        count={24}
-        value={h}
-        onPick={(n) => onChange(formatTime(n, m))}
-      />
-      <Wheel
-        label="Minute"
-        count={60}
-        value={m}
-        onPick={(n) => onChange(formatTime(h, n))}
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center font-mono text-[20px] font-bold text-ink"
-        style={{ top: ROW, height: ROW }}
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label={`Time eaten, ${formatTime(h, m)}. ${open ? "Close" : "Change"}`}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex h-10 w-fit cursor-pointer items-center gap-2 rounded-field border bg-bg px-3 text-[14px] text-ink ${
+          open ? "border-green" : "border-border"
+        }`}
       >
-        :
-      </span>
+        <ClockIcon size={16} className="text-ink-muted" />
+        {formatTime(h, m)}
+      </button>
+      {open && (
+        <div
+          role="group"
+          aria-label="Time eaten"
+          className="relative mx-auto grid w-44 grid-cols-2"
+          style={{ height: ROW * 3 }}
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 rounded-field bg-sand"
+            style={{ top: ROW, height: ROW }}
+          />
+          <Wheel
+            label="Hour"
+            count={24}
+            value={h}
+            onPick={(n) => onChange(formatTime(n, m))}
+          />
+          <Wheel
+            label="Minute"
+            count={60}
+            value={m}
+            onPick={(n) => onChange(formatTime(h, n))}
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center text-[20px] font-semibold text-ink"
+            style={{ top: ROW, height: ROW }}
+          >
+            :
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -110,8 +128,8 @@ function Wheel({
           role="option"
           aria-selected={i === value}
           onClick={() => onPick(i)}
-          className={`flex cursor-pointer snap-center items-center font-mono text-[20px] ${
-            i === value ? "font-bold text-ink" : "text-ink-muted"
+          className={`flex cursor-pointer snap-center items-center text-[20px] ${
+            i === value ? "font-semibold text-ink" : "text-ink-muted"
           } ${label === "Hour" ? "justify-end pr-3.5" : "justify-start pl-3.5"}`}
           style={{ height: ROW }}
         >
