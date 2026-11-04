@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { currentUser } from "./claims";
 import { createClient } from "./server";
 
 /** Is the person making this request logged in? For pages that look the same to everyone but offer
@@ -9,8 +10,7 @@ export async function isMember(): Promise<boolean> {
   if (!jar.getAll().some((c) => c.name.startsWith("sb-"))) return false;
   try {
     const supabase = await createClient();
-    const { data } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
-    return !!data.user;
+    return !!supabase && !!(await currentUser(supabase));
   } catch {
     return false;
   }

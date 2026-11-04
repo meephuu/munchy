@@ -16,7 +16,9 @@ export async function createClient() {
       getAll: () => cookieStore.getAll(),
       setAll: (list) => {
         try {
-          list.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          list.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options),
+          );
         } catch {
           // Called from a server component, which cannot set cookies: the proxy refreshes the session.
         }

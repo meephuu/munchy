@@ -6,19 +6,24 @@ import { supabaseConfig } from "./env";
 const MEMBERS_ONLY = ["/home", "/add", "/coach", "/progress", "/account"];
 const GUESTS_ONLY = ["/", "/login", "/signup"];
 
-const matches = (path: string, list: string[]) => list.some((p) => path === p || (p !== "/" && path.startsWith(p + "/")));
+const matches = (path: string, list: string[]) =>
+  list.some((p) => path === p || (p !== "/" && path.startsWith(p + "/")));
 
 /** Keeps the Supabase login fresh on every request that matters and sends people to the right side:
  *  logged-in people skip the guest pages, guests are sent to log in when they ask for member pages.
  *  This is a convenience check (it reads the cookie); every member page also asks Supabase itself. */
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
+export async function updateSession(
+  request: NextRequest,
+): Promise<NextResponse> {
   const config = supabaseConfig();
   const path = request.nextUrl.pathname;
   let response = NextResponse.next({ request });
   if (!config) return response;
 
   // No Supabase cookie at all: certainly a guest, no need to ask Supabase.
-  const hasLogin = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
+  const hasLogin = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-"));
 
   let loggedIn = false;
   if (hasLogin) {
@@ -28,12 +33,15 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
         setAll: (list) => {
           list.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
-          list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          list.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
         },
       },
     });
-    const { data } = await supabase.auth.getUser(); // also refreshes an expiring token into `response`
-    loggedIn = !!data.user;
+    // verifies the signed token locally (no round trip to Supabase) and refreshes an expiring one into `response`
+    const { data, error } = await supabase.auth.getClaims();
+    loggedIn = !error && !!data?.claims?.sub;
   }
 
   const redirect = (to: string) => {

@@ -9,6 +9,7 @@ import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { birthLabel } from "@/lib/birth";
 import { fromRow, targetOf } from "@/lib/profile";
+import { currentUser } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVITIES, GOALS, SEXES } from "@/lib/target";
 
@@ -40,8 +41,7 @@ const MONTHS = [
 async function Account() {
   const supabase = await createClient();
   if (!supabase) return <AccountsOff />;
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  const user = await currentUser(supabase);
   if (!user) redirect("/login");
 
   const { data: row } = await supabase
@@ -52,7 +52,8 @@ async function Account() {
   const profile = fromRow(row);
   const target = profile ? targetOf(profile) : null;
   const email = user.email ?? "";
-  const since = new Date(user.created_at);
+  // the profile is made at sign-up, so its date is the day the account started
+  const since = row?.created_at ? new Date(row.created_at) : null;
   const label = (list: { id: string; label: string }[], id: string) =>
     list.find((x) => x.id === id)?.label ?? id;
 
@@ -82,10 +83,12 @@ async function Account() {
           </span>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="truncate text-[15px] font-semibold">{email}</span>
-            <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
-              Member since {MONTHS[since.getUTCMonth()]}{" "}
-              {since.getUTCFullYear()}
-            </span>
+            {since && (
+              <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
+                Member since {MONTHS[since.getUTCMonth()]}{" "}
+                {since.getUTCFullYear()}
+              </span>
+            )}
           </div>
         </section>
 
@@ -139,7 +142,14 @@ async function Account() {
                 value={label(ACTIVITIES, profile.activity)}
               />
               <Row term="Sex" value={label(SEXES, profile.sex)} />
-              <Row term="Age" value={profile.birthDate ? `${profile.age} · born ${birthLabel(profile.birthDate)}` : `${profile.age}`} />
+              <Row
+                term="Age"
+                value={
+                  profile.birthDate
+                    ? `${profile.age} · born ${birthLabel(profile.birthDate)}`
+                    : `${profile.age}`
+                }
+              />
               <Row term="Height" value={`${profile.heightCm} cm`} />
               <Row term="Weight" value={`${profile.weightKg} kg`} last />
             </dl>

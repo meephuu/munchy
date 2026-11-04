@@ -17,7 +17,9 @@ export default function DishPage({ searchParams }: PageProps<"/dish">) {
   );
 }
 
-async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) {
+async function Dish({
+  searchParams,
+}: Pick<PageProps<"/dish">, "searchParams">) {
   const { q } = await searchParams;
   const query = (Array.isArray(q) ? q[0] : q)?.trim();
   if (!query) redirect("/");
@@ -28,7 +30,10 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
     dish = toDish(await fetchEstimate(query));
   } catch (e) {
     if (!(e instanceof EstimateError)) throw e;
-    const title = e.kind === "unclear" ? "We couldn't read that" : "Couldn't estimate this bite";
+    const title =
+      e.kind === "unclear"
+        ? "We couldn't read that"
+        : "Couldn't estimate this bite";
     return <DishProblem query={query} title={title} message={e.message} />;
   }
 
@@ -44,5 +49,12 @@ async function Dish({ searchParams }: Pick<PageProps<"/dish">, "searchParams">) 
   }
 
   // key: a new search must start from a clean result (no ingredients or edits from the last dish)
-  return <DishResult key={query} query={query} dish={dish} member={await memberLookup} />;
+  return (
+    <DishResult
+      key={query}
+      query={query}
+      dish={dish}
+      member={await memberLookup}
+    />
+  );
 }

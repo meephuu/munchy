@@ -16,7 +16,8 @@ export default function AddPage() {
         </div>
         <DishSearchBar suggest />
         <p className="text-sm text-ink-muted">
-          Type any dish, adjust the amounts if you like, then log it to breakfast, lunch, dinner or a snack.
+          Type any dish, adjust the amounts if you like, then log it to
+          breakfast, lunch, dinner or a snack.
         </p>
         <FavoritesManager />
         <MyDishes />

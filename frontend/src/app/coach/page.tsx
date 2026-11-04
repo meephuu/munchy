@@ -4,7 +4,8 @@ import { ComingSoon } from "@/components/ComingSoon";
 export default function CoachPage() {
   return (
     <ComingSoon eyebrow="Coach" lead="Ideas for" accent="your next bite">
-      Suggestions for what to eat next, based on how much room you have left today, are coming soon.
+      Suggestions for what to eat next, based on how much room you have left
+      today, are coming soon.
     </ComingSoon>
   );
 }

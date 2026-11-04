@@ -10,6 +10,7 @@ import { HomeToday } from "@/components/HomeToday";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { fromRow, targetOf } from "@/lib/profile";
+import { currentUser } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 
 // Home for people who are logged in (design/screens/Main.dc.html): how much of today's target is left,
@@ -25,10 +26,14 @@ export default function HomePage() {
 async function Home() {
   const supabase = await createClient();
   if (!supabase) return <AccountsOff />;
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) redirect("/login");
+  const user = await currentUser(supabase);
+  if (!user) redirect("/login");
 
-  const { data: row } = await supabase.from("profiles").select("*").eq("id", data.user.id).maybeSingle();
+  const { data: row } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
   const profile = fromRow(row);
   const target = profile ? targetOf(profile) : null;
 
@@ -42,8 +47,15 @@ async function Home() {
         {!target && (
           <section className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]">
             <Eyebrow tone="terracotta">One more step</Eyebrow>
-            <Title as="h2" lead="Set up your" accent="profile" className="text-lg" />
-            <p className="text-sm">Tell me a bit about you and I&apos;ll set your daily target.</p>
+            <Title
+              as="h2"
+              lead="Set up your"
+              accent="profile"
+              className="text-lg"
+            />
+            <p className="text-sm">
+              Tell me a bit about you and I&apos;ll set your daily target.
+            </p>
             <Link href="/onboarding" className="text-sm font-semibold">
               Set up my profile
             </Link>
