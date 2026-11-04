@@ -1,13 +1,14 @@
 "use client";
 
-import { MinusIcon, PlusIcon } from "@/components/Icons";
-import { formatTime, parseTime, stepTime } from "@/lib/time";
+import { ChevronDownIcon } from "@/components/Icons";
+import { formatTime, parseTime } from "@/lib/time";
 
-const button =
-  "flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-field bg-sand text-green";
+const two = (n: number) => String(n).padStart(2, "0");
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 
-/** Pick a time of day ("HH:MM", 24 hours) with the same - / + steppers as the amount editor: the hour by one,
- *  the minutes by five. Tap a number to type it. */
+/** Pick a time of day ("HH:MM", 24 hours) from two drop-downs, hour and minute. They are real selects, so a
+ *  phone shows its own scroll wheel; they are styled like the app's other fields. */
 export function TimePicker({
   value,
   onChange,
@@ -16,27 +17,17 @@ export function TimePicker({
   onChange: (time: string) => void;
 }) {
   const [h, m] = parseTime(value) ?? [12, 0];
-
-  // The box always shows two digits, so a typed digit lands after "0x": keep the last two ("01" + "2" -> 12).
-  const typed = (part: "hour" | "minute", text: string) => {
-    const digits = text.replace(/\D/g, "").slice(-2);
-    if (digits === "") return;
-    const n = Number(digits);
-    if (n > (part === "hour" ? 23 : 59)) return;
-    onChange(part === "hour" ? formatTime(n, m) : formatTime(h, n));
-  };
-
   return (
     <div
       role="group"
       aria-label="Time eaten"
       className="flex items-center gap-2"
     >
-      <Unit
-        label="hour"
+      <Select
+        label="Hour"
         value={h}
-        onType={(t) => typed("hour", t)}
-        onStep={(d) => onChange(stepTime(value, "hour", d))}
+        options={HOURS}
+        onPick={(n) => onChange(formatTime(n, m))}
       />
       <span
         aria-hidden="true"
@@ -44,54 +35,45 @@ export function TimePicker({
       >
         :
       </span>
-      <Unit
-        label="minute"
+      <Select
+        label="Minute"
         value={m}
-        onType={(t) => typed("minute", t)}
-        onStep={(d) => onChange(stepTime(value, "minute", d))}
+        options={MINUTES}
+        onPick={(n) => onChange(formatTime(h, n))}
       />
     </div>
   );
 }
 
-function Unit({
+function Select({
   label,
   value,
-  onType,
-  onStep,
+  options,
+  onPick,
 }: {
-  label: "hour" | "minute";
+  label: string;
   value: number;
-  onType: (text: string) => void;
-  onStep: (direction: 1 | -1) => void;
+  options: number[];
+  onPick: (n: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <button
-        type="button"
-        aria-label={`Earlier ${label}`}
-        onClick={() => onStep(-1)}
-        className={button}
+    <div className="relative">
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(e) => onPick(Number(e.target.value))}
+        className="h-11 w-[84px] cursor-pointer appearance-none rounded-field border border-border bg-surface pr-7 pl-3 font-mono text-[16px] font-bold text-ink outline-none focus:border-green"
       >
-        <MinusIcon size={18} />
-      </button>
-      <input
-        type="text"
-        inputMode="numeric"
-        aria-label={label === "hour" ? "Hour" : "Minute"}
-        value={String(value).padStart(2, "0")}
-        onChange={(e) => onType(e.target.value)}
-        onFocus={(e) => e.target.select()}
-        className="h-11 w-12 rounded-field border border-border bg-surface text-center font-mono text-[17px] font-bold text-ink outline-none focus:border-green"
+        {options.map((n) => (
+          <option key={n} value={n}>
+            {two(n)}
+          </option>
+        ))}
+      </select>
+      <ChevronDownIcon
+        size={16}
+        className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-green"
       />
-      <button
-        type="button"
-        aria-label={`Later ${label}`}
-        onClick={() => onStep(1)}
-        className={button}
-      >
-        <PlusIcon size={18} />
-      </button>
     </div>
   );
 }
