@@ -5,13 +5,24 @@
 import { BACKEND_URL } from "./backend";
 import type { UnitOption } from "./units";
 
-type ApiTotals = { kcal: number; protein_g: number; fat_g: number; carbs_g: number };
+type ApiTotals = {
+  kcal: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+};
 
 /** Response of POST /estimate (EstimateOut in backend/src/api.py). Only the fields we use. */
 export type EstimateResponse = {
   input: string;
   totals: ApiTotals;
-  lines: { name: string; grams: number; kcal: number; per_100g: ApiTotals; units: UnitOption[] }[];
+  lines: {
+    name: string;
+    grams: number;
+    kcal: number;
+    per_100g: ApiTotals;
+    units: UnitOption[];
+  }[];
   assumptions: string[];
   warnings: string[];
   unmatched: string[];
@@ -29,32 +40,73 @@ export class EstimateError extends Error {
   }
 }
 
-export async function fetchEstimate(text: string): Promise<EstimateResponse> {
-  let res: Response;
-  try {
-    res = await fetch(`${BACKEND_URL}/estimate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(60_000), // a fresh LLM parse can take a few seconds
-    });
-  } catch {
-    throw new EstimateError("unreachable", "Can't reach the estimator right now.");
+const TIMEOUT_MS = 120_000; // a fresh dish needs two or three LLM calls: about 30 s, more when the LLM is slow
+const RETRY_DELAY_MS = 1500;
+
+/** One POST to the backend. A refused or dropped connection is tried once more after a moment (the backend may be
+ *  restarting or loading its model); a timeout is not retried, because the backend is still working on it and
+ *  the answer will be cached for the next try. */
+export async function fetchEstimate(
+  text: string,
+  { retryDelayMs = RETRY_DELAY_MS } = {},
+): Promise<EstimateResponse> {
+  let res: Response | undefined;
+  for (let attempt = 0; attempt < 2 && !res; attempt++) {
+    try {
+      res = await fetch(`${BACKEND_URL}/estimate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+        cache: "no-store",
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "TimeoutError") {
+        throw new EstimateError(
+          "busy",
+          "This one is taking longer than usual. Try again: it's usually quick the second time.",
+        );
+      }
+      if (attempt === 1)
+        throw new EstimateError(
+          "unreachable",
+          "Can't reach the estimator right now.",
+        );
+      await new Promise((r) => setTimeout(r, retryDelayMs));
+    }
   }
+  if (!res)
+    throw new EstimateError(
+      "unreachable",
+      "Can't reach the estimator right now.",
+    );
 
   if (res.ok) return (await res.json()) as EstimateResponse;
   if (res.status === 422) {
-    throw new EstimateError("unclear", "We couldn't read that. Try naming the dish and what's in it.");
+    throw new EstimateError(
+      "unclear",
+      "We couldn't read that. Try naming the dish and what's in it.",
+    );
   }
   if (res.status === 502 || res.status === 503) {
-    throw new EstimateError("busy", "The estimator is busy. Try again in a minute.");
+    throw new EstimateError(
+      "busy",
+      "The estimator is busy. Try again in a minute.",
+    );
   }
-  throw new EstimateError("failed", "Something went wrong while estimating this dish.");
+  throw new EstimateError(
+    "failed",
+    "Something went wrong while estimating this dish.",
+  );
 }
 
 export type Confidence = "Low" | "Medium" | "High";
-export type Macros = { kcal: number; protein: number; carbs: number; fat: number };
+export type Macros = {
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+};
 
 /** One food in the meal, as the AI estimated it. `per100` is what lets the user change `grams`. */
 export type Ingredient = {
@@ -83,7 +135,12 @@ export type Dish = {
 const NO_MATCH = "no match found"; // how the backend starts the warning for an input it left out
 
 // Dots in the ingredient list cycle through the palette (bronze, terracotta, gold, green).
-const DOTS = ["var(--color-bronze-light)", "var(--color-terracotta)", "var(--color-gold)", "var(--color-green)"];
+const DOTS = [
+  "var(--color-bronze-light)",
+  "var(--color-terracotta)",
+  "var(--color-gold)",
+  "var(--color-green)",
+];
 export const dotFor = (position: number) => DOTS[position % DOTS.length];
 
 const round10 = (n: number) => Math.round(n / 10) * 10;
@@ -93,7 +150,9 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
  *  Low    - some input could not be matched, so the total is partial;
  *  Medium - everything matched, but there were uncertain matches or assumed amounts/parts;
  *  High   - everything matched cleanly and nothing was assumed. */
-export function confidenceOf(res: Pick<EstimateResponse, "complete" | "warnings" | "assumptions">): Confidence {
+export function confidenceOf(
+  res: Pick<EstimateResponse, "complete" | "warnings" | "assumptions">,
+): Confidence {
   if (!res.complete) return "Low";
   if (res.warnings.length > 0 || res.assumptions.length > 0) return "Medium";
   return "High";
@@ -114,10 +173,18 @@ export function toDish(res: EstimateResponse): Dish {
       dot: dotFor(i),
     })),
     confidence: confidenceOf(res),
-    notices: res.unmatched.map((n) => `We couldn't find “${n}” in our food list, so it isn't in the total.`),
+    notices: res.unmatched.map(
+      (n) =>
+        `We couldn't find “${n}” in our food list, so it isn't in the total.`,
+    ),
     // Uncertain-match warnings are technical (scores, runner-up names): they live with the
     // assumptions instead of in the main view. "no match found" ones are covered by `notices`.
-    assumptions: [...new Set([...res.assumptions, ...res.warnings.filter((w) => !w.startsWith(NO_MATCH))])],
+    assumptions: [
+      ...new Set([
+        ...res.assumptions,
+        ...res.warnings.filter((w) => !w.startsWith(NO_MATCH)),
+      ]),
+    ],
     empty: res.lines.length === 0,
   };
 }
