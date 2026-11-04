@@ -1,0 +1,68 @@
+# Common dishes to cache ahead of time (python warm_cache.py). One per line.
+# The first block is the "Try" suggestions of the web app (frontend/src/lib/suggest.ts and the guest page).
+Pad kra pao
+Khao man gai
+Som tam
+Grilled chicken breast salad
+Tom yum goong
+Larb moo
+Steamed fish with lime
+Gaeng som with shrimp
+Papaya salad
+Boiled egg and avocado toast
+Poached eggs on toast
+Greek yogurt with banana and oats
+Salmon with rice and broccoli
+Chicken rice bowl
+Beef steak with mashed potato
+Pad thai with shrimp
+Khao pad with egg
+Green curry with chicken and rice
+Massaman curry with rice
+Khao soi
+Pork ribs with sticky rice
+Peanut butter banana smoothie
+Spaghetti bolognese
+Tuna sandwich
+Tofu stir fry with vegetables
+Kuay teow nam with pork
+Moo ping with sticky rice
+Omelette with rice
+Vegetable soup with chicken
+Oatmeal with fruit
+
+# Thai everyday dishes
+ข้าวผัดกุ้ง
+ข้าวมันไก่
+ข้าวหน้าเป็ด
+ข้าวขาหมู
+ผัดซีอิ๊วหมู
+ราดหน้าหมู
+ก๋วยเตี๋ยวเรือ
+ต้มยำกุ้ง
+แกงเขียวหวานไก่
+ส้มตำไทย
+ลาบหมู
+ไก่ทอด
+หมูกระทะ
+ข้าวเหนียวมะม่วง
+โจ๊กหมู
+ไข่เจียวหมูสับ
+ผัดผักรวม
+ยำวุ้นเส้น
+แกงจืดเต้าหู้หมูสับ
+ข้าวไข่เจียว
+
+# Western and snacks
+Caesar salad
+Cheeseburger
+Margherita pizza
+Chicken sandwich
+French fries
+Chocolate chip cookie
+Banana bread
+Pancakes with maple syrup
+Fried chicken with rice
+Sushi salmon roll
+Iced latte
+Bubble milk tea

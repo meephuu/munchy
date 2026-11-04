@@ -1,4 +1,5 @@
 import { DishHeader } from "@/components/DishHeader";
+import { LoadingSteps } from "@/components/LoadingSteps";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 
@@ -9,7 +10,7 @@ export function DishLoading() {
       <div className="flex flex-col gap-3.5">
         <DishHeader />
         <div role="status" className="flex flex-col gap-3.5">
-          <Eyebrow tone="muted">Estimating your bite…</Eyebrow>
+          <LoadingSteps />
           <div className="h-[190px] animate-pulse rounded-hero bg-sand" />
           <div className="h-[150px] animate-pulse rounded-card bg-sand/70" />
         </div>
@@ -34,7 +35,10 @@ export function DishProblem({
     <Screen>
       <div className="flex flex-col gap-3.5">
         <DishHeader dish={query} />
-        <section role="alert" className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]">
+        <section
+          role="alert"
+          className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]"
+        >
           <Eyebrow tone="terracotta">Hmm</Eyebrow>
           <Title as="h2" lead={title} className="text-lg" />
           <p className="text-sm">{message}</p>

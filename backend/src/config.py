@@ -9,6 +9,8 @@ load_dotenv(ROOT / ".env")
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+# Tried once when the main model is overloaded or rate-limited (503 / 429); blank = no fallback.
+GEMINI_FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-flash-lite-latest")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")

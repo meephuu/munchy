@@ -209,11 +209,15 @@ class LLMParser:
         raise ParseError(f"LLM output failed validation: {last_error}")
 
 
+RETRY_STATUSES = {429, 500, 503, 504}   # overloaded or rate-limited: worth one try on the fallback model
+
+
 def gemini_complete(api_key: str, model: str, prompt: str = SYSTEM_PROMPT,
-                    schema: type[BaseModel] = ParseResult) -> Complete:
-    """Build a `complete` function backed by the Gemini API (schema-constrained JSON)."""
+                    schema: type[BaseModel] = ParseResult, fallback_model: str | None = None) -> Complete:
+    """Build a `complete` function backed by the Gemini API (schema-constrained JSON). If the main model
+    answers with an overload / rate-limit error, the same request is tried once on `fallback_model`."""
     from google import genai
-    from google.genai import types
+    from google.genai import errors, types
 
     client = genai.Client(api_key=api_key)
     cfg = types.GenerateContentConfig(
@@ -223,8 +227,16 @@ def gemini_complete(api_key: str, model: str, prompt: str = SYSTEM_PROMPT,
         temperature=0,
     )
 
+    def call(name: str, text: str) -> str:
+        return client.models.generate_content(model=name, contents=text, config=cfg).text
+
     def complete(text: str) -> str:
-        return client.models.generate_content(model=model, contents=text, config=cfg).text
+        try:
+            return call(model, text)
+        except errors.APIError as e:
+            if not fallback_model or fallback_model == model or e.code not in RETRY_STATUSES:
+                raise
+            return call(fallback_model, text)
 
     return complete
 
@@ -268,9 +280,10 @@ def get_parser() -> LLMParser:
     if config.LLM_PROVIDER == "gemini":
         if not config.GEMINI_API_KEY:
             raise RuntimeError("GEMINI_API_KEY is empty - set it in .env")
-        return LLMParser(gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL),
+        fallback = config.GEMINI_FALLBACK_MODEL or None
+        return LLMParser(gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL, fallback_model=fallback),
                          complete_parts=gemini_complete(config.GEMINI_API_KEY, config.GEMINI_MODEL,
-                                                        PARTS_PROMPT, Decomposition))
+                                                        PARTS_PROMPT, Decomposition, fallback_model=fallback))
     if config.LLM_PROVIDER == "ollama":
         return LLMParser(ollama_complete(config.OLLAMA_MODEL, config.OLLAMA_URL),
                          complete_parts=ollama_complete(config.OLLAMA_MODEL, config.OLLAMA_URL,
