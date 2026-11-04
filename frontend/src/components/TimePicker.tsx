@@ -1,14 +1,13 @@
 "use client";
 
-import { ChevronDownIcon } from "@/components/Icons";
+import { useEffect, useRef } from "react";
 import { formatTime, parseTime } from "@/lib/time";
 
+const ROW = 44; // px per row; three rows are visible and the middle one is the chosen time
 const two = (n: number) => String(n).padStart(2, "0");
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 
-/** Pick a time of day ("HH:MM", 24 hours) from two drop-downs, hour and minute. They are real selects, so a
- *  phone shows its own scroll wheel; they are styled like the app's other fields. */
+/** A minimal wheel time picker ("HH:MM", 24 hours): hour and minute columns you scroll or swipe, snapping to a row,
+ *  the chosen one on a soft band in the middle. Click a number to jump to it; arrow keys step the focused wheel. */
 export function TimePicker({
   value,
   onChange,
@@ -21,59 +20,104 @@ export function TimePicker({
     <div
       role="group"
       aria-label="Time eaten"
-      className="flex items-center gap-2"
+      className="relative mx-auto grid w-44 grid-cols-2"
+      style={{ height: ROW * 3 }}
     >
-      <Select
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 rounded-field bg-sand"
+        style={{ top: ROW, height: ROW }}
+      />
+      <Wheel
         label="Hour"
+        count={24}
         value={h}
-        options={HOURS}
         onPick={(n) => onChange(formatTime(n, m))}
+      />
+      <Wheel
+        label="Minute"
+        count={60}
+        value={m}
+        onPick={(n) => onChange(formatTime(h, n))}
       />
       <span
         aria-hidden="true"
-        className="font-brand text-xl leading-none text-green"
+        className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center font-mono text-[20px] font-bold text-ink"
+        style={{ top: ROW, height: ROW }}
       >
         :
       </span>
-      <Select
-        label="Minute"
-        value={m}
-        options={MINUTES}
-        onPick={(n) => onChange(formatTime(h, n))}
-      />
     </div>
   );
 }
 
-function Select({
+function Wheel({
   label,
+  count,
   value,
-  options,
   onPick,
 }: {
   label: string;
+  count: number;
   value: number;
-  options: number[];
   onPick: (n: number) => void;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const settle = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Keep the wheel on the value when it changes from outside (a tap, a key, the first render).
+  useEffect(() => {
+    const el = ref.current;
+    if (el && Math.round(el.scrollTop / ROW) !== value)
+      el.scrollTop = value * ROW;
+  }, [value]);
+
+  useEffect(() => () => clearTimeout(settle.current), []);
+
+  // Report the row the wheel came to rest on, a moment after the scrolling stops.
+  const onScroll = () => {
+    clearTimeout(settle.current);
+    settle.current = setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
+      const i = Math.min(
+        count - 1,
+        Math.max(0, Math.round(el.scrollTop / ROW)),
+      );
+      if (i !== value) onPick(i);
+    }, 90);
+  };
+
   return (
-    <div className="relative">
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(e) => onPick(Number(e.target.value))}
-        className="h-11 w-[84px] cursor-pointer appearance-none rounded-field border border-border bg-surface pr-7 pl-3 font-mono text-[16px] font-bold text-ink outline-none focus:border-green"
-      >
-        {options.map((n) => (
-          <option key={n} value={n}>
-            {two(n)}
-          </option>
-        ))}
-      </select>
-      <ChevronDownIcon
-        size={16}
-        className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-green"
-      />
+    <div
+      ref={ref}
+      role="listbox"
+      aria-label={label}
+      tabIndex={0}
+      onScroll={onScroll}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          onPick((value + (e.key === "ArrowDown" ? 1 : -1) + count) % count);
+        }
+      }}
+      className="relative h-full snap-y snap-mandatory overflow-y-scroll overscroll-contain outline-none [scrollbar-width:none] [mask-image:linear-gradient(to_bottom,transparent,black_30%,black_70%,transparent)] focus-visible:rounded-field focus-visible:ring-2 focus-visible:ring-green [&::-webkit-scrollbar]:hidden"
+      style={{ paddingBlock: ROW }}
+    >
+      {Array.from({ length: count }, (_, i) => (
+        <div
+          key={i}
+          role="option"
+          aria-selected={i === value}
+          onClick={() => onPick(i)}
+          className={`flex cursor-pointer snap-center items-center font-mono text-[20px] ${
+            i === value ? "font-bold text-ink" : "text-ink-muted"
+          } ${label === "Hour" ? "justify-end pr-3.5" : "justify-start pl-3.5"}`}
+          style={{ height: ROW }}
+        >
+          {two(i)}
+        </div>
+      ))}
     </div>
   );
 }
