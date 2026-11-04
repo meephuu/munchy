@@ -61,6 +61,7 @@ export function DishResult({
   const aiGrams = dish.ingredients.map((i) => i.grams);
   const [extra, setExtra] = useState<Ingredient[]>([]); // foods the user added
   const [grams, setGrams] = useState(aiGrams); // one amount per ingredient, AI's first
+  const [removed, setRemoved] = useState<number[]>([]); // AI-found ingredients the user deleted
   const [openRow, setOpenRow] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
   const [slotChoice, setSlotChoice] = useState<MealSlot | null>(null);
@@ -73,11 +74,11 @@ export function DishResult({
 
   const ingredients = [...dish.ingredients, ...extra];
   const names = ingredients.map((i) => i.name);
-  const tweaks = availableTweaks(names);
+  const tweaks = availableTweaks(names.filter((_, i) => !removed.includes(i)));
   const mult = multipliers(names, place, active);
   // what is really eaten: the amount the person set, times what the tweaks and the place do to it
   const eaten = ingredients.map(
-    (ing, i) => Math.round((grams[i] ?? ing.grams) * mult[i] * 10) / 10,
+    (ing, i) => Math.round((removed.includes(i) ? 0 : (grams[i] ?? ing.grams) * mult[i]) * 10) / 10,
   );
   const placeRow = placeExtra(
     place,
@@ -89,7 +90,7 @@ export function DishResult({
         placeRow.grams,
       ])
     : summarize({ ...dish, ingredients }, eaten);
-  const adjusted = place !== "stall" || active.length > 0;
+  const adjusted = place !== "stall" || active.length > 0 || removed.length > 0;
   const assumptions = [
     ...dish.assumptions,
     ...adjustmentNotes(place, active, tweaks),
@@ -259,6 +260,7 @@ export function DishResult({
           <Eyebrow tone="muted">Ingredients · tap to change</Eyebrow>
           <section className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row">
             {view.rows.map((row, i) => {
+              if (removed.includes(i)) return null; // deleted by the user
               const locked = i >= ingredients.length || mult[i] === 0; // the place's extra oil, or left out by a tweak
               return (
                 <div
@@ -307,7 +309,14 @@ export function DishResult({
                       }
                       baseLabel={row.added ? "Typical serving" : "As estimated"}
                       onChange={(g) => setAmount(i, g)}
-                      onRemove={row.added ? () => removeAdded(i) : undefined}
+                      onRemove={
+                        row.added
+                          ? () => removeAdded(i)
+                          : () => {
+                              setRemoved((all) => [...all, i]);
+                              setOpenRow(null);
+                            }
+                      }
                     />
                   )}
                 </div>
@@ -337,6 +346,7 @@ export function DishResult({
                 onClick={() => {
                   setExtra([]);
                   setGrams(aiGrams);
+                  setRemoved([]);
                   setPlace("stall");
                   setActive([]);
                   setOpenRow(null);

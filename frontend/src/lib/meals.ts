@@ -192,3 +192,58 @@ export function friendlyMealError(err: { code?: string; message?: string; status
   }
   return "We couldn't save that. Please try again.";
 }
+
+/** The same day as `day` at a typed "HH:MM" time, or null if the text is not a time. */
+export function withTime(day: Date, text: string): Date | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(text.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return null;
+  return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, min);
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/** An ingredient of a logged meal at a new amount: everything scales with the weight it was logged at. */
+export function scaleItem(item: MealItem, grams: number): MealItem {
+  const k = item.grams > 0 ? grams / item.grams : 0;
+  return {
+    name: item.name,
+    grams: round1(grams),
+    kcal: Math.round(item.kcal * k),
+    protein: round1(item.protein * k),
+    carbs: round1(item.carbs * k),
+    fat: round1(item.fat * k),
+  };
+}
+
+/** What changes when a logged meal is edited (the day stays; user_id and title are not touched). */
+export type MealUpdate = Pick<MealInsert, "eaten_at" | "slot" | "kcal" | "protein_g" | "carbs_g" | "fat_g" | "items">;
+
+export type MealEdit = {
+  time: string;
+  slot: MealSlot;
+  items: MealItem[];
+  /** Used only when the meal has no ingredients (typed-in dish): its numbers as typed. */
+  totals: { kcal: number; protein: number; carbs: number; fat: number };
+};
+
+/** The row changes for an edited meal, or null if the time is not valid. With ingredients the totals are
+ *  their sum (so they always agree); without, the typed totals are used. Ingredients at 0 g are dropped. */
+export function mealUpdate(meal: Meal, edit: MealEdit): MealUpdate | null {
+  const at = withTime(meal.eatenAt, edit.time);
+  if (!at) return null;
+  const items = edit.items.filter((i) => i.grams > 0);
+  const sum = (f: (i: MealItem) => number) => round1(items.reduce((s, i) => s + f(i), 0));
+  const t = edit.totals;
+  return {
+    eaten_at: at.toISOString(),
+    slot: edit.slot,
+    items,
+    kcal: items.length ? Math.round(sum((i) => i.kcal)) : t.kcal,
+    protein_g: items.length ? sum((i) => i.protein) : t.protein,
+    carbs_g: items.length ? sum((i) => i.carbs) : t.carbs,
+    fat_g: items.length ? sum((i) => i.fat) : t.fat,
+  };
+}

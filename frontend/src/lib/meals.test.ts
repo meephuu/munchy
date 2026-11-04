@@ -12,6 +12,9 @@ import {
   nextSlot,
   slotLabel,
   timeLabel,
+  scaleItem,
+  withTime,
+  mealUpdate,
   type Meal,
 } from "./meals";
 
@@ -182,5 +185,35 @@ describe("friendlyMealError", () => {
     expect(friendlyMealError({ code: "23514", message: 'violates check constraint "meals_kcal_check"' })).toBe(
       "We couldn't save that. Please try again.",
     );
+  });
+});
+
+describe("editing a logged meal", () => {
+  const item = { name: "Egg", grams: 50, kcal: 78, protein: 6.5, carbs: 0.4, fat: 5.3 };
+  const base = meal("lunch", 156, { eatenAt: at(12, 30), items: [item, { ...item, name: "Rice", kcal: 100 }] });
+
+  it("moves a meal to a typed time on the same day", () => {
+    const d = withTime(at(12, 30), "7:05")!;
+    expect([d.getDate(), d.getHours(), d.getMinutes()]).toEqual([1, 7, 5]);
+    expect(withTime(at(12), "25:00")).toBeNull();
+    expect(withTime(at(12), "noon")).toBeNull();
+  });
+  it("scales an item with its amount", () => {
+    expect(scaleItem(item, 100)).toEqual({ name: "Egg", grams: 100, kcal: 156, protein: 13, carbs: 0.8, fat: 10.6 });
+    expect(scaleItem({ ...item, grams: 0 }, 100).kcal).toBe(0);
+  });
+  it("adds the ingredients up and drops 0 g ones", () => {
+    const u = mealUpdate(base, { time: "08:00", slot: "breakfast", items: [item, scaleItem(base.items[1], 0)], totals: { kcal: 0, protein: 0, carbs: 0, fat: 0 } })!;
+    expect(u.kcal).toBe(78);
+    expect(u.items).toHaveLength(1);
+    expect(u.slot).toBe("breakfast");
+    expect(new Date(u.eaten_at).getHours()).toBe(8);
+  });
+  it("uses the typed totals when there are no ingredients", () => {
+    const u = mealUpdate(meal("snack", 300), { time: "16:00", slot: "snack", items: [], totals: { kcal: 320, protein: 5, carbs: 40, fat: 9 } })!;
+    expect([u.kcal, u.protein_g, u.carbs_g, u.fat_g]).toEqual([320, 5, 40, 9]);
+  });
+  it("refuses a bad time", () => {
+    expect(mealUpdate(base, { time: "99:99", slot: "lunch", items: [], totals: { kcal: 1, protein: 0, carbs: 0, fat: 0 } })).toBeNull();
   });
 });
