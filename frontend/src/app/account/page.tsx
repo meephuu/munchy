@@ -7,6 +7,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from "@/components/Icons";
 import { LogoutButton } from "@/components/LogoutButton";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
+import { birthLabel } from "@/lib/birth";
 import { fromRow, targetOf } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVITIES, GOALS, SEXES } from "@/lib/target";
@@ -138,7 +139,7 @@ async function Account() {
                 value={label(ACTIVITIES, profile.activity)}
               />
               <Row term="Sex" value={label(SEXES, profile.sex)} />
-              <Row term="Age" value={`${profile.age}`} />
+              <Row term="Age" value={profile.birthDate ? `${profile.age} · born ${birthLabel(profile.birthDate)}` : `${profile.age}`} />
               <Row term="Height" value={`${profile.heightCm} cm`} />
               <Row term="Weight" value={`${profile.weightKg} kg`} last />
             </dl>

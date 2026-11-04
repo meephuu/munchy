@@ -34,6 +34,7 @@ describe("rows", () => {
       activity: "desk",
       sex: "unspecified",
       age: 21,
+      birth_date: null,
       height_cm: 174,
       weight_kg: 68,
       target_kcal: t.kcal,
@@ -60,5 +61,33 @@ describe("parseDraft", () => {
     expect(parseDraft("")).toBeNull();
     expect(parseDraft("{not json")).toBeNull();
     expect(parseDraft(JSON.stringify({ ...DEFAULT_PROFILE, age: 3 }))).toBeNull();
+  });
+});
+
+describe("date of birth", () => {
+  const now = new Date(2026, 10, 5);
+  const withBirth = { ...DEFAULT_PROFILE, birthDate: "2000-03-07", age: undefined };
+
+  it("works the age out from the date (and ignores any age that came with it)", () => {
+    expect(toProfile(withBirth, now)).toMatchObject({ age: 26, birthDate: "2000-03-07" });
+    expect(toProfile({ ...withBirth, age: 99 }, now)?.age).toBe(26);
+  });
+  it("the age moves on after the birthday", () => {
+    expect(toProfile(withBirth, new Date(2026, 2, 6))?.age).toBe(25);
+    expect(toProfile(withBirth, new Date(2026, 2, 7))?.age).toBe(26);
+  });
+  it("refuses a date in the future, an impossible date, or someone under 14", () => {
+    expect(toProfile({ ...withBirth, birthDate: "2027-01-01" }, now)).toBeNull();
+    expect(toProfile({ ...withBirth, birthDate: "2000-02-30" }, now)).toBeNull();
+    expect(toProfile({ ...withBirth, birthDate: "2020-01-01" }, now)).toBeNull();
+  });
+  it("is stored with the date and the age at saving time, and read back", () => {
+    const p = toProfile(withBirth, now)!;
+    const row = toRow(p);
+    expect(row).toMatchObject({ birth_date: "2000-03-07", age: 26 });
+    expect(fromRow(row)).toMatchObject({ birthDate: "2000-03-07" });
+  });
+  it("an older profile with only an age still works", () => {
+    expect(fromRow({ ...toRow(DEFAULT_PROFILE), birth_date: null })).toEqual(DEFAULT_PROFILE);
   });
 });

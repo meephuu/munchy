@@ -1,6 +1,7 @@
 // A person's profile: what they told us (goal, activity, body) and the daily target worked out from it.
 // Stored in Supabase as one row per account (see supabase/migrations). Everything here is pure.
 
+import { ageOn } from "./birth";
 import {
   ACTIVITIES,
   dailyTarget,
@@ -17,7 +18,10 @@ export type Profile = {
   goal: Goal;
   activity: Activity;
   sex: Sex;
+  /** Whole years, worked out from `birthDate` when there is one (else the age saved before dates of birth existed). */
   age: number;
+  /** YYYY-MM-DD; null for profiles saved before we asked for it. */
+  birthDate: string | null;
   heightCm: number;
   weightKg: number;
 };
@@ -28,6 +32,7 @@ export type ProfileRow = {
   activity: Activity;
   sex: Sex;
   age: number;
+  birth_date: string | null;
   height_cm: number;
   weight_kg: number;
   target_kcal: number;
@@ -41,6 +46,7 @@ export const DEFAULT_PROFILE: Profile = {
   activity: "desk",
   sex: "unspecified",
   age: 21,
+  birthDate: null,
   heightCm: 174,
   weightKg: 68,
 };
@@ -48,14 +54,18 @@ export const DEFAULT_PROFILE: Profile = {
 const isOneOf = <T extends string>(list: { id: T }[], v: unknown): v is T => list.some((x) => x.id === v);
 
 /** A Profile from untrusted data (a saved draft, a database row...), or null if anything is off. */
-export function toProfile(raw: unknown): Profile | null {
+export function toProfile(raw: unknown, now: Date = new Date()): Profile | null {
   if (typeof raw !== "object" || raw === null) return null;
   const r = raw as Record<string, unknown>;
+  const birthDate = typeof r.birthDate === "string" && r.birthDate ? r.birthDate : null;
+  // with a date of birth the age follows it (and a bad date is refused); without one, the age as given
+  const age = birthDate ? ageOn(birthDate, now) : Number(r.age);
   const profile = {
     goal: r.goal,
     activity: r.activity,
     sex: r.sex,
-    age: Number(r.age),
+    age,
+    birthDate,
     heightCm: Number(r.heightCm),
     weightKg: Number(r.weightKg),
   };
@@ -77,6 +87,7 @@ export function toRow(p: Profile): ProfileRow {
     activity: p.activity,
     sex: p.sex,
     age: p.age,
+    birth_date: p.birthDate,
     height_cm: p.heightCm,
     weight_kg: p.weightKg,
     target_kcal: t.kcal,
@@ -90,7 +101,7 @@ export function toRow(p: Profile): ProfileRow {
 export function fromRow(row: unknown): Profile | null {
   if (typeof row !== "object" || row === null) return null;
   const r = row as Record<string, unknown>;
-  return toProfile({ goal: r.goal, activity: r.activity, sex: r.sex, age: r.age, heightCm: r.height_cm, weightKg: r.weight_kg });
+  return toProfile({ goal: r.goal, activity: r.activity, sex: r.sex, age: r.age, birthDate: r.birth_date, heightCm: r.height_cm, weightKg: r.weight_kg });
 }
 
 // A guest fills the profile in before they have an account; it waits here until they sign up.

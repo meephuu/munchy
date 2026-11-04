@@ -21,6 +21,9 @@ with the same "own rows only" security, plus delete).
 Then run `migrations/20261105000000_favorites_weights_dishes.sql`: it creates `favorites` (the heart on a dish),
 `weights` (the weight log on Progress) and `custom_dishes` (a person's own dishes), all own-rows-only.
 
+Then run `migrations/20261106000000_birth_date.sql`: it adds the `birth_date` column to `profiles` (the app works the age
+out from it). Until it is run, saving a profile still works (the age is saved, the date is not).
+
 ## 3. Choose how sign-up confirms
 **Authentication → Providers → Email**:
 - For development, turn **Confirm email** off: people are signed in right after sign-up.

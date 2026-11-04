@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
 import { Chip } from "@/components/Chip";
 import { PlusIcon } from "@/components/Icons";
+import { TimePicker } from "@/components/TimePicker";
 import { MacroLine } from "@/components/MacroLine";
 import { IngredientSearch } from "@/components/IngredientSearch";
 import { Eyebrow } from "@/components/Type";
@@ -114,13 +115,7 @@ export function MealEditor({
     <div className="flex flex-col gap-3 border-t border-divider pt-3">
       <div className="flex flex-col gap-1.5">
         <Eyebrow tone="muted">Time</Eyebrow>
-        <input
-          type="time"
-          aria-label="Time eaten"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className={`${field} max-w-36`}
-        />
+        <TimePicker value={time} onChange={setTime} />
       </div>
 
       <div className="flex flex-col gap-1.5">
