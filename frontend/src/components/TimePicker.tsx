@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ClockIcon } from "@/components/Icons";
 import { formatTime, parseTime } from "@/lib/time";
 
-const ROW = 44; // px per row; three rows are visible and the middle one is the chosen time
+const ROW = 36; // px per row; three rows are visible and the middle one is the chosen time
 const two = (n: number) => String(n).padStart(2, "0");
 
 /** A minimal wheel time picker ("HH:MM", 24 hours): hour and minute columns you scroll or swipe, snapping to a row,
@@ -19,7 +19,7 @@ export function TimePicker({
   const [open, setOpen] = useState(false);
   const [h, m] = parseTime(value) ?? [12, 0];
   return (
-    <div className="flex flex-col gap-2">
+    <div className="relative w-fit">
       <button
         type="button"
         aria-expanded={open}
@@ -36,12 +36,12 @@ export function TimePicker({
         <div
           role="group"
           aria-label="Time eaten"
-          className="relative mx-auto grid w-44 grid-cols-2"
+          className="absolute top-full left-0 z-20 mt-1.5 grid w-32 grid-cols-2 overflow-hidden rounded-card border border-border bg-surface shadow-panel"
           style={{ height: ROW * 3 }}
         >
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 rounded-field bg-sand"
+            className="absolute inset-x-1.5 rounded-field bg-sand"
             style={{ top: ROW, height: ROW }}
           />
           <Wheel
@@ -58,7 +58,7 @@ export function TimePicker({
           />
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center text-[20px] font-semibold text-ink"
+            className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center text-[16px] font-semibold text-ink"
             style={{ top: ROW, height: ROW }}
           >
             :
@@ -128,9 +128,9 @@ function Wheel({
           role="option"
           aria-selected={i === value}
           onClick={() => onPick(i)}
-          className={`flex cursor-pointer snap-center items-center text-[20px] ${
+          className={`flex cursor-pointer snap-center items-center text-[16px] ${
             i === value ? "font-semibold text-ink" : "text-ink-muted"
-          } ${label === "Hour" ? "justify-end pr-3.5" : "justify-start pl-3.5"}`}
+          } ${label === "Hour" ? "justify-end pr-3" : "justify-start pl-3"}`}
           style={{ height: ROW }}
         >
           {two(i)}
