@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Munchy desktop — Log a dish</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Climate+Crisis&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&amp;family=Space+Mono:wght@400;700&amp;family=Figtree:wght@400;500;600&amp;family=Anuphan:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1D5C3A}a:hover{color:#164A2E}
+input::placeholder{color:#8A8272}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch; background: #F7F2EA; font-family: 'Figtree', 'Anuphan', sans-serif; color: #1E1C18">
+<aside style="flex: 1 1 240px; max-width: 100%; box-sizing: border-box; padding: 20px 0 20px 20px">
+  <div style="background: #FFFFFF; border-radius: 20px; box-shadow: 0 6px 20px rgba(70,50,20,0.08); border-radius: 22px; padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; height: 100%; box-sizing: border-box">
+    <a href="Home.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 0 8px; text-decoration: none">
+      <img src="../../logo/logo-text.png" alt="Munchy" style="height: 26px; width: auto; align-self: flex-start">
+      <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Your Bite Buddy</span>
+    </a>
+    <a href="Add.dc.html" aria-current="page" style="height: 48px; border-radius: 14px; background: #164A2E; color: #F7F2EA; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 600; text-decoration: none"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>Log a dish</a>
+    <nav aria-label="Main" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="Home.dc.html" style="min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 15px; color: #6B6457; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+      <a href="Coach.dc.html" style="min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 15px; color: #6B6457; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path></svg>Coach</a>
+      <a href="Progress.dc.html" style="min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 15px; color: #6B6457; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-7M12 20V5M19 20v-11"></path></svg>Progress</a>
+      <a href="Account.dc.html" style="min-height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 15px; color: #6B6457; font-weight: 500"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Me</a>
+    </nav>
+    <div style="margin-top: auto; background: #F7F2EA; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+      <span style="font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Daily target</span>
+      <span style="font-family: 'Climate Crisis', sans-serif; font-size: 24px; line-height: 1; color: #1D5C3A">2,150<span style="font-family: 'Figtree', sans-serif; font-size: 12px; font-weight: 600; color: #1E1C18"> kcal</span></span>
+      <span style="font-size: 12px; color: #6B6457">Stay balanced · On my feet</span>
+    </div>
+    <a href="Account.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 0 4px; text-decoration: none; color: #1E1C18">
+      <span aria-hidden="true" style="width: 36px; height: 36px; flex: none; border-radius: 50%; background: #1D5C3A; color: #F7F2EA; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-weight: 600; font-size: 16px">Y</span>
+      <span style="min-width: 0; display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">[you@example.com]</span><span style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Member</span></span>
+    </a>
+  </div>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 36px 40px 48px">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px">
+
+    <section style="background: #FFFFFF; border-radius: 20px; box-shadow: 0 6px 20px rgba(70,50,20,0.08); padding: 36px 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 32px; position: relative">
+      <div style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">Log a dish</span>
+        <h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 40px; line-height: 1.12; color: #1E1C18">What did you <span style="font-style: italic; color: #1D5C3A">munch?</span></h1>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #6B6457; max-width: 520px">Type any dish, adjust the amounts if you like, then log it to breakfast, lunch, dinner or a snack.</p>
+        <div style="display: flex; flex-direction: column; gap: 6px; max-width: 640px">
+          <form style="margin: 0; display: flex; align-items: center; gap: 10px; height: 64px; box-sizing: border-box; padding: 6px 6px 6px 18px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 4px 16px rgba(70,50,20,0.08)">
+  <label for="q-BiteCheck.dc.html" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Dish name</label>
+  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A8272" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+  <input id="q-BiteCheck.dc.html" type="text" placeholder="e.g. pad kra pao with fried egg" value="kh" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #1E1C18">
+  <a href="BiteCheck.dc.html" aria-label="Analyze dish" style="height: 52px; padding: 0 20px; flex: none; box-sizing: border-box; border-radius: 12px; background: #1D5C3A; color: #F7F2EA; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 600">Check it<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</form>
+          <ul aria-label="Suggestions" style="margin: 0; padding: 6px 0; list-style: none; background: #FFFFFF; border: 1px solid #F0EADF; border-radius: 16px; box-shadow: 0 8px 24px rgba(70,50,20,0.12)">
+            <li><a href="BiteCheck.dc.html" style="min-height: 48px; box-sizing: border-box; padding: 8px 18px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: #1E1C18; text-decoration: none"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8272" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span style="flex: 1">Khao man gai</span><span style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Recent</span></a></li><li><a href="BiteCheck.dc.html" style="min-height: 48px; box-sizing: border-box; padding: 8px 18px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: #1E1C18; text-decoration: none"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8272" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span style="flex: 1">Khao soi</span><span style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #8A5F1A">Try</span></a></li><li><a href="BiteCheck.dc.html" style="min-height: 48px; box-sizing: border-box; padding: 8px 18px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: #1E1C18; text-decoration: none"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8272" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span style="flex: 1">Khao pad with egg</span><span style="font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #8A5F1A">Try</span></a></li>
+          </ul>
+        </div>
+      </div>
+      <img src="../../assets/bowl.png" alt="" style="flex: 0 1 220px; width: 220px; max-width: 100%; height: auto">
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+        <section style="background: #FFFFFF; border-radius: 20px; box-shadow: 0 6px 20px rgba(70,50,20,0.08); padding: 24px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; line-height: 1.12; color: #1E1C18">My <span style="font-style: italic; color: #1D5C3A">favorites</span></h2><button type="button" style="border: 0; background: transparent; padding: 0; font-family: inherit; font-size: 14px; font-weight: 600; color: #1D5C3A; cursor: pointer">Edit</button></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px"><a href="BiteCheck.dc.html" style="height: 34px; box-sizing: border-box; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: 1px solid #E2D8C6; background: #FFFFFF; color: #1E1C18">pad kra pao with fried egg</a><a href="BiteCheck.dc.html" style="height: 34px; box-sizing: border-box; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: 1px solid #E2D8C6; background: #FFFFFF; color: #1E1C18">som tam</a></div>
+          <span style="font-size: 13px; color: #6B6457">Save a dish with the heart on its Bite check to find it here.</span>
+        </section>
+        <section style="background: #FFFFFF; border-radius: 20px; box-shadow: 0 6px 20px rgba(70,50,20,0.08); padding: 24px; display: flex; flex-direction: column; gap: 14px">
+          <span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A5F1A">New dish · one serving</span>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="nd-name" style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Name</label><input id="nd-name" placeholder="e.g. Mom's green curry" style="height: 46px; width: 100%; box-sizing: border-box; border: 1px solid #E2D8C6; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1E1C18; outline: none"></div>
+          <button type="button" style="min-height: 40px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; gap: 6px; font-family: inherit; font-size: 14px; font-weight: 600; color: #1D5C3A; cursor: pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>Add an ingredient · optional</button>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px"><div style="display: flex; flex-direction: column; gap: 6px"><label for="nd-k" style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Calories (kcal)</label><input id="nd-k" placeholder="" style="height: 46px; width: 100%; box-sizing: border-box; border: 1px solid #E2D8C6; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1E1C18; outline: none"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="nd-p" style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Protein (g)</label><input id="nd-p" placeholder="" style="height: 46px; width: 100%; box-sizing: border-box; border: 1px solid #E2D8C6; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1E1C18; outline: none"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="nd-c" style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Carbs (g)</label><input id="nd-c" placeholder="" style="height: 46px; width: 100%; box-sizing: border-box; border: 1px solid #E2D8C6; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1E1C18; outline: none"></div><div style="display: flex; flex-direction: column; gap: 6px"><label for="nd-f" style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B6457">Fat (g)</label><input id="nd-f" placeholder="" style="height: 46px; width: 100%; box-sizing: border-box; border: 1px solid #E2D8C6; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1E1C18; outline: none"></div></div>
+          <span style="font-size: 12px; color: #6B6457">Calories are required. Leave a macro empty if you don't know it.</span>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap">
+            <button type="button" style="flex: 2 1 200px; height: 48px; border: 0; border-radius: 16px; background: #1D5C3A; color: #F7F2EA; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Save &amp; log to dinner</button>
+            <button type="button" style="flex: 1 1 110px; height: 48px; border: 1px solid #E2D8C6; border-radius: 16px; background: transparent; color: #1D5C3A; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Save only</button>
+          </div>
+        </section>
+      </div>
+      <section style="flex: 1.4 1 420px; min-width: 0; background: #FFFFFF; border-radius: 20px; box-shadow: 0 6px 20px rgba(70,50,20,0.08); padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; line-height: 1.12; color: #1E1C18">My <span style="font-style: italic; color: #1D5C3A">dishes</span></h2><span style="font-family: 'Space Mono', monospace; font-size: 10px; color: #6B6457">2 saved</span></div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><span style="font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #6B6457">Log as</span><button type="button" aria-pressed="false" style="height: 34px; box-sizing: border-box; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: 1px solid #E2D8C6; background: #FFFFFF; color: #1E1C18">Breakfast</button><button type="button" aria-pressed="false" style="height: 34px; box-sizing: border-box; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: 1px solid #E2D8C6; background: #FFFFFF; color: #1E1C18">Lunch</button><button type="button" aria-pressed="false" style="height: 34px; box-sizing: border-box; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: 1px solid #E2D8C6; background: #FFFFFF; color: #1E1C18">Snack</button><button type="button" aria-pressed="true" style="height: 34px; box-sizing: border-box; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: 1px solid #1D5C3A; background: #1D5C3A; color: #F7F2EA">Dinner</button></div>
+        <ul style="margin: 0; padding: 0; list-style: none">
+          <li style="min-height: 64px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #F0EADF">
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 500">Mom's green curry</span><span style="font-family: 'Space Mono', monospace; font-size: 11px; color: #6B6457">520 kcal · P 28 · C 54 · F 21</span></span>
+          <button type="button" style="min-height: 38px; padding: 0 14px; border: 0; border-radius: 18px; background: #1D5C3A; color: #F7F2EA; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Log to dinner</button>
+          <button type="button" aria-label="Delete Mom's green curry" style="width: 36px; height: 36px; border: 0; background: transparent; color: #6B6457; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button>
+        </li>
+          <li style="min-height: 64px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #F0EADF">
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 500">Protein oats</span><span style="font-family: 'Space Mono', monospace; font-size: 11px; color: #6B6457">410 kcal · P 32 · C 48 · F 9</span></span>
+          <button type="button" style="min-height: 38px; padding: 0 14px; border: 0; border-radius: 18px; background: #1D5C3A; color: #F7F2EA; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Log to dinner</button>
+          <button type="button" aria-label="Delete Protein oats" style="width: 36px; height: 36px; border: 0; background: transparent; color: #6B6457; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button>
+        </li>
+        </ul>
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6B6457">Cook something we don't know? Create your own dish: type its calories and macros, or add ingredients and let them add up.</p>
+      </section>
+    </div>
+  </div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

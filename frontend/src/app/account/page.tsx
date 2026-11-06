@@ -10,6 +10,7 @@ import { Eyebrow, Title } from "@/components/Type";
 import { birthLabel } from "@/lib/birth";
 import { fromRow, targetOf } from "@/lib/profile";
 import { currentUser } from "@/lib/supabase/claims";
+import { memberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVITIES, GOALS, SEXES } from "@/lib/target";
 
@@ -58,7 +59,9 @@ async function Account() {
     list.find((x) => x.id === id)?.label ?? id;
 
   return (
-    <Screen>
+    <Screen
+      shell={{ kind: "member", member: memberShell(user.email, profile) }}
+    >
       <div className="flex flex-col gap-4">
         <header className="flex items-center gap-3 pt-2">
           <Link

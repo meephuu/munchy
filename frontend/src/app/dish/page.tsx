@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { DishResult } from "@/components/DishResult";
 import { DishLoading, DishProblem } from "@/components/DishStates";
 import { EstimateError, fetchEstimate, toDish } from "@/lib/estimate";
-import { isMember } from "@/lib/supabase/session";
+import { memberInfo } from "@/lib/supabase/session";
 
 // Guest dish result. Public. `?q=` is the dish the guest typed; it is sent to the backend
 // (POST /estimate). Without it there is nothing to show, so go back to search. With Cache
@@ -24,7 +24,7 @@ async function Dish({
   const query = (Array.isArray(q) ? q[0] : q)?.trim();
   if (!query) redirect("/");
 
-  const memberLookup = isMember(); // runs while the estimate is being worked out
+  const memberLookup = memberInfo(); // runs while the estimate is being worked out
   let dish;
   try {
     dish = toDish(await fetchEstimate(query));
@@ -34,7 +34,14 @@ async function Dish({
       e.kind === "unclear"
         ? "We couldn't read that"
         : "Couldn't estimate this bite";
-    return <DishProblem query={query} title={title} message={e.message} />;
+    return (
+      <DishProblem
+        query={query}
+        title={title}
+        message={e.message}
+        member={await memberLookup}
+      />
+    );
   }
 
   if (dish.empty) {
@@ -44,6 +51,7 @@ async function Dish({
         title="Not in our food list yet"
         message="We couldn't match anything in that to a food we know. Try a simpler name, like “fried egg” or “pad thai”."
         details={dish.notices}
+        member={await memberLookup}
       />
     );
   }

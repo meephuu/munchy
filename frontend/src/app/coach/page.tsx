@@ -6,6 +6,7 @@ import { CoachView } from "@/components/CoachView";
 import { Screen } from "@/components/Screen";
 import { fromRow, targetOf } from "@/lib/profile";
 import { currentUser } from "@/lib/supabase/claims";
+import { memberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/server";
 
 // Coach (design/screens/Coach.dc.html). Reading the login is request-time work, so it sits behind <Suspense>.
@@ -31,7 +32,9 @@ async function Coach() {
   const profile = fromRow(row);
 
   return (
-    <Screen>
+    <Screen
+      shell={{ kind: "member", member: memberShell(user.email, profile) }}
+    >
       <div className="flex flex-col gap-4 pt-4">
         <CoachView target={profile ? targetOf(profile) : null} />
       </div>

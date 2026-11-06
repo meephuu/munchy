@@ -7,6 +7,7 @@ import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { fromRow, targetOf } from "@/lib/profile";
 import { currentUser } from "@/lib/supabase/claims";
+import { memberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/server";
 
 // Progress (design/screens/Progress.dc.html). Reading the login is request-time work, so it sits behind <Suspense>.
@@ -32,7 +33,9 @@ async function Progress() {
   const profile = fromRow(row);
 
   return (
-    <Screen>
+    <Screen
+      shell={{ kind: "member", member: memberShell(user.email, profile) }}
+    >
       <div className="flex flex-col gap-4 pt-4">
         <div className="flex flex-col gap-1">
           <Eyebrow>Progress · last 7 days</Eyebrow>

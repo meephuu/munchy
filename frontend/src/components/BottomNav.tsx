@@ -38,7 +38,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main"
-      className="sticky bottom-4 -mx-2 mt-6 flex h-[68px] items-center justify-around rounded-panel bg-surface shadow-nav"
+      className="sticky bottom-4 -mx-2 mt-6 flex h-[68px] desk:hidden items-center justify-around rounded-panel bg-surface shadow-nav"
     >
       {item(ITEMS[0])}
       {item(ITEMS[1])}

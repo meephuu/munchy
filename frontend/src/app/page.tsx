@@ -12,9 +12,9 @@ const TRY_DISHES = ["Pad kra pao", "Khao man gai", "Som tam"];
 
 export default function GuestHome() {
   return (
-    <Screen>
+    <Screen shell={{ kind: "guest" }}>
       <div className="flex flex-col gap-[18px]">
-        <header className="flex items-center justify-between pt-2">
+        <header className="flex items-center justify-between pt-2 desk:hidden">
           <div className="flex flex-col gap-1">
             <Wordmark />
             <Eyebrow>Your Bite Buddy</Eyebrow>
@@ -29,9 +29,14 @@ export default function GuestHome() {
 
         <div className="flex flex-col items-center gap-3 pt-1 text-center">
           <Image src="/bowl.png" alt="" width={140} height={140} priority />
-          <Title lead="What's on your plate," accent="and what's in it?" className="text-[28px]" />
+          <Title
+            lead="What's on your plate,"
+            accent="and what's in it?"
+            className="text-[28px]"
+          />
           <p className="text-sm leading-normal text-ink-muted">
-            Type any dish and get calories &amp; nutrients in seconds. No account needed.
+            Type any dish and get calories &amp; nutrients in seconds. No
+            account needed.
           </p>
         </div>
 
@@ -75,9 +80,15 @@ export default function GuestHome() {
 
       <section className="mt-auto flex flex-col gap-3 rounded-panel bg-surface p-[18px] shadow-panel">
         <Eyebrow>Free account</Eyebrow>
-        <Title lead="Unlock your" accent="Bite Buddy" as="h2" className="text-[19px]" />
+        <Title
+          lead="Unlock your"
+          accent="Bite Buddy"
+          as="h2"
+          className="text-[19px]"
+        />
         <p className="text-[13px] leading-normal text-ink-muted">
-          Daily target built for your body, meal log &amp; progress, and coach ideas for what to eat next.
+          Daily target built for your body, meal log &amp; progress, and coach
+          ideas for what to eat next.
         </p>
         <Link
           href="/onboarding"

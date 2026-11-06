@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { OnboardingForm } from "@/components/OnboardingForm";
 import { Screen } from "@/components/Screen";
 import { fromRow } from "@/lib/profile";
+import { memberShell } from "@/lib/shell";
 import { currentUser } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,5 +28,12 @@ async function Onboarding() {
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
-  return <OnboardingForm member saved={fromRow(row)} />;
+  const saved = fromRow(row);
+  return (
+    <OnboardingForm
+      member
+      saved={saved}
+      shell={memberShell(user.email, saved)}
+    />
+  );
 }

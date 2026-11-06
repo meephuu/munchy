@@ -38,6 +38,7 @@ import {
   withTime,
 } from "@/lib/meals";
 import { formatTime, parseTime } from "@/lib/time";
+import type { MemberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/client";
 
 // Guest dish result (design/screens/GuestDish.dc.html), filled with the backend's estimate.
@@ -69,13 +70,15 @@ function mealMoment(time: string): Date {
 export function DishResult({
   query,
   dish,
-  member,
+  member: memberInfo,
 }: {
   query: string;
   dish: Dish;
-  member: boolean;
+  /** What the sidebar shows when the person is logged in; null for a guest. */
+  member: MemberShell | null;
 }) {
   const router = useRouter();
+  const member = memberInfo !== null;
   const aiGrams = dish.ingredients.map((i) => i.grams);
   const [extra, setExtra] = useState<Ingredient[]>([]); // foods the user added
   const [grams, setGrams] = useState(aiGrams); // one amount per ingredient, AI's first
@@ -177,7 +180,11 @@ export function DishResult({
   };
 
   return (
-    <Screen>
+    <Screen
+      shell={
+        memberInfo ? { kind: "member", member: memberInfo } : { kind: "guest" }
+      }
+    >
       <div className="flex flex-col gap-3.5">
         <DishHeader dish={query} member={member} />
 
@@ -199,9 +206,7 @@ export function DishResult({
         <section className="flex flex-col gap-3 rounded-hero bg-surface p-[18px] shadow-card">
           <div className="flex items-center justify-between gap-2">
             <Eyebrow>
-              {view.edited || adjusted
-                ? "Estimated · edited"
-                : "Estimated"}
+              {view.edited || adjusted ? "Estimated · edited" : "Estimated"}
             </Eyebrow>
             <span className="shrink-0 rounded-badge bg-green-tint px-2 py-1 font-mono text-[10px] tracking-[1px] text-green uppercase">
               {dish.confidence} confidence

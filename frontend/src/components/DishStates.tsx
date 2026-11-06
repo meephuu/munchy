@@ -1,6 +1,7 @@
 import { DishHeader } from "@/components/DishHeader";
 import { LoadingSteps } from "@/components/LoadingSteps";
 import { Screen } from "@/components/Screen";
+import type { MemberShell } from "@/lib/shell";
 import { Eyebrow, Title } from "@/components/Type";
 
 /** Shown while the backend works (a fresh parse can take a few seconds). */
@@ -25,14 +26,16 @@ export function DishProblem({
   title,
   message,
   details = [],
+  member = null,
 }: {
   query: string;
   title: string;
   message: string;
   details?: string[];
+  member?: MemberShell | null;
 }) {
   return (
-    <Screen>
+    <Screen shell={member ? { kind: "member", member } : { kind: "guest" }}>
       <div className="flex flex-col gap-3.5">
         <DishHeader dish={query} />
         <section

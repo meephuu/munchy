@@ -18,6 +18,7 @@ import {
   toRow,
   type Profile,
 } from "@/lib/profile";
+import type { MemberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/client";
 import {
   ACTIVITIES,
@@ -36,9 +37,12 @@ import {
 
 export function OnboardingForm({
   member,
+  shell = null,
   saved,
 }: {
   member: boolean;
+  /** What the sidebar shows for a logged-in person (null for a guest). */
+  shell?: MemberShell | null;
   saved: Profile | null;
 }) {
   const router = useRouter();
@@ -114,7 +118,9 @@ export function OnboardingForm({
   }
 
   return (
-    <Screen>
+    <Screen
+      shell={shell ? { kind: "member", member: shell } : { kind: "guest" }}
+    >
       <div className="flex flex-col gap-3.5 pt-1">
         {member ? (
           <header className="flex items-center gap-3 pt-1">

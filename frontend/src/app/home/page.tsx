@@ -11,6 +11,7 @@ import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { fromRow, targetOf } from "@/lib/profile";
 import { currentUser } from "@/lib/supabase/claims";
+import { memberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/server";
 
 // Home for people who are logged in (design/screens/Main.dc.html): how much of today's target is left,
@@ -38,7 +39,9 @@ async function Home() {
   const target = profile ? targetOf(profile) : null;
 
   return (
-    <Screen>
+    <Screen
+      shell={{ kind: "member", member: memberShell(user.email, profile) }}
+    >
       <div className="flex flex-col gap-4 pt-2">
         <Greeting />
         <DishSearchBar suggest goal={profile?.goal ?? null} />
