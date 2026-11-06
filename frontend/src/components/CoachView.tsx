@@ -255,7 +255,7 @@ export function CoachView({ target }: { target: TargetLike | null }) {
                           </span>
                           <span className="flex shrink-0 flex-col items-end gap-1">
                             <span className="text-sm font-semibold">
-                              {d.kcal} kcal
+                              <CountUp value={d.kcal} /> kcal
                             </span>
                             <span className="rounded-badge bg-green-tint px-2 py-0.5 font-mono text-[10px] text-green">
                               P {d.protein} g
@@ -292,7 +292,7 @@ export function CoachView({ target }: { target: TargetLike | null }) {
                           </div>
                           <div className="flex items-baseline gap-1.5">
                             <span className="font-brand text-[30px] leading-none text-green">
-                              {d.kcal}
+                              <CountUp value={d.kcal} />
                             </span>
                             <span className="text-[13px] font-semibold">
                               kcal
