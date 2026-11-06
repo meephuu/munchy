@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -62,121 +63,162 @@ async function Account() {
     <Screen
       shell={{ kind: "member", member: memberShell(user.email, profile) }}
     >
-      <div className="flex flex-col gap-4">
-        <header className="flex items-center gap-3 pt-2">
+      <div className="flex flex-col gap-4 desk:gap-6">
+        <header className="flex items-center gap-3 pt-2 desk:pt-0">
           <Link
             href="/home"
             aria-label="Back to Home"
-            className="flex size-11 shrink-0 items-center justify-center rounded-row bg-surface text-ink shadow-row"
+            className="flex size-11 shrink-0 items-center justify-center rounded-row bg-surface text-ink shadow-row desk:hidden"
           >
             <ArrowLeftIcon size={20} />
           </Link>
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-0.5 desk:gap-2">
             <Eyebrow>Account</Eyebrow>
-            <Title lead="You &" accent="your target" className="text-xl" />
+            <Title
+              lead="You &"
+              accent="your target"
+              className="text-xl desk:text-4xl"
+            />
           </div>
         </header>
 
-        <section className="flex items-center gap-3.5 rounded-hero bg-surface p-[18px] shadow-card">
-          <span
-            aria-hidden="true"
-            className="flex size-14 shrink-0 items-center justify-center rounded-full bg-green font-heading text-2xl font-semibold text-bg"
-          >
-            {(email || "?").charAt(0).toUpperCase()}
-          </span>
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate text-[15px] font-semibold">{email}</span>
-            {since && (
-              <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
-                Member since {MONTHS[since.getUTCMonth()]}{" "}
-                {since.getUTCFullYear()}
-              </span>
-            )}
-          </div>
-        </section>
-
-        {target && profile ? (
-          <section className="flex flex-col gap-3 rounded-hero bg-green p-[18px] text-bg">
-            <span className="font-mono text-[10px] font-bold tracking-[1.5px] text-gold uppercase">
-              Daily target · {label(GOALS, profile.goal)}
+        <div className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-stretch desk:gap-6">
+          <section className="flex items-center gap-3.5 rounded-hero bg-surface p-[18px] shadow-card desk:min-w-0 desk:flex-[1_1_300px] desk:flex-col desk:items-start desk:gap-[18px] desk:p-7">
+            <span
+              aria-hidden="true"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full bg-green font-heading text-2xl font-semibold text-bg desk:size-[72px] desk:text-[32px]"
+            >
+              {(email || "?").charAt(0).toUpperCase()}
             </span>
-            <div className="flex items-baseline gap-2">
-              <span className="font-brand text-[44px] leading-none">
-                {target.kcal.toLocaleString("en-US")}
+            <div className="flex min-w-0 flex-col gap-0.5 desk:gap-1">
+              <span className="truncate text-[15px] font-semibold desk:text-lg">
+                {email}
               </span>
-              <span className="text-[15px] font-semibold">kcal</span>
+              {since && (
+                <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase desk:text-[11px]">
+                  Member since {MONTHS[since.getUTCMonth()]}{" "}
+                  {since.getUTCFullYear()}
+                </span>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              <Macro label="Protein" grams={target.proteinG} />
-              <Macro label="Carbs" grams={target.carbsG} />
-              <Macro label="Fat" grams={target.fatG} />
+            <div className="mt-auto hidden desk:block">
+              <LogoutButton />
             </div>
-            {target.floored && (
-              <span className="text-xs text-green-soft">
-                Kept at a safe minimum: eating less than this isn&apos;t a good
-                idea.
-              </span>
-            )}
           </section>
-        ) : (
-          <section className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]">
-            <Eyebrow tone="terracotta">One more step</Eyebrow>
-            <p className="text-sm">
-              Tell me a bit about you and I&apos;ll set your daily target.
-            </p>
-            <Link href="/onboarding" className="text-sm font-semibold">
-              Set up my profile
-            </Link>
-          </section>
-        )}
 
-        {profile && (
-          <section className="flex flex-col gap-1">
-            <div className="flex items-baseline justify-between">
-              <Eyebrow tone="muted">About you</Eyebrow>
-              <Link href="/onboarding" className="text-[13px] font-semibold">
-                Edit
+          {target && profile ? (
+            <section className="flex flex-col gap-3 rounded-hero bg-green p-[18px] text-bg desk:min-w-0 desk:flex-[2_1_480px] desk:flex-row desk:flex-wrap desk:items-center desk:gap-6 desk:p-7">
+              <div className="flex flex-col gap-3 desk:min-w-[300px] desk:flex-1 desk:gap-4">
+                <span className="font-mono text-[10px] font-bold tracking-[1.5px] text-gold uppercase desk:text-[11px]">
+                  Daily target · {label(GOALS, profile.goal)}
+                </span>
+                <div className="flex items-baseline gap-2 desk:gap-2.5">
+                  <span className="font-brand text-[44px] leading-none desk:text-[64px]">
+                    {target.kcal.toLocaleString("en-US")}
+                  </span>
+                  <span className="text-[15px] font-semibold desk:text-[17px]">
+                    kcal
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 desk:gap-2.5">
+                  <Macro label="Protein" grams={target.proteinG} />
+                  <Macro label="Carbs" grams={target.carbsG} />
+                  <Macro label="Fat" grams={target.fatG} />
+                </div>
+                {target.floored && (
+                  <span className="text-xs text-green-soft">
+                    Kept at a safe minimum: eating less than this isn&apos;t a
+                    good idea.
+                  </span>
+                )}
+              </div>
+              <Image
+                src="/bowl.png"
+                alt=""
+                width={150}
+                height={150}
+                className="hidden shrink-0 desk:block"
+              />
+            </section>
+          ) : (
+            <section className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px] desk:flex-[2_1_480px] desk:p-7">
+              <Eyebrow tone="terracotta">One more step</Eyebrow>
+              <p className="text-sm">
+                Tell me a bit about you and I&apos;ll set your daily target.
+              </p>
+              <Link href="/onboarding" className="text-sm font-semibold">
+                Set up my profile
               </Link>
-            </div>
-            <dl className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row">
-              <Row term="Goal" value={label(GOALS, profile.goal)} />
-              <Row
-                term="Typical day"
-                value={label(ACTIVITIES, profile.activity)}
-              />
-              <Row term="Sex" value={label(SEXES, profile.sex)} />
-              <Row
-                term="Age"
-                value={
-                  profile.birthDate
-                    ? `${profile.age} · born ${birthLabel(profile.birthDate)}`
-                    : `${profile.age}`
-                }
-              />
-              <Row term="Height" value={`${profile.heightCm} cm`} />
-              <Row term="Weight" value={`${profile.weightKg} kg`} last />
-            </dl>
-          </section>
-        )}
+            </section>
+          )}
+        </div>
 
-        <nav
-          aria-label="Shortcuts"
-          className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row"
-        >
-          <Shortcut
-            href="/progress"
-            title="Progress"
-            hint="Your week, streak and weight"
-          />
-          <Shortcut
-            href="/add"
-            title="My dishes & favorites"
-            hint="Create your own dishes, log in one tap"
-            last
-          />
-        </nav>
+        <div className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-start desk:gap-6">
+          {profile && (
+            <section className="flex flex-col gap-1 desk:min-w-0 desk:flex-[2_1_480px] desk:rounded-hero desk:bg-surface desk:px-7 desk:pt-[22px] desk:pb-2.5 desk:shadow-card">
+              <div className="flex items-baseline justify-between desk:pb-1">
+                <Eyebrow tone="muted" className="desk:hidden">
+                  About you
+                </Eyebrow>
+                <Title
+                  as="h2"
+                  lead="About"
+                  accent="you"
+                  className="hidden text-[22px] desk:block"
+                />
+                <Link
+                  href="/onboarding"
+                  className="text-[13px] font-semibold desk:text-sm"
+                >
+                  <span className="desk:hidden">Edit</span>
+                  <span className="hidden desk:inline">Edit profile</span>
+                </Link>
+              </div>
+              <dl className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row desk:grid desk:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] desk:gap-x-8 desk:rounded-none desk:bg-transparent desk:p-0 desk:shadow-none">
+                <Row term="Goal" value={label(GOALS, profile.goal)} />
+                <Row
+                  term="Typical day"
+                  value={label(ACTIVITIES, profile.activity)}
+                />
+                <Row term="Sex" value={label(SEXES, profile.sex)} />
+                <Row
+                  term="Age"
+                  value={
+                    profile.birthDate
+                      ? `${profile.age} · born ${birthLabel(profile.birthDate)}`
+                      : `${profile.age}`
+                  }
+                />
+                <Row term="Height" value={`${profile.heightCm} cm`} />
+                <Row term="Weight" value={`${profile.weightKg} kg`} />
+              </dl>
+            </section>
+          )}
 
-        <div className="flex flex-col items-center gap-2 pt-1">
+          <div className="flex min-w-0 flex-col gap-4 desk:flex-[1_1_300px]">
+            <nav
+              aria-label="Shortcuts"
+              className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row desk:rounded-hero desk:px-6 desk:py-1.5 desk:shadow-card"
+            >
+              <Shortcut
+                href="/progress"
+                title="Progress"
+                hint="Your week, streak and weight"
+              />
+              <Shortcut
+                href="/add"
+                title="My dishes & favorites"
+                hint="Create your own dishes, log in one tap"
+                last
+              />
+            </nav>
+            <p className="hidden text-center font-mono text-[9px] tracking-[0.5px] text-ink-muted uppercase desk:block">
+              Estimates are approximate · Not medical advice
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-2 pt-1 desk:hidden">
           <LogoutButton />
           <p className="text-center font-mono text-[9px] tracking-[0.5px] text-ink-muted uppercase">
             Estimates are approximate · Not medical advice
@@ -190,32 +232,24 @@ async function Account() {
 
 function Macro({ label, grams }: { label: string; grams: number }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-field bg-white/10 p-2">
+    <div className="flex flex-col gap-0.5 rounded-field bg-white/10 p-2 desk:gap-1 desk:rounded-row desk:p-3.5">
       <span className="font-mono text-[9px] text-green-soft uppercase">
         {label}
       </span>
-      <span className="text-base font-semibold">{grams} g</span>
+      <span className="text-base font-semibold desk:text-[22px]">
+        {grams} g
+      </span>
     </div>
   );
 }
 
-function Row({
-  term,
-  value,
-  last = false,
-}: {
-  term: string;
-  value: string;
-  last?: boolean;
-}) {
+function Row({ term, value }: { term: string; value: string }) {
   return (
-    <div
-      className={`flex min-h-11 items-center justify-between gap-3 ${last ? "" : "border-b border-divider"}`}
-    >
+    <div className="flex min-h-11 items-center justify-between gap-3 border-b border-divider last:border-b-0 desk:min-h-16 desk:flex-col desk:items-start desk:justify-center desk:gap-1 desk:py-3 desk:last:border-b">
       <dt className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
         {term}
       </dt>
-      <dd className="text-[14px] font-semibold">{value}</dd>
+      <dd className="text-[14px] font-semibold desk:text-base">{value}</dd>
     </div>
   );
 }
@@ -234,7 +268,7 @@ function Shortcut({
   return (
     <Link
       href={href}
-      className={`flex min-h-14 items-center gap-3 py-2 text-ink ${last ? "" : "border-b border-divider"}`}
+      className={`flex min-h-14 items-center gap-3 py-2 text-ink hover:bg-bg/60 desk:min-h-[72px] ${last ? "" : "border-b border-divider"}`}
     >
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-sm font-semibold">{title}</span>
