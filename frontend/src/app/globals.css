@@ -480,3 +480,16 @@ button.bg-bg.border-border:not(:disabled):hover {
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/*
+ * iPhone Safari zooms the page in when you tap a text box whose text is smaller than 16 px, and does not zoom back out.
+ * Touch screens get 16 px in every text box (it is outside the cascade layers, so it beats the per-field sizes), which
+ * stops the zoom without turning off pinch zoom for people who want it.
+ */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
