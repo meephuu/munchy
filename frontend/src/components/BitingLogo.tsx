@@ -48,8 +48,8 @@ function biteCircles({ x, y, r }: (typeof BITES)[number]) {
 
 // where each crumb of a bite goes (user units of the 1024 box): sideways, then down
 const CRUMBS = [
-  { dx: -70, dy: 100, rot: -200, size: 34 },
-  { dx: 45, dy: 120, rot: 160, size: 28 },
+  { dx: -45, dy: 80, rot: -200, size: 34 },
+  { dx: 35, dy: 90, rot: 160, size: 28 },
 ];
 
 const TICK = 0.4; // seconds between bites
@@ -150,8 +150,10 @@ export function BitingLogo({ className = "" }: { className?: string }) {
 
       {BITES.map((b, i) => {
         // crumbs start from the leading edge of the bite
-        const sx = b.x + Math.cos(EAT_DIRECTION) * b.r * 0.9;
-        const sy = b.y + Math.sin(EAT_DIRECTION) * b.r * 0.9;
+        // (kept inside the letter's box, so the crumbs of the edge bites do not start outside it)
+        const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+        const sx = clamp(b.x + Math.cos(EAT_DIRECTION) * b.r * 0.9, 100, 920);
+        const sy = clamp(b.y + Math.sin(EAT_DIRECTION) * b.r * 0.9, 260, 720);
         return CRUMBS.map((c, j) => (
           <rect
             key={`${i}-${j}`}
