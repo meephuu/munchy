@@ -11,10 +11,8 @@ export function DishLoading() {
     <Screen>
       <div className="flex flex-col gap-3.5">
         <DishHeader />
-        <div role="status" className="flex flex-col gap-3.5">
+        <div role="status" aria-label="Loading">
           <LoadingSteps />
-          <div className="h-[190px] animate-pulse rounded-hero bg-sand" />
-          <div className="h-[150px] animate-pulse rounded-card bg-sand/70" />
         </div>
       </div>
     </Screen>

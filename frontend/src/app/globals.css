@@ -58,7 +58,7 @@
   /* Screens at least this wide get the phone frame (see .app-shell below). */
   --breakpoint-frame: 600px;
   /* Tablets: no phone frame; the phone layout, centered in a wider column (defined after frame so tab: wins). */
-  --breakpoint-tab: 768px;
+  --breakpoint-tab: 600px;
   /* From this width the desktop layout takes over (sidebar or top bar, no phone frame). */
   --breakpoint-desk: 1024px;
 
@@ -113,8 +113,8 @@ body {
   }
 }
 
-/* Tablet (768-1023 px): the phone layout without the frame, in a centered column on the cream page. */
-@media (min-width: 768px) {
+/* Tablet (600-1023 px): the phone layout without the frame, in a centered column on the cream page. */
+@media (min-width: 600px) {
   body {
     display: block;
     background: var(--color-bg);
@@ -161,5 +161,50 @@ body {
 
   input::placeholder {
     color: var(--color-placeholder);
+  }
+}
+
+/* Loading animation of a dish being worked out (LoadingSteps): the bowl bobs, steam rises, a bar sweeps. */
+@keyframes bowl-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(2deg);
+  }
+}
+
+@keyframes steam-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scaleX(0.9);
+  }
+  35% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scaleX(1.3);
+  }
+}
+
+@keyframes bar-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

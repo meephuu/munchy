@@ -43,7 +43,7 @@ export function Screen({
         }`}
       >
         <div
-          className={`flex flex-1 flex-col tab:mx-auto tab:w-full tab:max-w-[680px] tab:px-4 desk:max-w-none desk:flex-none desk:gap-6 desk:px-0 ${guest ? "" : "desk:max-w-[1120px]"}`}
+          className={`flex flex-1 flex-col tab:mx-auto tab:w-full tab:max-w-[840px] tab:px-6 desk:max-w-none desk:flex-none desk:gap-6 desk:px-0 ${guest ? "" : "desk:max-w-[1120px]"}`}
         >
           {children}
         </div>

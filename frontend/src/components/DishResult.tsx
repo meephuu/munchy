@@ -262,6 +262,7 @@ export function DishResult({
               {memberInfo?.target && (
                 <div className="hidden flex-col gap-3 desk:flex">
                   <DishDayBars
+                    weight={view.weight}
                     target={memberInfo.target}
                     dish={{
                       kcal: view.kcal,
@@ -270,9 +271,6 @@ export function DishResult({
                       fat: view.fat,
                     }}
                   />
-                  <span className="text-[13px] text-ink-muted">
-                    Weight <b className="text-ink">{view.weight}g</b>
-                  </span>
                 </div>
               )}
             </section>

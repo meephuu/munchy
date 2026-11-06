@@ -12,16 +12,24 @@ import { createClient } from "@/lib/supabase/client";
 
 type Dish = { kcal: number; protein: number; carbs: number; fat: number };
 
-const ROWS = [
-  { key: "kcal", label: "Calories", unit: "kcal", goal: "kcal", text: "text-green", bar: "bg-green" },
-  { key: "protein", label: "Protein", unit: "g", goal: "proteinG", text: "text-green", bar: "bg-green" },
-  { key: "carbs", label: "Carbs", unit: "g", goal: "carbsG", text: "text-bronze", bar: "bg-bronze" },
-  { key: "fat", label: "Fat", unit: "g", goal: "fatG", text: "text-terracotta-text", bar: "bg-terracotta" },
+const MACROS = [
+  { key: "protein", label: "Protein", goal: "proteinG", text: "text-green", bar: "bg-green" },
+  { key: "carbs", label: "Carbs", goal: "carbsG", text: "text-bronze", bar: "bg-bronze" },
+  { key: "fat", label: "Fat", goal: "fatG", text: "text-terracotta-text", bar: "bg-terracotta" },
 ] as const;
 
-/** Desktop bite check, for a member: for calories and each macro, a bar of the day's target with what is already
- *  eaten today and what this dish adds on top. Today's meals are loaded in the browser (a day is the person's own). */
-export function DishDayBars({ target, dish }: { target: TargetLike; dish: Dish }) {
+/** Desktop bite check, for a member: a calories bar, and the Protein / Carbs / Fat boxes each with a bar of the day's
+ *  target: what is already eaten today (paler) and what this dish adds on top. Today's meals are loaded in the browser
+ *  (a day is the person's own). The Weight box has no target, so no bar. */
+export function DishDayBars({
+  target,
+  dish,
+  weight,
+}: {
+  target: TargetLike;
+  dish: Dish;
+  weight: number;
+}) {
   const [meals, setMeals] = useState<Meal[] | null>(null);
 
   useEffect(() => {
@@ -46,63 +54,115 @@ export function DishDayBars({ target, dish }: { target: TargetLike; dish: Dish }
   const eaten = dayTotals(meals ?? [], target).eaten;
 
   return (
-    <div
-      className="flex flex-col gap-3.5"
-      aria-busy={meals === null}
-      aria-label="This dish against today's target"
-    >
-      {ROWS.map((r) => {
-        const goal = target[r.goal];
-        const before = eaten[r.key];
-        const add = Math.round(dish[r.key]);
-        const total = before + add;
-        const over = total > goal;
-        const scale = Math.max(goal, total) || 1;
-        const pct = (n: number) => `${Math.min(100, (n / scale) * 100)}%`;
-        return (
-          <div key={r.key} className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="font-mono text-[10px] tracking-[0.5px] text-ink-muted uppercase">
-                {r.label}
-              </span>
-              <span className={`text-xl font-semibold ${r.text}`}>
-                +{add}
-                <span className="text-xs">{r.unit === "g" ? "g" : " kcal"}</span>
-              </span>
-            </div>
-            <div className="relative flex h-2.5 overflow-hidden rounded-[5px] bg-sand">
-              <div
-                className={`h-full ${r.bar} opacity-45`}
-                style={{ width: pct(before) }}
-              />
-              <div
-                className={`h-full ${over ? "bg-terracotta" : r.bar}`}
-                style={{ width: pct(add) }}
-              />
-              {over && (
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-y-0 w-0.5 bg-ink"
-                  style={{ left: pct(goal) }}
-                />
-              )}
-            </div>
-            <span className="font-mono text-[11px] text-ink-muted">
-              {meals === null
-                ? "…"
-                : over
-                  ? `${total - goal} ${r.unit} over · ${before} eaten + ${add} of ${goal}`
-                  : `${before} eaten + ${add} → ${goal - total} ${r.unit} left of ${goal}`}
+    <div className="flex flex-col gap-3.5" aria-busy={meals === null}>
+      <Bar
+        label="Of today's calories"
+        unit="kcal"
+        before={eaten.kcal}
+        add={Math.round(dish.kcal)}
+        goal={target.kcal}
+        bar="bg-green"
+        loading={meals === null}
+        thin
+      />
+      <div className="grid grid-cols-2 gap-2.5">
+        {MACROS.map((m) => (
+          <div
+            key={m.key}
+            className="flex flex-col gap-1.5 rounded-row bg-bg p-3"
+          >
+            <span className="font-mono text-[9px] text-ink-muted uppercase">
+              {m.label}
             </span>
+            <span className={`text-xl font-semibold ${m.text}`}>
+              {dish[m.key]}g
+            </span>
+            <Bar
+              unit="g"
+              before={eaten[m.key]}
+              add={Math.round(dish[m.key])}
+              goal={target[m.goal]}
+              bar={m.bar}
+              loading={meals === null}
+            />
           </div>
-        );
-      })}
+        ))}
+        <div className="flex flex-col gap-0.5 rounded-row bg-bg p-3">
+          <span className="font-mono text-[9px] text-ink-muted uppercase">
+            Weight
+          </span>
+          <span className="text-xl font-semibold">{weight}g</span>
+        </div>
+      </div>
       <div className="flex items-center gap-3 font-mono text-[10px] text-ink-muted uppercase">
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-green opacity-45" /> Eaten today
         </span>
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-green" /> This dish
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-0.5 bg-ink" /> Target
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Bar({
+  label,
+  unit,
+  before,
+  add,
+  goal,
+  bar,
+  loading,
+  thin = false,
+}: {
+  label?: string;
+  unit: string;
+  before: number;
+  add: number;
+  goal: number;
+  bar: string;
+  loading: boolean;
+  thin?: boolean;
+}) {
+  const total = before + add;
+  const over = total > goal;
+  const scale = Math.max(goal, total) || 1;
+  const pct = (n: number) => `${Math.min(100, (n / scale) * 100)}%`;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div
+        role="img"
+        aria-label={`${before} eaten plus ${add} of ${goal} ${unit}`}
+        className={`relative flex overflow-hidden rounded-[5px] bg-sand ${thin ? "h-2" : "h-2.5"}`}
+      >
+        <div
+          className={`h-full ${bar} opacity-45`}
+          style={{ width: pct(before) }}
+        />
+        <div
+          className={`h-full ${over ? "bg-terracotta" : bar}`}
+          style={{ width: pct(add) }}
+        />
+        {over && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 w-0.5 bg-ink"
+            style={{ left: pct(goal) }}
+          />
+        )}
+      </div>
+      <div className="flex justify-between gap-2 font-mono text-[10px] text-ink-muted">
+        <span>{label ?? `${total} / ${goal}${unit === "g" ? "g" : ""}`}</span>
+        <span className={over ? "text-terracotta-text" : ""}>
+          {loading
+            ? "…"
+            : over
+              ? `${total - goal} ${unit} over`
+              : `${goal - total} ${unit} left`}
         </span>
       </div>
     </div>
