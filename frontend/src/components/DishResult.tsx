@@ -429,7 +429,7 @@ export function DishResult({
                       >
                         <span
                           aria-hidden="true"
-                          className="size-2 shrink-0 rounded-full desk:size-2.5"
+                          className="size-2 shrink-0 rounded-full ring-1 ring-black/10 ring-inset desk:size-2.5"
                           style={{ background: row.dot }}
                         />
                         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -550,7 +550,7 @@ export function DishResult({
                     <li key={k.id} title={k.hint} className="flex items-center gap-1.5">
                       <span
                         aria-hidden="true"
-                        className="size-2 rounded-full"
+                        className="size-2 rounded-full ring-1 ring-black/10 ring-inset"
                         style={{ background: k.color }}
                       />
                       {k.label}

@@ -10,7 +10,7 @@ export const FOOD_KINDS: { id: FoodKindId; label: string; hint: string; color: s
   { id: "protein", label: "Protein", hint: "meat, fish, egg, tofu, beans", color: "var(--color-green)" },
   { id: "carbs", label: "Carbs", hint: "rice, noodles, bread, sugar", color: "var(--color-bronze-light)" },
   { id: "fat", label: "Fat", hint: "oil, butter, nuts, coconut", color: "var(--color-terracotta)" },
-  { id: "fresh", label: "Veg, fruit & drinks", hint: "light foods, under 70 kcal per 100 g", color: "var(--color-leaf)" },
+  { id: "fresh", label: "Veg, fruit & drinks", hint: "light foods, under 70 kcal per 100 g", color: "var(--color-cream)" },
 ];
 
 const LIGHT_KCAL = 70; // per 100 g and below: vegetables, most fruit, broth, milk, sauces

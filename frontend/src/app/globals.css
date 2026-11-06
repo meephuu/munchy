@@ -37,7 +37,7 @@
 
   /* Used by the screens but not in the spec table */
   --color-gold: #e3c27a; /* fried-egg dot, lock icon on green */
-  --color-leaf: #86b36b; /* veg, fruit & drinks dot in the ingredient list */
+  --color-cream: #f1e4c3; /* veg, fruit & drinks dot in the ingredient list (a ring keeps it visible on white) */
   --color-green-soft: #d6e2d9; /* small text on a green button */
 
   /* Shadows: cards have no borders, only these */
