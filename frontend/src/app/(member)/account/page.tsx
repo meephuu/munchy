@@ -90,7 +90,7 @@ async function Account() {
             >
               {(email || "?").charAt(0).toUpperCase()}
             </span>
-            <div className="flex min-w-0 flex-col gap-0.5 desk:gap-1">
+            <div className="flex min-w-0 flex-col gap-0.5 desk:w-full desk:gap-1">
               <span className="truncate text-[15px] font-semibold desk:text-lg">
                 {email}
               </span>

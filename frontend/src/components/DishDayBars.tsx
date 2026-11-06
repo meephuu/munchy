@@ -157,9 +157,13 @@ function Bar({
           />
         )}
       </div>
-      <div className="flex justify-between gap-2 font-mono text-[10px] text-ink-muted">
-        <span>{label ?? `${total} / ${goal}${unit === "g" ? "g" : ""}`}</span>
-        <span className={over ? "text-terracotta-text" : ""}>
+      <div className="flex flex-wrap justify-between gap-x-2 gap-y-0.5 font-mono text-[10px] text-ink-muted">
+        <span className="whitespace-nowrap">
+          {label ?? `${total} / ${goal}${unit === "g" ? "g" : ""}`}
+        </span>
+        <span
+          className={`whitespace-nowrap ${over ? "text-terracotta-text" : ""}`}
+        >
           {loading
             ? "…"
             : over

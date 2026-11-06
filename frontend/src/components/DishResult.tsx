@@ -238,7 +238,7 @@ export function DishResult({
                   alt=""
                   width={96}
                   height={96}
-                  className="hidden shrink-0 desk:block"
+                  className="hidden shrink-0 min-[1400px]:block"
                 />
               </div>
               <div
