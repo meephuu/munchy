@@ -68,7 +68,7 @@ function css(): string {
     ".mb-hole{transform-box:fill-box;transform-origin:50% 50%;transform:scale(0)}",
     ".mb-crumb{transform-box:fill-box;transform-origin:50% 50%;opacity:0}",
     "@keyframes mb-wiggle{0%,100%{transform:rotate(-4deg) scale(1.02,.97)}50%{transform:rotate(4deg) scale(.98,1.03)}}",
-    `@keyframes mb-pop{0%{opacity:0;transform:scale(.4)}${pct(0.3)}{opacity:1;transform:scale(1.1)}${pct(0.5)}{transform:scale(1)}100%{opacity:1;transform:scale(1)}}`,
+    `@keyframes mb-pop{0%{opacity:0;transform:scale(0)}${pct(0.06)}{opacity:1}${pct(0.26)}{transform:scale(1.28,.9)}${pct(0.42)}{transform:scale(.88,1.1)}${pct(0.58)}{transform:scale(1.06,.97)}${pct(0.75)}{transform:scale(1)}100%{opacity:1;transform:scale(1)}}`,
   ];
 
   // the jolt of each bite: a quick squash to the side and back
@@ -93,10 +93,10 @@ function css(): string {
     void b;
   });
   // With "reduce motion" on the letter still gets eaten (a few bites in place are gentle), but the wiggle is much smaller,
-  // and the jolts and the pop-in are dropped.
+  // and the jolts are dropped (the pop-in stays).
   out.push(
     "@keyframes mb-wiggle-soft{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}",
-    "@media (prefers-reduced-motion:reduce){.mb-wig{animation:mb-wiggle-soft 1.2s ease-in-out infinite}.mb-jolt{animation:none}.mb-pop{animation:none}}",
+    "@media (prefers-reduced-motion:reduce){.mb-wig{animation:mb-wiggle-soft 1.2s ease-in-out infinite}.mb-jolt{animation:none}}",
   );
   return out.join("");
 }
