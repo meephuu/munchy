@@ -6,8 +6,8 @@ import { useState, useSyncExternalStore } from "react";
 import { Brand } from "@/components/Brand";
 import { PrimaryButton } from "@/components/Button";
 import { Field } from "@/components/Field";
-import { Screen } from "@/components/Screen";
-import { Title } from "@/components/Type";
+import { AuthScreen } from "@/components/AuthScreen";
+import { Eyebrow, Title } from "@/components/Type";
 import { friendlyAuthError, validateCredentials } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 
@@ -41,7 +41,10 @@ export function LoginForm() {
     setBusy(true);
     const supabase = createClient();
     if (!supabase) return setBusy(false);
-    const { error: failure } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { error: failure } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     if (failure) {
       setBusy(false);
       return setError(friendlyAuthError(failure));
@@ -51,17 +54,50 @@ export function LoginForm() {
   }
 
   return (
-    <Screen>
-      <form onSubmit={submit} noValidate className="flex flex-col gap-4 pt-1">
-        <Brand />
-        <Title lead="Welcome" accent="back" className="text-[26px]" />
+    <AuthScreen>
+      <form
+        onSubmit={submit}
+        noValidate
+        className="flex flex-col gap-4 pt-1 desk:gap-[18px] desk:pt-0"
+      >
+        <div className="desk:hidden">
+          <Brand />
+        </div>
+        <Eyebrow className="hidden desk:block">Log in</Eyebrow>
+        <Title
+          lead="Welcome"
+          accent="back"
+          className="text-[26px] desk:text-[40px]"
+        />
+        <p className="hidden text-[15px] text-ink-muted desk:block">
+          Pick up where you left off: today&apos;s bites, your target and your
+          week.
+        </p>
         {notice && (
-          <p role="status" className="rounded-card bg-terracotta-tint px-3.5 py-3 text-[13px]">
+          <p
+            role="status"
+            className="rounded-card bg-terracotta-tint px-3.5 py-3 text-[13px]"
+          >
             {notice}
           </p>
         )}
-        <Field id="email" label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Field id="password" label="Password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         {error && (
           <p role="alert" className="text-sm text-terracotta-text">
             {error}
@@ -80,6 +116,6 @@ export function LoginForm() {
           Back to search
         </Link>
       </form>
-    </Screen>
+    </AuthScreen>
   );
 }

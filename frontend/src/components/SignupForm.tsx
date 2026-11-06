@@ -6,10 +6,20 @@ import { useState, useSyncExternalStore } from "react";
 import { Brand } from "@/components/Brand";
 import { PrimaryButton, PrimaryLink } from "@/components/Button";
 import { Field } from "@/components/Field";
-import { Screen } from "@/components/Screen";
-import { Title } from "@/components/Type";
-import { friendlyAuthError, MIN_PASSWORD, validateCredentials } from "@/lib/auth";
-import { clearDraft, DRAFT_KEY, parseDraft, targetOf, toRow } from "@/lib/profile";
+import { AuthScreen } from "@/components/AuthScreen";
+import { Eyebrow, Title } from "@/components/Type";
+import {
+  friendlyAuthError,
+  MIN_PASSWORD,
+  validateCredentials,
+} from "@/lib/auth";
+import {
+  clearDraft,
+  DRAFT_KEY,
+  parseDraft,
+  targetOf,
+  toRow,
+} from "@/lib/profile";
 import { createClient } from "@/lib/supabase/client";
 
 // The browser-only draft from the Get started screen: undefined while the page is still loading,
@@ -72,45 +82,79 @@ export function SignupForm() {
 
   if (checkInbox) {
     return (
-      <Screen>
+      <AuthScreen>
         <div className="flex flex-col gap-4 pt-1">
-          <Brand />
-          <Title lead="Check your" accent="email" className="text-[26px]" />
+          <div className="desk:hidden">
+            <Brand />
+          </div>
+          <Eyebrow className="hidden desk:block">Check your inbox</Eyebrow>
+          <Title
+            lead="Check your"
+            accent="email"
+            className="text-[26px] desk:text-[40px]"
+          />
           <p className="text-sm">
-            We sent a link to <strong>{email.trim()}</strong>. Open it to confirm your account, then log in.
+            We sent a link to <strong>{email.trim()}</strong>. Open it to
+            confirm your account, then log in.
           </p>
           <PrimaryLink href="/login">Go to log in</PrimaryLink>
         </div>
-      </Screen>
+      </AuthScreen>
     );
   }
 
-  if (draft === undefined) return <Screen>{null}</Screen>;
+  if (draft === undefined) return <AuthScreen>{null}</AuthScreen>;
 
   if (draft === null) {
     return (
-      <Screen>
+      <AuthScreen>
         <div className="flex flex-col gap-4 pt-1">
-          <Brand />
-          <Title lead="First, a few quick" accent="questions" className="text-[26px]" />
-          <p className="text-sm">So your daily target fits you, tell me a bit about yourself before you sign up.</p>
+          <div className="desk:hidden">
+            <Brand />
+          </div>
+          <Eyebrow className="hidden desk:block">Get started</Eyebrow>
+          <Title
+            lead="First, a few quick"
+            accent="questions"
+            className="text-[26px] desk:text-[40px]"
+          />
+          <p className="text-sm">
+            So your daily target fits you, tell me a bit about yourself before
+            you sign up.
+          </p>
           <PrimaryLink href="/onboarding">Get started</PrimaryLink>
         </div>
-      </Screen>
+      </AuthScreen>
     );
   }
 
   const target = targetOf(draft);
   return (
-    <Screen>
+    <AuthScreen>
       <form onSubmit={submit} noValidate className="flex flex-col gap-4 pt-1">
-        <Brand />
-        <Title lead="Create your" accent="account" className="text-[26px]" />
+        <div className="desk:hidden">
+          <Brand />
+        </div>
+        <Eyebrow className="hidden desk:block">Sign up</Eyebrow>
+        <Title
+          lead="Create your"
+          accent="account"
+          className="text-[26px] desk:text-[40px]"
+        />
         <p className="rounded-card bg-green-tint px-3.5 py-3 text-sm">
-          Your daily target: <strong>{target.kcal.toLocaleString("en-US")} kcal</strong> · Protein{" "}
+          Your daily target:{" "}
+          <strong>{target.kcal.toLocaleString("en-US")} kcal</strong> · Protein{" "}
           {target.proteinG} g · Carbs {target.carbsG} g · Fat {target.fatG} g
         </p>
-        <Field id="email" label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <Field
           id="password"
           label={`Password (at least ${MIN_PASSWORD} characters)`}
@@ -137,6 +181,6 @@ export function SignupForm() {
           Change my answers
         </Link>
       </form>
-    </Screen>
+    </AuthScreen>
   );
 }
