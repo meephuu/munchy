@@ -89,12 +89,28 @@ export function FavoritesManager() {
     }
   }
 
-  if (!list || (list.length === 0 && !error)) return null;
+  if (!list) return null;
+  if (list.length === 0 && !error) {
+    // nothing saved: say so on desktop (the card is part of the layout), stay out of the way on a phone
+    return (
+      <section className="hidden flex-col gap-3.5 rounded-hero bg-surface p-6 shadow-card desk:flex">
+        <Title as="h2" lead="My" accent="favorites" className="text-[22px]" />
+        <span className="text-[13px] text-ink-muted">
+          Save a dish with the heart on its Bite check to find it here.
+        </span>
+      </section>
+    );
+  }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2 desk:gap-3.5 desk:rounded-hero desk:bg-surface desk:p-6 desk:shadow-card">
       <div className="flex items-baseline justify-between">
-        <Title as="h2" lead="My" accent="favorites" className="text-lg" />
+        <Title
+          as="h2"
+          lead="My"
+          accent="favorites"
+          className="text-lg desk:text-[22px]"
+        />
         {list.length > 0 && (
           <button
             type="button"

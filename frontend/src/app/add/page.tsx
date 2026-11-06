@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AccountsOff } from "@/components/AccountsOff";
@@ -12,8 +13,8 @@ import { memberShell } from "@/lib/shell";
 import { currentUser } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 
-// The "+" in the bottom nav: look up a dish, then log it from the result. Members only (see the proxy).
-// Reading the login is request-time work, so it sits behind <Suspense>.
+// The "+" in the bottom nav / "Log a dish" in the sidebar: look up a dish, then log it from the result. Members only
+// (see the proxy). Reading the login is request-time work, so it sits behind <Suspense>.
 export default function AddPage() {
   return (
     <Suspense fallback={<Screen>{null}</Screen>}>
@@ -39,18 +40,35 @@ async function Add() {
     <Screen
       shell={{ kind: "member", member: memberShell(user.email, profile) }}
     >
-      <div className="flex flex-1 flex-col gap-4 pt-4">
-        <div className="flex flex-col gap-1">
-          <Eyebrow>Log a dish</Eyebrow>
-          <Title lead="What did you" accent="munch?" className="text-[26px]" />
-        </div>
-        <DishSearchBar suggest goal={profile?.goal ?? null} />
-        <p className="text-sm text-ink-muted">
-          Type any dish, adjust the amounts if you like, then log it to
-          breakfast, lunch, dinner or a snack.
-        </p>
-        <FavoritesManager />
-        <MyDishes />
+      <div className="flex flex-1 flex-col gap-4 pt-4 desk:gap-6 desk:pt-0">
+        <section className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-center desk:gap-8 desk:rounded-hero desk:bg-surface desk:px-10 desk:py-9 desk:shadow-card">
+          <div className="flex min-w-0 flex-col gap-4 desk:flex-[1_1_460px]">
+            <div className="flex flex-col gap-1 desk:gap-4">
+              <Eyebrow>Log a dish</Eyebrow>
+              <Title
+                lead="What did you"
+                accent="munch?"
+                className="text-[26px] desk:text-[40px]"
+              />
+            </div>
+            <div className="desk:max-w-[640px]">
+              <DishSearchBar suggest large goal={profile?.goal ?? null} />
+            </div>
+            <p className="text-sm text-ink-muted desk:max-w-[520px] desk:text-[15px] desk:leading-normal">
+              Type any dish, adjust the amounts if you like, then log it to
+              breakfast, lunch, dinner or a snack.
+            </p>
+          </div>
+          <Image
+            src="/bowl.png"
+            alt=""
+            width={220}
+            height={220}
+            className="hidden h-auto w-[220px] max-w-full desk:block"
+          />
+        </section>
+
+        <MyDishes favorites={<FavoritesManager />} />
       </div>
       <BottomNav />
     </Screen>

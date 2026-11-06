@@ -55,10 +55,13 @@ export function DishSearchBar({
   placeholder = "e.g. pad kra pao with fried egg",
   suggest = false,
   goal = null,
+  large = false,
 }: {
   placeholder?: string;
   suggest?: boolean;
   goal?: Goal | null;
+  /** From 1024 px wide: a 64 px bar with a "Check it" button (the Log a dish screen). */
+  large?: boolean;
 }) {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
@@ -109,7 +112,7 @@ export function DishSearchBar({
       <Form
         action="/dish"
         onSubmit={() => rememberSearch(text)}
-        className="flex h-14 items-center gap-2 rounded-card bg-surface py-1.5 pr-1.5 pl-3.5 shadow-search"
+        className={`flex h-14 items-center gap-2 rounded-card bg-surface py-1.5 pr-1.5 pl-3.5 shadow-search ${large ? "desk:h-16 desk:rounded-2xl desk:pl-[18px]" : ""}`}
       >
         <label htmlFor="dish" className="sr-only">
           Dish name
@@ -128,13 +131,14 @@ export function DishSearchBar({
             setOpen(true);
             void load();
           }}
-          className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none"
+          className={`min-w-0 flex-1 bg-transparent text-sm text-ink outline-none ${large ? "desk:text-base" : ""}`}
         />
         <button
           type="submit"
           aria-label="Analyze dish"
-          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-field bg-green text-bg hover:bg-green-dark"
+          className={`flex size-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-field bg-green text-bg hover:bg-green-dark ${large ? "desk:h-[52px] desk:w-auto desk:rounded-xl desk:px-5 desk:text-[15px] desk:font-semibold" : ""}`}
         >
+          {large && <span className="hidden desk:inline">Check it</span>}
           <ArrowRightIcon size={20} />
         </button>
       </Form>
