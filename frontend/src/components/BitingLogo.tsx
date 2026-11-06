@@ -54,7 +54,7 @@ const CRUMBS = [
 
 const TICK = 0.4; // seconds between bites
 const HOLD = 2; // ticks of the whole letter, wiggling, before the first bite
-const END = 2; // ticks with nothing left, before it pops back
+const END = 1; // ticks with nothing left, before it pops back
 const LOOP = (HOLD + BITES.length + END) * TICK; // seconds for one whole eating
 const pct = (seconds: number) => `${((seconds / LOOP) * 100).toFixed(2)}%`;
 const biteAt = (i: number) => (HOLD + i) * TICK;
