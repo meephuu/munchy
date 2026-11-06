@@ -205,6 +205,12 @@ describe("editing a logged meal", () => {
     expect(withTime(at(12), "25:00")).toBeNull();
     expect(withTime(at(12), "noon")).toBeNull();
   });
+  it("a time picked earlier today stays on today (not the day before)", () => {
+    const now = new Date(2026, 10, 6, 16, 48);
+    const d = withTime(now, "08:45")!;
+    expect([d.getDate(), d.getHours(), d.getMinutes()]).toEqual([6, 8, 45]);
+    expect(localDate(d)).toBe("2026-11-06");
+  });
   it("scales an item with its amount", () => {
     expect(scaleItem(item, 100)).toEqual({ name: "Egg", grams: 100, kcal: 156, protein: 13, carbs: 0.8, fat: 10.6 });
     expect(scaleItem({ ...item, grams: 0 }, 100).kcal).toBe(0);

@@ -29,7 +29,6 @@ import {
   type TweakId,
 } from "@/lib/tweaks";
 import {
-  dayOf,
   defaultSlot,
   friendlyMealError,
   mealToInsert,
@@ -61,9 +60,10 @@ const serverTime = () => "12:00";
 const slotAt = (time: string): MealSlot =>
   defaultSlot(new Date(2000, 0, 1, ...(parseTime(time) ?? [12, 0])));
 
-/** The moment to log for a time picked today: the person's own day (see dayOf), so 01:30 after midnight is tonight's. */
+/** The moment to log for a time picked now. withTime works out the person's day itself (see dayOf), so it is given
+ *  the current moment, not a day start: 01:30 after midnight is tonight's, and 08:45 at 4 pm is this morning. */
 function mealMoment(time: string): Date {
-  return withTime(dayOf(new Date()), time) ?? new Date();
+  return withTime(new Date(), time) ?? new Date();
 }
 
 export function DishResult({
@@ -200,7 +200,7 @@ export function DishResult({
           <div className="flex items-center justify-between gap-2">
             <Eyebrow>
               {view.edited || adjusted
-                ? "Estimated · your changes"
+                ? "Estimated · edited"
                 : "Estimated"}
             </Eyebrow>
             <span className="shrink-0 rounded-badge bg-green-tint px-2 py-1 font-mono text-[10px] tracking-[1px] text-green uppercase">
