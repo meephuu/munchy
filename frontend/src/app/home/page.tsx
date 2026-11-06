@@ -30,12 +30,16 @@ async function Home() {
   const user = await currentUser(supabase);
   if (!user) redirect("/login");
 
-  const { data: row } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: row }, { data: favorites }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("favorites")
+      .select("id,title")
+      .order("created_at", { ascending: false })
+      .limit(12),
+  ]);
   const profile = fromRow(row);
+  const favoriteItems = (favorites ?? []) as { id: string; title: string }[];
   const target = profile ? targetOf(profile) : null;
 
   return (
@@ -43,9 +47,15 @@ async function Home() {
       shell={{ kind: "member", member: memberShell(user.email, profile) }}
     >
       <div className="flex flex-col gap-4 pt-2">
-        <Greeting />
-        <DishSearchBar suggest goal={profile?.goal ?? null} />
-        <FavoritesList />
+        <div className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-end desk:justify-between desk:gap-5">
+          <Greeting />
+          <div className="desk:min-w-[280px] desk:flex-[0_1_460px]">
+            <DishSearchBar suggest goal={profile?.goal ?? null} />
+          </div>
+        </div>
+        <div className="desk:hidden">
+          <FavoritesList items={favoriteItems} />
+        </div>
 
         {!target && (
           <section className="flex flex-col gap-2 rounded-hero bg-terracotta-tint p-[18px]">
@@ -65,7 +75,7 @@ async function Home() {
           </section>
         )}
 
-        <HomeToday target={target} />
+        <HomeToday target={target} favorites={favoriteItems} />
       </div>
       <BottomNav />
     </Screen>
