@@ -48,8 +48,8 @@ function biteCircles({ x, y, r }: (typeof BITES)[number]) {
 
 // where each crumb of a bite goes (user units of the 1024 box): sideways, then down
 const CRUMBS = [
-  { dx: -150, dy: 230, rot: -200, size: 34 },
-  { dx: 60, dy: 260, rot: 160, size: 28 },
+  { dx: -70, dy: 100, rot: -200, size: 34 },
+  { dx: 45, dy: 120, rot: 160, size: 28 },
 ];
 
 const TICK = 0.4; // seconds between bites
@@ -68,7 +68,7 @@ function css(): string {
     ".mb-hole{transform-box:fill-box;transform-origin:50% 50%;transform:scale(0)}",
     ".mb-crumb{transform-box:fill-box;transform-origin:50% 50%;opacity:0}",
     "@keyframes mb-wiggle{0%,100%{transform:rotate(-4deg) scale(1.02,.97)}50%{transform:rotate(4deg) scale(.98,1.03)}}",
-    `@keyframes mb-pop{0%{opacity:0;transform:scale(0)}${pct(0.06)}{opacity:1}${pct(0.26)}{transform:scale(1.28,.9)}${pct(0.42)}{transform:scale(.88,1.1)}${pct(0.58)}{transform:scale(1.06,.97)}${pct(0.75)}{transform:scale(1)}100%{opacity:1;transform:scale(1)}}`,
+    `@keyframes mb-pop{0%{opacity:0;transform:scale(0)}${pct(0.03)}{opacity:1}${pct(0.14)}{transform:scale(1.28,.9)}${pct(0.23)}{transform:scale(.88,1.1)}${pct(0.32)}{transform:scale(1.06,.97)}${pct(0.42)}{transform:scale(1)}100%{opacity:1;transform:scale(1)}}`,
   ];
 
   // the jolt of each bite: a quick squash to the side and back
@@ -87,7 +87,7 @@ function css(): string {
     out.push(`.mb-hole-${i}{animation:mb-hole-${i} ${LOOP}s linear infinite}`);
     // its crumbs: pop out, rise a little, then fall and fade
     out.push(
-      `@keyframes mb-crumb-${i}{0%,${pct(t)}{opacity:0;transform:translate(0,0) rotate(0)}${pct(t + 0.02)}{opacity:1;transform:translate(0,0) rotate(0)}${pct(t + 0.18)}{opacity:1;transform:translate(calc(var(--dx)*.5),-50px) rotate(calc(var(--rot)*.3))}${pct(t + 0.7)}{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot))}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot))}}`,
+      `@keyframes mb-crumb-${i}{0%,${pct(t)}{opacity:0;transform:translate(0,0) rotate(0)}${pct(t + 0.02)}{opacity:1;transform:translate(0,0) rotate(0)}${pct(t + 0.14)}{opacity:1;transform:translate(calc(var(--dx)*.5),-28px) rotate(calc(var(--rot)*.3))}${pct(t + 0.5)}{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot))}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot))}}`,
     );
     out.push(`.mb-crumb-${i}{animation:mb-crumb-${i} ${LOOP}s linear infinite}`);
     void b;
