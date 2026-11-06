@@ -35,7 +35,7 @@ async function Coach() {
     <Screen
       shell={{ kind: "member", member: memberShell(user.email, profile) }}
     >
-      <div className="flex flex-col gap-4 pt-4">
+      <div className="flex flex-col gap-4 pt-4 desk:gap-6 desk:pt-0">
         <CoachView target={profile ? targetOf(profile) : null} />
       </div>
       <BottomNav />
