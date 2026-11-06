@@ -1,4 +1,5 @@
-import { dotFor, type Ingredient } from "@/lib/estimate";
+import type { Ingredient } from "@/lib/estimate";
+import { dotOf } from "@/lib/foodkind";
 import type { UnitOption } from "@/lib/units";
 
 /** One suggestion from GET /foods/search (FoodOut in backend/src/api.py). */
@@ -18,18 +19,19 @@ export async function searchFoods(q: string, signal?: AbortSignal): Promise<Food
 }
 
 /** A search hit as an ingredient of the meal, starting from the food's typical serving. */
-export function toIngredient(hit: FoodHit, position: number): Ingredient {
+export function toIngredient(hit: FoodHit): Ingredient {
+  const per100 = {
+    kcal: hit.per_100g.kcal,
+    protein: hit.per_100g.protein_g,
+    carbs: hit.per_100g.carbs_g,
+    fat: hit.per_100g.fat_g,
+  };
   return {
     name: hit.name,
     grams: hit.default_serving_g,
-    per100: {
-      kcal: hit.per_100g.kcal,
-      protein: hit.per_100g.protein_g,
-      carbs: hit.per_100g.carbs_g,
-      fat: hit.per_100g.fat_g,
-    },
+    per100,
     units: hit.units,
-    dot: dotFor(position),
+    dot: dotOf(per100),
     added: true,
   };
 }

@@ -58,7 +58,7 @@ export function MealEditor({
   const addFood = (hit: FoodHit) => {
     setAdding(false);
     const [orig] = itemsOf(
-      [toIngredient(hit, rows.length)],
+      [toIngredient(hit)],
       [hit.default_serving_g],
     );
     if (!orig) return;

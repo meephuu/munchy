@@ -260,7 +260,7 @@ function CustomDishForm({
 
   const addFood = (hit: FoodHit) => {
     setAdding(false);
-    const ing = toIngredient(hit, ingredients.length);
+    const ing = toIngredient(hit);
     setIngredientState([...ingredients, ing], [...grams, ing.grams]);
     setOpenRow(ingredients.length);
   };

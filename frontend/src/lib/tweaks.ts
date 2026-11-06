@@ -4,6 +4,7 @@
 // per-100 g values and stay explainable.
 
 import type { Ingredient, Macros } from "./estimate";
+import { dotOf } from "./foodkind";
 
 export type Place = "stall" | "restaurant" | "home";
 
@@ -89,7 +90,7 @@ export function placeExtra(place: Place, kcal: number): Ingredient | null {
     grams: Math.round(((kcal * RESTAURANT_EXTRA) / OIL_KCAL_PER_100G) * 1000) / 10,
     per100,
     units: [],
-    dot: "var(--color-green)",
+    dot: dotOf(per100),
   };
 }
 

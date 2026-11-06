@@ -3,6 +3,7 @@
 // needs the backend URL and no CORS setup is required for this path.
 
 import { BACKEND_URL } from "./backend";
+import { dotOf } from "./foodkind";
 import type { UnitOption } from "./units";
 
 type ApiTotals = {
@@ -115,6 +116,7 @@ export type Ingredient = {
   per100: Macros;
   /** Units the food is naturally counted in (besides grams): 1 egg, 2 tbsp... */
   units: UnitOption[];
+  /** Colour of the food's kind (see foodkind.ts). */
   dot: string;
   /** Added by the user from the food search, not found by the AI. */
   added?: boolean;
@@ -134,15 +136,6 @@ export type Dish = {
 
 const NO_MATCH = "no match found"; // how the backend starts the warning for an input it left out
 
-// Dots in the ingredient list cycle through the palette (bronze, terracotta, gold, green).
-const DOTS = [
-  "var(--color-bronze-light)",
-  "var(--color-terracotta)",
-  "var(--color-gold)",
-  "var(--color-green)",
-];
-export const dotFor = (position: number) => DOTS[position % DOTS.length];
-
 const round10 = (n: number) => Math.round(n / 10) * 10;
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
@@ -160,7 +153,7 @@ export function confidenceOf(
 
 export function toDish(res: EstimateResponse): Dish {
   return {
-    ingredients: res.lines.map((l, i) => ({
+    ingredients: res.lines.map((l) => ({
       name: l.name,
       grams: round1(l.grams),
       per100: {
@@ -170,7 +163,12 @@ export function toDish(res: EstimateResponse): Dish {
         fat: l.per_100g.fat_g,
       },
       units: l.units,
-      dot: dotFor(i),
+      dot: dotOf({
+        kcal: l.per_100g.kcal,
+        protein: l.per_100g.protein_g,
+        carbs: l.per_100g.carbs_g,
+        fat: l.per_100g.fat_g,
+      }),
     })),
     confidence: confidenceOf(res),
     notices: res.unmatched.map(

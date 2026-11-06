@@ -22,7 +22,7 @@ const response: EstimateResponse = {
 
 describe("toIngredient", () => {
   it("starts from the food's typical serving and is marked as added", () => {
-    const ing = toIngredient(egg, 3);
+    const ing = toIngredient(egg);
     expect(ing).toMatchObject({
       name: "boiled egg",
       grams: 50,
@@ -36,7 +36,7 @@ describe("toIngredient", () => {
 
 describe("a meal with an added food", () => {
   const dish = toDish(response);
-  const withEgg = { ...dish, ingredients: [...dish.ingredients, toIngredient(egg, 1)] };
+  const withEgg = { ...dish, ingredients: [...dish.ingredients, toIngredient(egg)] };
 
   it("adds the food's nutrients at its serving to the totals", () => {
     const s = summarize(withEgg, [100, 50]);

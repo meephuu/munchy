@@ -22,6 +22,7 @@ import { DishSearchBar } from "@/components/DishSearchBar";
 import { Eyebrow } from "@/components/Type";
 import { summarize, type Dish, type Ingredient } from "@/lib/estimate";
 import { toIngredient, type FoodHit } from "@/lib/foods";
+import { FOOD_KINDS } from "@/lib/foodkind";
 import {
   adjustmentNotes,
   availableTweaks,
@@ -146,7 +147,7 @@ export function DishResult({
       setOpenRow(same); // already in the meal: just edit it
       return;
     }
-    const ingredient = toIngredient(hit, ingredients.length);
+    const ingredient = toIngredient(hit);
     setExtra((all) => [...all, ingredient]);
     setGrams((all) => [...all, ingredient.grams]);
     setOpenRow(ingredients.length); // open its amount editor
@@ -541,6 +542,21 @@ export function DishResult({
                     Reset to the estimate
                   </button>
                 )}
+                <ul
+                  aria-label="What the dot colours mean"
+                  className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-divider py-3 font-mono text-[9px] tracking-[0.5px] text-ink-muted uppercase"
+                >
+                  {FOOD_KINDS.map((k) => (
+                    <li key={k.id} title={k.hint} className="flex items-center gap-1.5">
+                      <span
+                        aria-hidden="true"
+                        className="size-2 rounded-full"
+                        style={{ background: k.color }}
+                      />
+                      {k.label}
+                    </li>
+                  ))}
+                </ul>
               </section>
             </div>
 
