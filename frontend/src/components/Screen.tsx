@@ -5,7 +5,11 @@ import type { MemberShell } from "@/lib/shell";
 
 export type Shell =
   | { kind: "member"; member: MemberShell }
-  | { kind: "guest"; topBar?: ReactNode };
+  | {
+      kind: "guest";
+      topBar?: ReactNode;
+      /** the sign-up screens: "Already have an account?" instead of "Create free account" */ hasAccountHint?: boolean;
+    };
 
 /**
  * One screen. On a phone it is the design frame: 390 wide with 20px side padding (the width, and the phone frame on
@@ -26,7 +30,11 @@ export function Screen({
       className={`contents desk:flex desk:min-h-dvh ${guest ? "desk:flex-col" : "desk:flex-row"}`}
     >
       {shell?.kind === "member" && <Sidebar shell={shell.member} />}
-      {guest && <GuestTopBar>{shell.topBar}</GuestTopBar>}
+      {guest && (
+        <GuestTopBar hasAccountHint={shell.hasAccountHint}>
+          {shell.topBar}
+        </GuestTopBar>
+      )}
       <main
         className={`flex min-h-dvh w-full flex-col px-5 pt-5 pb-5 frame:min-h-full desk:min-h-0 desk:min-w-0 desk:flex-1 ${
           guest

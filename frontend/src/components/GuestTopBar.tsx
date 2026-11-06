@@ -5,7 +5,13 @@ import { Eyebrow, Wordmark } from "@/components/Type";
 /** The guest shell's top bar from 1024 px wide (design/DESIGN.md, "Desktop layout (V3)"): the logo and tagline on the
  *  left; on the right any `children` (the guest dish page puts a compact dish search here), then "Log in" and
  *  "Create free account". Hidden on phones, where each screen has its own header. */
-export function GuestTopBar({ children }: { children?: ReactNode }) {
+export function GuestTopBar({
+  children,
+  hasAccountHint = false,
+}: {
+  children?: ReactNode;
+  hasAccountHint?: boolean;
+}) {
   const hasSearch = children !== undefined && children !== null;
   return (
     <header className="mx-auto hidden w-full max-w-[1240px] flex-wrap items-center justify-between gap-4 px-10 py-6 desk:flex">
@@ -14,6 +20,11 @@ export function GuestTopBar({ children }: { children?: ReactNode }) {
         <Eyebrow>Your Bite Buddy</Eyebrow>
       </Link>
       <div className="flex items-center gap-3">
+        {hasAccountHint && (
+          <span className="text-sm text-ink-muted">
+            Already have an account?
+          </span>
+        )}
         {hasSearch && <div className="w-[340px] max-w-full">{children}</div>}
         <Link
           href="/login"
@@ -21,7 +32,7 @@ export function GuestTopBar({ children }: { children?: ReactNode }) {
         >
           Log in
         </Link>
-        {!hasSearch && (
+        {!hasSearch && !hasAccountHint && (
           <Link
             href="/onboarding"
             className="flex h-11 items-center rounded-full bg-green px-5 text-sm font-semibold text-bg hover:bg-green-dark"
