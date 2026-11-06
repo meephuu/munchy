@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PROFILE, fromRow, parseDraft, targetOf, toProfile, toRow } from "./profile";
+import { calculatedTargetOf, DEFAULT_PROFILE, fromRow, parseDraft, targetOf, toCustomTarget, toProfile, toRow } from "./profile";
 
 describe("toProfile", () => {
   it("accepts a valid profile, also with numbers given as text (as a saved draft or form would)", () => {
@@ -89,5 +89,31 @@ describe("date of birth", () => {
   });
   it("an older profile with only an age still works", () => {
     expect(fromRow({ ...toRow(DEFAULT_PROFILE), birth_date: null })).toEqual(DEFAULT_PROFILE);
+  });
+});
+
+describe("custom target", () => {
+  const mine = { custom_kcal: 2300, custom_protein_g: 150, custom_carbs_g: 250, custom_fat_g: 80 };
+
+  it("is read from the row and replaces the calculated target", () => {
+    const profile = fromRow({ ...toRow(DEFAULT_PROFILE), ...mine })!;
+    expect(profile.customTarget).toEqual({ kcal: 2300, proteinG: 150, carbsG: 250, fatG: 80 });
+    expect(targetOf(profile)).toMatchObject({ kcal: 2300, proteinG: 150, carbsG: 250, fatG: 80, custom: true, floored: false });
+    expect(calculatedTargetOf(profile).kcal).toBe(1900);
+  });
+
+  it("is ignored when the row has none, or only some of the four numbers", () => {
+    expect(fromRow(toRow(DEFAULT_PROFILE))!.customTarget).toBeUndefined();
+    expect(fromRow({ ...toRow(DEFAULT_PROFILE), custom_kcal: 2300 })!.customTarget).toBeUndefined();
+    expect(targetOf(DEFAULT_PROFILE).custom).toBeUndefined();
+  });
+
+  it("toCustomTarget takes whole numbers in range, typed or stored", () => {
+    expect(toCustomTarget({ kcal: "2200", proteinG: "140", carbsG: "0", fatG: "70" })).toEqual({ kcal: 2200, proteinG: 140, carbsG: 0, fatG: 70 });
+    expect(toCustomTarget({ kcal: "", proteinG: 1, carbsG: 1, fatG: 1 })).toBeNull();
+    expect(toCustomTarget({ kcal: 900, proteinG: 1, carbsG: 1, fatG: 1 })).toBeNull();
+    expect(toCustomTarget({ kcal: 2000, proteinG: 1001, carbsG: 1, fatG: 1 })).toBeNull();
+    expect(toCustomTarget({ kcal: 2000.5, proteinG: 1, carbsG: 1, fatG: 1 })).toBeNull();
+    expect(toCustomTarget({ kcal: null, proteinG: null, carbsG: null, fatG: null })).toBeNull();
   });
 });

@@ -8,9 +8,10 @@ import { ArrowLeftIcon, ArrowRightIcon } from "@/components/Icons";
 import { LogoutButton } from "@/components/LogoutButton";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { Screen } from "@/components/Screen";
+import { TargetEditor } from "@/components/TargetEditor";
 import { Eyebrow, Title } from "@/components/Type";
 import { birthLabel } from "@/lib/birth";
-import { fromRow, targetOf } from "@/lib/profile";
+import { calculatedTargetOf, fromRow, targetOf } from "@/lib/profile";
 import { currentUser } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVITIES, GOALS, SEXES } from "@/lib/target";
@@ -110,7 +111,8 @@ async function Account() {
             <section className="flex flex-col gap-3 rounded-hero bg-green p-[18px] text-bg desk:min-w-0 desk:flex-[2_1_480px] desk:flex-row desk:flex-wrap desk:items-center desk:gap-6 desk:p-7">
               <div className="flex flex-col gap-3 desk:min-w-[300px] desk:flex-1 desk:gap-4">
                 <span className="font-mono text-[10px] font-bold tracking-[1.5px] text-gold uppercase desk:text-[11px]">
-                  Daily target · {label(GOALS, profile.goal)}
+                  Daily target ·{" "}
+                  {target.custom ? "Your own" : label(GOALS, profile.goal)}
                 </span>
                 <div className="flex items-baseline gap-2 desk:gap-2.5">
                   <span className="font-brand text-[44px] leading-none desk:text-[64px]">
@@ -152,6 +154,14 @@ async function Account() {
             </section>
           )}
         </div>
+
+        {target && profile && (
+          <TargetEditor
+            current={target}
+            calculated={calculatedTargetOf(profile)}
+            custom={!!target.custom}
+          />
+        )}
 
         <div className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-start desk:gap-6">
           {profile && (

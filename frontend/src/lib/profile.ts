@@ -14,6 +14,23 @@ import {
   type Target,
 } from "./target";
 
+/** A daily target the person typed in themselves, used instead of the calculated one until they reset it. */
+export type CustomTarget = { kcal: number; proteinG: number; carbsG: number; fatG: number };
+
+export const CUSTOM_LIMITS = { kcal: { min: 1000, max: 6000 }, macro: { min: 0, max: 1000 } };
+
+/** A CustomTarget from untrusted values (the form, a database row), or null if any is missing, not a whole number or
+ *  out of range. */
+export function toCustomTarget(raw: { kcal: unknown; proteinG: unknown; carbsG: unknown; fatG: unknown }): CustomTarget | null {
+  const nums = [raw.kcal, raw.proteinG, raw.carbsG, raw.fatG].map((v) => (v === null || v === "" ? NaN : Number(v)));
+  if (!nums.every((n) => Number.isInteger(n))) return null;
+  const [kcal, proteinG, carbsG, fatG] = nums;
+  const { kcal: k, macro: m } = CUSTOM_LIMITS;
+  if (kcal < k.min || kcal > k.max) return null;
+  if ([proteinG, carbsG, fatG].some((n) => n < m.min || n > m.max)) return null;
+  return { kcal, proteinG, carbsG, fatG };
+}
+
 export type Profile = {
   goal: Goal;
   activity: Activity;
@@ -24,6 +41,8 @@ export type Profile = {
   birthDate: string | null;
   heightCm: number;
   weightKg: number;
+  /** Set when the person chose their own daily target (see targetOf); not part of the form's inputs. */
+  customTarget?: CustomTarget | null;
 };
 
 /** A profile row as it is stored (snake_case, with the target saved next to the inputs). */
@@ -76,8 +95,15 @@ export function toProfile(raw: unknown, now: Date = new Date()): Profile | null 
   return isValidBody(p) ? p : null;
 }
 
+/** The daily target: the person's own if they set one, else worked out from their body, activity and goal. */
 export function targetOf(p: Profile): Target {
-  return dailyTarget(p, p.goal, p.activity)!; // a valid Profile always has a target
+  const calculated = dailyTarget(p, p.goal, p.activity)!; // a valid Profile always has a target
+  return p.customTarget ? { ...calculated, ...p.customTarget, floored: false, custom: true } : calculated;
+}
+
+/** The target worked out from the body alone, ignoring any custom one (to offer "back to calculated"). */
+export function calculatedTargetOf(p: Profile): Target {
+  return dailyTarget(p, p.goal, p.activity)!;
 }
 
 export function toRow(p: Profile): ProfileRow {
@@ -101,7 +127,10 @@ export function toRow(p: Profile): ProfileRow {
 export function fromRow(row: unknown): Profile | null {
   if (typeof row !== "object" || row === null) return null;
   const r = row as Record<string, unknown>;
-  return toProfile({ goal: r.goal, activity: r.activity, sex: r.sex, age: r.age, birthDate: r.birth_date, heightCm: r.height_cm, weightKg: r.weight_kg });
+  const profile = toProfile({ goal: r.goal, activity: r.activity, sex: r.sex, age: r.age, birthDate: r.birth_date, heightCm: r.height_cm, weightKg: r.weight_kg });
+  if (!profile) return null;
+  const customTarget = toCustomTarget({ kcal: r.custom_kcal, proteinG: r.custom_protein_g, carbsG: r.custom_carbs_g, fatG: r.custom_fat_g });
+  return customTarget ? { ...profile, customTarget } : profile;
 }
 
 // A guest fills the profile in before they have an account; it waits here until they sign up.

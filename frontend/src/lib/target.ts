@@ -51,6 +51,8 @@ export type Target = {
   maintenance: number;
   /** The goal asked for less than is safe, so the target was raised to the floor. */
   floored: boolean;
+  /** The person set these numbers themselves instead of using the calculated ones. */
+  custom?: boolean;
 };
 
 const inRange = (n: number, r: { min: number; max: number }) =>

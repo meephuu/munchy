@@ -126,3 +126,7 @@ assumed amounts, **High** if neither.
 ## Page changes
 
 Home, Coach, Progress, Me and Log a dish live in `src/app/(member)/`, whose layout renders the desktop sidebar once, so it stays while only the page beside it changes. Each page shows a `PageSkeleton` while loading, and its content fades in (`page-in` in `globals.css`).
+
+## Own daily target
+
+On Me, "Set your own goal" lets a member type their own calories and macros. They are saved in four nullable `custom_*` columns on `profiles` (`supabase/migrations/20261107000000_custom_target.sql`); `targetOf` in `src/lib/profile.ts` uses them instead of the calculated target, so Home, Coach, Progress and the sidebar follow. Editing the profile does not clear them; "Go back to calculated" does.

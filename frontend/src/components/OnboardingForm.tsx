@@ -318,7 +318,12 @@ export function OnboardingForm({
                 Worked out with the Mifflin-St Jeor formula from your body, your
                 typical day and your goal.
               </p>
-              {target?.floored && (
+              {saved?.customTarget && (
+            <span className="text-[11px] text-ink-muted desk:text-green-soft">
+              You set your own target on Me; it stays as it is when you save here.
+            </span>
+          )}
+          {target?.floored && (
                 <span className="text-[11px] text-ink-muted desk:text-green-soft">
                   I kept this at a safe minimum: eating less than this
                   isn&apos;t a good idea.
