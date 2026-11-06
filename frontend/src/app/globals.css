@@ -399,6 +399,32 @@ li:has(> div > button[aria-expanded]):hover {
   background-color: #f8f3ea;
 }
 
+/* List rows that run the full width of a card (ingredients, shortcuts, today's meals on desktop): on hover the row gets a
+   soft rounded tint that reaches 12 px past the text on both sides (a sideways shadow, so nothing moves), instead of a flat
+   band hard against the text. The divider under the row hides while it is tinted. */
+.row-hover {
+  border-radius: 12px;
+}
+.row-hover:hover,
+li:has(> div > button[aria-expanded]):hover {
+  background-color: var(--color-bg);
+}
+.row-hover:hover {
+  box-shadow:
+    -12px 0 0 var(--color-bg),
+    12px 0 0 var(--color-bg);
+  border-bottom-color: transparent;
+}
+@media (min-width: 1024px) {
+  li:has(> div > button[aria-expanded]):hover {
+    border-radius: 12px;
+    box-shadow:
+      -12px 0 0 var(--color-bg),
+      12px 0 0 var(--color-bg);
+    border-bottom-color: transparent;
+  }
+}
+
 /* the dashed "next meal" rows */
 a[href].border-dashed:hover {
   background-color: var(--color-surface);

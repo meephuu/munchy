@@ -278,7 +278,7 @@ function Shortcut({
   return (
     <Link
       href={href}
-      className={`flex min-h-14 items-center gap-3 py-2 text-ink hover:bg-bg/60 desk:min-h-[72px] ${last ? "" : "border-b border-divider"}`}
+      className={`flex min-h-14 items-center gap-3 py-2 row-hover text-ink desk:min-h-[72px] ${last ? "" : "border-b border-divider"}`}
     >
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-sm font-semibold">{title}</span>

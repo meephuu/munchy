@@ -426,7 +426,7 @@ export function DishResult({
                         aria-expanded={openRow === i}
                         aria-controls={`amount-${i}`}
                         onClick={() => setOpenRow(openRow === i ? null : i)}
-                        className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 py-2 text-left hover:bg-bg/60 disabled:cursor-default desk:min-h-14 desk:gap-3.5"
+                        className="flex min-h-11 w-full row-hover cursor-pointer items-center gap-2.5 py-2 text-left disabled:cursor-default desk:min-h-14 desk:gap-3.5"
                       >
                         <span
                           aria-hidden="true"
