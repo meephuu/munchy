@@ -122,3 +122,7 @@ assumed amounts, **High** if neither.
 - Coach (placeholder for now), editing a logged meal or a saved dish (delete and create again instead).
 - Place and tweak chips are approximations (fixed rules), not data from the backend.
 - Sodium: the database has none, so the fourth tile shows total weight instead.
+
+## Page changes
+
+Home, Coach, Progress, Me and Log a dish live in `src/app/(member)/`, whose layout renders the desktop sidebar once, so it stays while only the page beside it changes. Each page shows a `PageSkeleton` while loading, and its content fades in (`page-in` in `globals.css`).

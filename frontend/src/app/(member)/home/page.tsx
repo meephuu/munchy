@@ -7,18 +7,18 @@ import { DishSearchBar } from "@/components/DishSearchBar";
 import { FavoritesList } from "@/components/FavoritesList";
 import { Greeting } from "@/components/Greeting";
 import { HomeToday } from "@/components/HomeToday";
+import { PageSkeleton } from "@/components/PageSkeleton";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { fromRow, targetOf } from "@/lib/profile";
 import { currentUser } from "@/lib/supabase/claims";
-import { memberShell } from "@/lib/shell";
 import { createClient } from "@/lib/supabase/server";
 
 // Home for people who are logged in (design/screens/Main.dc.html): how much of today's target is left,
 // the macros, and what was eaten today. Reading the login is request-time work, so it sits behind <Suspense>.
 export default function HomePage() {
   return (
-    <Suspense fallback={<Screen>{null}</Screen>}>
+    <Suspense fallback={<PageSkeleton />}>
       <Home />
     </Suspense>
   );
@@ -44,7 +44,7 @@ async function Home() {
 
   return (
     <Screen
-      shell={{ kind: "member", member: memberShell(user.email, profile) }}
+      shell={{ kind: "inShell" }}
     >
       <div className="flex flex-col gap-4 pt-2">
         <div className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-end desk:justify-between desk:gap-5">

@@ -208,3 +208,15 @@ body {
     transform: none;
   }
 }
+
+/* A page's content fades in and rises a few pixels when it appears (Screen), so changing page feels like one motion. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

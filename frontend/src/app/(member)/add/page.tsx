@@ -5,10 +5,10 @@ import { BottomNav } from "@/components/BottomNav";
 import { DishSearchBar } from "@/components/DishSearchBar";
 import { FavoritesManager } from "@/components/FavoritesManager";
 import { MyDishes } from "@/components/MyDishes";
+import { PageSkeleton } from "@/components/PageSkeleton";
 import { Screen } from "@/components/Screen";
 import { Eyebrow, Title } from "@/components/Type";
 import { fromRow } from "@/lib/profile";
-import { memberShell } from "@/lib/shell";
 import { currentUser } from "@/lib/supabase/claims";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,7 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 // (see the proxy). Reading the login is request-time work, so it sits behind <Suspense>.
 export default function AddPage() {
   return (
-    <Suspense fallback={<Screen>{null}</Screen>}>
+    <Suspense fallback={<PageSkeleton />}>
       <Add />
     </Suspense>
   );
@@ -37,7 +37,7 @@ async function Add() {
 
   return (
     <Screen
-      shell={{ kind: "member", member: memberShell(user.email, profile) }}
+      shell={{ kind: "inShell" }}
     >
       <div className="flex flex-1 flex-col gap-4 pt-4 desk:gap-6 desk:pt-0">
         <section className="flex flex-col gap-4 desk:flex-row desk:flex-wrap desk:items-center desk:gap-8 desk:rounded-hero desk:bg-surface desk:px-10 desk:py-9 desk:shadow-card">

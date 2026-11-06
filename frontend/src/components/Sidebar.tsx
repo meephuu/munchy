@@ -23,9 +23,10 @@ const ITEMS: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/account", label: "Me", icon: <UserIcon size={22} /> },
 ];
 
-export function Sidebar({ shell }: { shell: MemberShell }) {
+/** `shell` is null while the person's details are still loading: the same panel, without the target and email. */
+export function Sidebar({ shell }: { shell: MemberShell | null }) {
   const path = usePathname();
-  const initial = (shell.email ?? "?").charAt(0).toUpperCase();
+  const initial = (shell?.email ?? "?").charAt(0).toUpperCase();
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-[260px] shrink-0 py-5 pl-5 desk:block">
@@ -64,7 +65,7 @@ export function Sidebar({ shell }: { shell: MemberShell }) {
           })}
         </nav>
 
-        {shell.targetKcal !== null && (
+        {shell && shell.targetKcal !== null && (
           <div className="mt-auto flex flex-col gap-1.5 rounded-row bg-bg p-3.5">
             <Eyebrow className="text-[9px]">Daily target</Eyebrow>
             <span className="font-brand text-2xl leading-none text-green">
@@ -82,7 +83,7 @@ export function Sidebar({ shell }: { shell: MemberShell }) {
 
         <Link
           href="/account"
-          className={`flex items-center gap-2.5 px-1 text-ink ${shell.targetKcal === null ? "mt-auto" : ""}`}
+          className={`flex items-center gap-2.5 px-1 text-ink ${!shell || shell.targetKcal === null ? "mt-auto" : ""}`}
         >
           <span
             aria-hidden="true"
@@ -92,7 +93,7 @@ export function Sidebar({ shell }: { shell: MemberShell }) {
           </span>
           <span className="flex min-w-0 flex-col">
             <span className="truncate text-[13px] font-semibold">
-              {shell.email ?? "Your account"}
+              {shell ? (shell.email ?? "Your account") : "Your account"}
             </span>
             <span className="font-mono text-[9px] tracking-[1px] text-ink-muted uppercase">
               Member
