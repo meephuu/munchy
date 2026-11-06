@@ -395,8 +395,20 @@ a[aria-label="Log a dish"]:hover {
 }
 
 /* a meal on Home: the whole row tints, since only its title is the button */
-li:has(> div > button[aria-expanded]):hover {
-  background-color: #f8f3ea;
+li:has(> div > button[aria-expanded]) {
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease;
+}
+@media (max-width: 1023.98px) {
+  /* on a phone the meal is a white card: it gets the same hover as the other cards (cream tint, lift, softer shadow) */
+  li:has(> div > button[aria-expanded]):hover {
+    background-color: #fcf9f3;
+    transform: translateY(-1px);
+    filter: drop-shadow(0 5px 8px rgb(70 50 20 / 0.08));
+  }
 }
 
 /* List rows that run the full width of a card (ingredients, shortcuts, today's meals on desktop): on hover the row gets a
@@ -405,8 +417,7 @@ li:has(> div > button[aria-expanded]):hover {
 .row-hover {
   border-radius: 12px;
 }
-.row-hover:hover,
-li:has(> div > button[aria-expanded]):hover {
+.row-hover:hover {
   background-color: var(--color-bg);
 }
 .row-hover:hover {
@@ -417,6 +428,7 @@ li:has(> div > button[aria-expanded]):hover {
 }
 @media (min-width: 1024px) {
   li:has(> div > button[aria-expanded]):hover {
+    background-color: var(--color-bg);
     border-radius: 12px;
     box-shadow:
       -12px 0 0 var(--color-bg),
