@@ -9,30 +9,30 @@
 const M_PATH =
   "M43 214H457L524 504L588 214H979V796H680V472L603 796H404L327 474V796H43Z";
 
-// Each bite is a big circle with two smaller ones for the teeth, on its side facing down-right (the way the eating goes).
-// They start at the top-left corner and work across and down, each next to what is already gone, until the whole M is
+// Each bite is a big circle with two smaller ones for the teeth, on its side facing down-left (the way the eating goes).
+// They start at the top-right corner and work across and down, each next to what is already gone, until the whole M is
 // taken (checked by sampling every point of the letter against the circles).
 const BITES = [
-  { x: 60, y: 260, r: 230 },
-  { x: 300, y: 260, r: 230 },
-  { x: 60, y: 560, r: 230 },
-  { x: 540, y: 290, r: 230 },
-  { x: 300, y: 560, r: 230 },
-  { x: 60, y: 800, r: 200 },
-  { x: 780, y: 290, r: 230 },
-  { x: 540, y: 580, r: 230 },
-  { x: 300, y: 800, r: 220 },
-  { x: 990, y: 300, r: 230 },
-  { x: 780, y: 600, r: 230 },
-  { x: 540, y: 800, r: 220 },
-  { x: 990, y: 640, r: 230 },
-  { x: 780, y: 810, r: 220 },
-  { x: 990, y: 800, r: 200 },
+  { x: 962, y: 260, r: 230 },
+  { x: 722, y: 260, r: 230 },
+  { x: 962, y: 560, r: 230 },
+  { x: 482, y: 290, r: 230 },
+  { x: 722, y: 560, r: 230 },
+  { x: 962, y: 800, r: 200 },
+  { x: 242, y: 290, r: 230 },
+  { x: 482, y: 580, r: 230 },
+  { x: 722, y: 800, r: 220 },
+  { x: 32, y: 300, r: 230 },
+  { x: 242, y: 600, r: 230 },
+  { x: 482, y: 800, r: 220 },
+  { x: 32, y: 640, r: 230 },
+  { x: 242, y: 810, r: 220 },
+  { x: 32, y: 800, r: 200 },
 ];
 
-const EAT_DIRECTION = Math.PI / 4; // down and to the right
+const EAT_DIRECTION = (3 * Math.PI) / 4; // down and to the left
 
-/** The circles of one bite: the big one and two teeth on its leading (down-right) side. */
+/** The circles of one bite: the big one and two teeth on its leading (down-left) side. */
 function biteCircles({ x, y, r }: (typeof BITES)[number]) {
   const a = EAT_DIRECTION;
   const teeth = [-1, 1].map((s) => {
@@ -48,11 +48,8 @@ function biteCircles({ x, y, r }: (typeof BITES)[number]) {
 
 // where each crumb of a bite goes (user units of the 1024 box): sideways, then down
 const CRUMBS = [
-  { dx: -230, dy: 300, rot: -200, size: 48 },
-  { dx: -90, dy: 380, rot: 160, size: 38 },
-  { dx: 40, dy: 340, rot: -120, size: 54 },
-  { dx: 150, dy: 420, rot: 240, size: 42 },
-  { dx: 260, dy: 310, rot: -180, size: 36 },
+  { dx: -150, dy: 230, rot: -200, size: 34 },
+  { dx: 60, dy: 260, rot: 160, size: 28 },
 ];
 
 const TICK = 0.4; // seconds between bites
