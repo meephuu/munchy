@@ -34,7 +34,9 @@ export function Screen({
             : "desk:px-10 desk:pt-9 desk:pb-12"
         }`}
       >
-        <div className="flex flex-1 flex-col desk:mx-auto desk:w-full desk:max-w-[1120px] desk:flex-none desk:gap-6">
+        <div
+          className={`flex flex-1 flex-col desk:mx-auto desk:w-full desk:flex-none desk:gap-6 ${guest ? "" : "desk:max-w-[1120px]"}`}
+        >
           {children}
         </div>
       </main>

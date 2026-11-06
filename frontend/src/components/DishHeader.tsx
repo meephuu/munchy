@@ -5,27 +5,37 @@ import { Eyebrow, Title } from "@/components/Type";
 
 /** Top bar of the dish screens (design "Bite check"): back button, eyebrow, and the dish as the title.
  *  The last word of the dish is set in italic green like the design's "Pad kra pao, *fried egg*". */
-export function DishHeader({ dish, member = false }: { dish?: string; member?: boolean }) {
+export function DishHeader({
+  dish,
+  member = false,
+}: {
+  dish?: string;
+  member?: boolean;
+}) {
   const words = dish?.trim().split(/\s+/) ?? [];
   const accent = words.length > 1 ? words.pop() : undefined;
   const lead = words.join(" ") || undefined;
   const title = dish ? (
-    <Title lead={lead} accent={accent} className="line-clamp-2 text-xl first-letter:uppercase" />
+    <Title
+      lead={lead}
+      accent={accent}
+      className="line-clamp-2 text-xl first-letter:uppercase desk:text-[32px]"
+    />
   ) : (
     <Title lead="Working it" accent="out…" className="text-xl" />
   );
 
   return (
-    <header className="flex items-center justify-between gap-3 pt-2">
-      <div className="flex min-w-0 items-center gap-3">
+    <header className="flex flex-wrap items-center justify-between gap-3 pt-2 desk:gap-4 desk:pt-0">
+      <div className="flex min-w-0 items-center gap-3 desk:gap-4">
         <Link
           href="/"
           aria-label="Back to search"
-          className="flex size-11 shrink-0 items-center justify-center rounded-row bg-surface text-ink shadow-row"
+          className="flex size-11 shrink-0 items-center justify-center rounded-row bg-surface text-ink shadow-row desk:size-12 desk:rounded-[14px]"
         >
           <ArrowLeftIcon size={20} />
         </Link>
-        <div className="flex min-w-0 flex-col gap-0.5">
+        <div className="flex min-w-0 flex-col gap-0.5 desk:gap-1">
           <Eyebrow>Bite check</Eyebrow>
           {title}
         </div>
@@ -33,7 +43,10 @@ export function DishHeader({ dish, member = false }: { dish?: string; member?: b
       {member && dish ? (
         <FavoriteButton title={dish} />
       ) : (
-        <Link href="/login" className="shrink-0 text-sm font-semibold">
+        <Link
+          href="/login"
+          className="shrink-0 text-sm font-semibold desk:hidden"
+        >
           Log in
         </Link>
       )}

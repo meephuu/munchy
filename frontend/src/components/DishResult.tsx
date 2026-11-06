@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
@@ -16,6 +17,7 @@ import {
 import { MacroLine } from "@/components/MacroLine";
 import { IngredientSearch } from "@/components/IngredientSearch";
 import { Screen } from "@/components/Screen";
+import { DishSearchBar } from "@/components/DishSearchBar";
 import { Eyebrow } from "@/components/Type";
 import { summarize, type Dish, type Ingredient } from "@/lib/estimate";
 import { toIngredient, type FoodHit } from "@/lib/foods";
@@ -182,302 +184,378 @@ export function DishResult({
   return (
     <Screen
       shell={
-        memberInfo ? { kind: "member", member: memberInfo } : { kind: "guest" }
+        memberInfo
+          ? { kind: "member", member: memberInfo }
+          : {
+              kind: "guest",
+              topBar: <DishSearchBar placeholder="Check another dish" />,
+            }
       }
     >
-      <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-3.5 desk:gap-6">
         <DishHeader dish={query} member={member} />
 
-        <div className="flex flex-col gap-2">
-          <Eyebrow tone="muted">Where&apos;s it from?</Eyebrow>
-          <div className="flex flex-wrap gap-2">
-            {PLACES.map((p) => (
-              <Chip
-                key={p.id}
-                selected={place === p.id}
-                onClick={() => setPlace(p.id)}
-              >
-                {p.label}
-              </Chip>
-            ))}
-          </div>
-        </div>
-
-        <section className="flex flex-col gap-3 rounded-hero bg-surface p-[18px] shadow-card">
-          <div className="flex items-center justify-between gap-2">
-            <Eyebrow>
-              {view.edited || adjusted ? "Estimated · edited" : "Estimated"}
-            </Eyebrow>
-            <span className="shrink-0 rounded-badge bg-green-tint px-2 py-1 font-mono text-[10px] tracking-[1px] text-green uppercase">
-              {dish.confidence} confidence
-            </span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span
-              aria-live="polite"
-              className="font-brand text-[46px] leading-none text-green"
-            >
-              {view.kcal}
-            </span>
-            <span className="text-[15px] font-semibold">kcal</span>
-          </div>
-          <span className="text-[13px] text-ink-muted">
-            Range{" "}
-            <b className="text-ink">
-              {view.low}–{view.high}
-            </b>{" "}
-            kcal
-          </span>
-
-          <div className="grid grid-cols-4 gap-2">
-            <MacroTile
-              label="Protein"
-              value={`${view.protein}g`}
-              valueClass="text-green"
-            />
-            <MacroTile
-              label="Carbs"
-              value={`${view.carbs}g`}
-              valueClass="text-bronze"
-            />
-            <MacroTile
-              label="Fat"
-              value={`${view.fat}g`}
-              valueClass="text-terracotta-text"
-            />
-            <MacroTile label="Weight" value={`${view.weight}g`} />
-          </div>
-        </section>
-
-        {dish.notices.length > 0 && (
-          <section
-            role="note"
-            className="rounded-card bg-terracotta-tint px-3.5 py-3"
-          >
-            <ul className="flex flex-col gap-1 text-[13px]">
-              {dish.notices.map((w) => (
-                <li key={w}>{w}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {tweaks.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <Eyebrow tone="muted">Tweak it</Eyebrow>
-            <div className="flex flex-wrap gap-2">
-              {tweaks.map((t) => (
-                <Chip
-                  key={t.id}
-                  selected={active.includes(t.id)}
-                  onClick={() =>
-                    setActive((all) =>
-                      all.includes(t.id)
-                        ? all.filter((x) => x !== t.id)
-                        : [...all, t.id],
-                    )
-                  }
-                >
-                  {t.label}
-                </Chip>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2">
-          <Eyebrow tone="muted">Ingredients · tap to change</Eyebrow>
-          <section className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row">
-            {view.rows.map((row, i) => {
-              if (removed.includes(i)) return null; // deleted by the user
-              const locked = i >= ingredients.length || mult[i] === 0; // the place's extra oil, or left out by a tweak
-              return (
-                <div
-                  key={i}
-                  className="border-b border-divider last:border-b-0"
-                >
-                  <button
-                    type="button"
-                    disabled={locked}
-                    aria-expanded={openRow === i}
-                    aria-controls={`amount-${i}`}
-                    onClick={() => setOpenRow(openRow === i ? null : i)}
-                    className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 py-2 text-left disabled:cursor-default"
-                  >
+        {/* One column on a phone (the order-* classes keep the phone's order); two on desktop. The wrappers with
+            `contents` do not exist on a phone, so the order-* items line up as one column there. */}
+        <div className="flex flex-col gap-3.5 desk:flex-row desk:flex-wrap desk:items-start desk:gap-6">
+          {/* ---- left column: the estimate and the log panel */}
+          <div className="contents desk:flex desk:min-w-0 desk:flex-[1_1_340px] desk:flex-col desk:gap-5">
+            <section className="order-2 flex flex-col gap-3 rounded-hero bg-surface p-[18px] shadow-card desk:order-none desk:gap-4 desk:p-[26px]">
+              <div className="flex items-center justify-between gap-2">
+                <Eyebrow>
+                  {view.edited || adjusted ? "Estimated · edited" : "Estimated"}
+                </Eyebrow>
+                <span className="shrink-0 rounded-badge bg-green-tint px-2 py-1 font-mono text-[10px] tracking-[1px] text-green uppercase">
+                  {dish.confidence} confidence
+                </span>
+              </div>
+              <div className="flex items-center gap-[18px]">
+                <div className="flex flex-1 flex-col gap-3 desk:gap-2">
+                  <div className="flex items-baseline gap-2">
                     <span
-                      aria-hidden="true"
-                      className="size-2 shrink-0 rounded-full"
-                      style={{ background: row.dot }}
-                    />
-                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="text-[13px] first-letter:uppercase">
-                        {row.name}{" "}
-                        {row.added && (
-                          <span className="font-mono text-[9px] tracking-[1px] text-bronze uppercase">
-                            added
-                          </span>
-                        )}
-                      </span>
-                      {mult[i] !== 0 && (
-                        <MacroLine
-                          protein={row.protein}
-                          carbs={row.carbs}
-                          fat={row.fat}
-                        />
-                      )}
-                    </span>
-                    <span
-                      className={`flex items-center gap-1 font-mono text-[11px] ${row.edited ? "font-bold text-green" : "text-ink-muted"}`}
+                      aria-live="polite"
+                      className="font-brand text-[46px] leading-none text-green desk:text-[64px]"
                     >
-                      {mult[i] === 0 ? "left out" : `${row.grams} g`}
-                      {!locked && <EditIcon size={12} aria-hidden />}
+                      {view.kcal}
                     </span>
-                    <span className="w-10 text-right text-[13px] font-semibold">
-                      {row.kcal}
+                    <span className="text-[15px] font-semibold desk:text-[17px]">
+                      kcal
                     </span>
-                  </button>
-                  {openRow === i && !locked && (
-                    <p className="pb-1 font-mono text-[10px] text-ink-muted">
-                      Per 100 g · {Math.round(ingredients[i].per100.kcal)} kcal
-                      · P {Math.round(ingredients[i].per100.protein * 10) / 10}{" "}
-                      · C {Math.round(ingredients[i].per100.carbs * 10) / 10} ·
-                      F {Math.round(ingredients[i].per100.fat * 10) / 10} g
+                  </div>
+                  <span className="text-[13px] text-ink-muted desk:text-sm">
+                    Range{" "}
+                    <b className="text-ink">
+                      {view.low}–{view.high}
+                    </b>{" "}
+                    kcal
+                  </span>
+                </div>
+                <Image
+                  src="/bowl.png"
+                  alt=""
+                  width={96}
+                  height={96}
+                  className="hidden shrink-0 desk:block"
+                />
+              </div>
+              <div className="grid grid-cols-4 gap-2 desk:grid-cols-2 desk:gap-2.5">
+                <MacroTile
+                  label="Protein"
+                  value={`${view.protein}g`}
+                  valueClass="text-green"
+                />
+                <MacroTile
+                  label="Carbs"
+                  value={`${view.carbs}g`}
+                  valueClass="text-bronze"
+                />
+                <MacroTile
+                  label="Fat"
+                  value={`${view.fat}g`}
+                  valueClass="text-terracotta-text"
+                />
+                <MacroTile label="Weight" value={`${view.weight}g`} />
+              </div>
+            </section>
+
+            {dish.notices.length > 0 && (
+              <section
+                role="note"
+                className="order-3 rounded-card bg-terracotta-tint px-3.5 py-3 desk:order-none"
+              >
+                <ul className="flex flex-col gap-1 text-[13px]">
+                  {dish.notices.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {member ? (
+              <div className="contents desk:flex desk:flex-col desk:gap-3.5 desk:rounded-hero desk:bg-surface desk:p-[22px] desk:shadow-card">
+                <div className="order-7 flex flex-col gap-2 desk:order-none desk:gap-3.5">
+                  <Eyebrow tone="muted">Log as</Eyebrow>
+                  <div className="flex flex-wrap gap-2">
+                    {SLOTS.map((o) => (
+                      <Chip
+                        key={o.id}
+                        selected={slot === o.id}
+                        onClick={() => setSlotChoice(o.id)}
+                      >
+                        {o.label}
+                      </Chip>
+                    ))}
+                  </div>
+                  <div className="flex flex-col gap-2 desk:flex-row desk:items-center desk:gap-3">
+                    <Eyebrow tone="muted">Time</Eyebrow>
+                    <TimePicker value={time} onChange={setTimeChoice} up />
+                  </div>
+                </div>
+                <div className="order-8 mt-6 flex flex-col gap-2 desk:order-none desk:mt-0">
+                  {logError && (
+                    <p
+                      role="alert"
+                      className="rounded-card bg-terracotta-tint px-3.5 py-2.5 text-[13px]"
+                    >
+                      {logError}
                     </p>
                   )}
-                  {openRow === i && !locked && (
-                    <AmountEditor
-                      id={`amount-${i}`}
-                      name={row.name}
-                      grams={row.grams}
-                      units={ingredients[i].units}
-                      estimated={
-                        Math.round(ingredients[i].grams * mult[i] * 10) / 10
-                      }
-                      baseLabel={row.added ? "Typical serving" : "As estimated"}
-                      onChange={(g) => setAmount(i, g)}
-                      onRemove={
-                        row.added
-                          ? () => removeAdded(i)
-                          : () => {
-                              setRemoved((all) => [...all, i]);
-                              setOpenRow(null);
-                            }
-                      }
-                    />
-                  )}
+                  <button
+                    type="button"
+                    onClick={logMeal}
+                    disabled={logging || nothingToLog}
+                    className="sticky bottom-5 flex h-14 w-full cursor-pointer items-center justify-center rounded-btn bg-green text-[15px] font-semibold text-bg hover:bg-green-dark disabled:cursor-not-allowed disabled:opacity-50 desk:static desk:h-14 desk:rounded-[18px] desk:text-base"
+                  >
+                    {logging
+                      ? "Logging…"
+                      : `Log to ${slotLabel(slot).toLowerCase()} · ${view.kcal} kcal`}
+                  </button>
                 </div>
-              );
-            })}
-            {adding ? (
-              <IngredientSearch
-                onPick={addFood}
-                onClose={() => setAdding(false)}
-              />
+              </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setAdding(true);
-                  setOpenRow(null);
-                }}
-                className="flex min-h-11 cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-green"
+              <Link
+                href="/onboarding"
+                className="sticky bottom-5 order-8 mt-6 flex h-16 items-center gap-3 rounded-btn bg-green px-[18px] text-bg hover:bg-green-dark desk:static desk:order-none desk:mt-0 desk:h-auto desk:rounded-hero desk:p-[22px]"
               >
-                <PlusIcon size={16} />
-                Add an ingredient
-              </button>
+                <LockIcon size={22} className="shrink-0 text-gold" />
+                <span className="flex flex-1 flex-col gap-0.5">
+                  <span className="text-[15px] font-semibold desk:text-base">
+                    See how this fits your day
+                  </span>
+                  <span className="text-xs text-green-soft">
+                    Free account · log meals &amp; get coached
+                  </span>
+                </span>
+                <ArrowRightIcon size={20} />
+              </Link>
             )}
-            {(view.edited || adjusted) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setExtra([]);
-                  setGrams(aiGrams);
-                  setRemoved([]);
-                  setPlace("stall");
-                  setActive([]);
-                  setOpenRow(null);
-                  setAdding(false);
-                }}
-                className="min-h-11 cursor-pointer text-left text-[13px] font-semibold text-green"
-              >
-                Reset to the estimate
-              </button>
-            )}
-          </section>
-        </div>
-
-        {assumptions.length > 0 && (
-          <details className="rounded-card bg-surface px-3.5 py-3 shadow-row">
-            <summary className="cursor-pointer text-[13px] text-ink-muted">
-              How we estimated this · {assumptions.length}{" "}
-              {assumptions.length === 1 ? "note" : "notes"}
-            </summary>
-            <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs text-ink-muted">
-              {assumptions.map((a) => (
-                <li key={a}>{a}</li>
-              ))}
-            </ul>
-          </details>
-        )}
-
-        {member && (
-          <div className="flex flex-col gap-2">
-            <Eyebrow tone="muted">Log as</Eyebrow>
-            <div className="flex flex-wrap gap-2">
-              {SLOTS.map((o) => (
-                <Chip
-                  key={o.id}
-                  selected={slot === o.id}
-                  onClick={() => setSlotChoice(o.id)}
-                >
-                  {o.label}
-                </Chip>
-              ))}
-            </div>
-            <Eyebrow tone="muted">Time</Eyebrow>
-            <TimePicker value={time} onChange={setTimeChoice} up />
           </div>
-        )}
-      </div>
 
-      {member ? (
-        <div className="sticky bottom-5 mt-6 flex flex-col gap-2">
-          {logError && (
-            <p
-              role="alert"
-              className="rounded-card bg-terracotta-tint px-3.5 py-2.5 text-[13px]"
-            >
-              {logError}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={logMeal}
-            disabled={logging || nothingToLog}
-            className="flex h-14 w-full cursor-pointer items-center justify-center rounded-btn bg-green text-[15px] font-semibold text-bg hover:bg-green-dark disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {logging
-              ? "Logging…"
-              : `Log to ${slotLabel(slot).toLowerCase()} · ${view.kcal} kcal`}
-          </button>
+          {/* ---- right column: where it's from, tweaks, the ingredients table, how we estimated it */}
+          <div className="contents desk:flex desk:min-w-0 desk:flex-[1.6_1_480px] desk:flex-col desk:gap-5">
+            <div className="contents desk:flex desk:flex-wrap desk:gap-x-10 desk:gap-y-5 desk:rounded-hero desk:bg-surface desk:px-[26px] desk:py-[22px] desk:shadow-card">
+              <div className="order-1 flex flex-col gap-2 desk:order-none desk:gap-2.5">
+                <Eyebrow tone="muted">Where&apos;s it from?</Eyebrow>
+                <div className="flex flex-wrap gap-2">
+                  {PLACES.map((pl) => (
+                    <Chip
+                      key={pl.id}
+                      selected={place === pl.id}
+                      onClick={() => setPlace(pl.id)}
+                    >
+                      {pl.label}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+
+              {tweaks.length > 0 && (
+                <div className="order-4 flex flex-col gap-2 desk:order-none desk:gap-2.5">
+                  <Eyebrow tone="muted">Tweak it</Eyebrow>
+                  <div className="flex flex-wrap gap-2">
+                    {tweaks.map((t) => (
+                      <Chip
+                        key={t.id}
+                        selected={active.includes(t.id)}
+                        onClick={() =>
+                          setActive((all) =>
+                            all.includes(t.id)
+                              ? all.filter((x) => x !== t.id)
+                              : [...all, t.id],
+                          )
+                        }
+                      >
+                        {t.label}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="order-5 flex flex-col gap-2 desk:order-none desk:gap-0 desk:rounded-hero desk:bg-surface desk:px-[26px] desk:pt-[18px] desk:pb-2.5 desk:shadow-card">
+              <Eyebrow tone="muted" className="desk:hidden">
+                Ingredients · tap to change
+              </Eyebrow>
+              <div className="hidden items-baseline justify-between pb-1.5 desk:flex">
+                <h2 className="font-heading text-xl font-semibold">
+                  Ingredients
+                </h2>
+                <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
+                  Click a row to change it
+                </span>
+              </div>
+              <div className="hidden gap-3.5 border-b border-divider py-2 font-mono text-[9px] tracking-[1px] text-ink-muted uppercase desk:flex">
+                <span className="w-2.5" />
+                <span className="flex-1">Ingredient</span>
+                <span className="w-[170px]">Macros</span>
+                <span className="w-[72px] text-right">Amount</span>
+                <span className="w-[52px] text-right">kcal</span>
+              </div>
+              <section className="flex flex-col rounded-card bg-surface px-3.5 py-1 shadow-row desk:rounded-none desk:bg-transparent desk:p-0 desk:shadow-none">
+                {view.rows.map((row, i) => {
+                  if (removed.includes(i)) return null; // deleted by the user
+                  const locked = i >= ingredients.length || mult[i] === 0; // the place's extra oil, or left out by a tweak
+                  return (
+                    <div
+                      key={i}
+                      className="border-b border-divider last:border-b-0 desk:last:border-b"
+                    >
+                      <button
+                        type="button"
+                        disabled={locked}
+                        aria-expanded={openRow === i}
+                        aria-controls={`amount-${i}`}
+                        onClick={() => setOpenRow(openRow === i ? null : i)}
+                        className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 py-2 text-left hover:bg-bg/60 disabled:cursor-default desk:min-h-14 desk:gap-3.5"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="size-2 shrink-0 rounded-full desk:size-2.5"
+                          style={{ background: row.dot }}
+                        />
+                        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                          <span className="text-[13px] first-letter:uppercase desk:text-[15px]">
+                            {row.name}{" "}
+                            {row.added && (
+                              <span className="font-mono text-[9px] tracking-[1px] text-bronze uppercase">
+                                added
+                              </span>
+                            )}
+                          </span>
+                          {mult[i] !== 0 && (
+                            <span className="desk:hidden">
+                              <MacroLine
+                                protein={row.protein}
+                                carbs={row.carbs}
+                                fat={row.fat}
+                              />
+                            </span>
+                          )}
+                        </span>
+                        <span className="hidden w-[170px] desk:block">
+                          {mult[i] !== 0 && (
+                            <MacroLine
+                              protein={row.protein}
+                              carbs={row.carbs}
+                              fat={row.fat}
+                              className="gap-x-2.5 text-[11px]"
+                            />
+                          )}
+                        </span>
+                        <span
+                          className={`flex items-center gap-1 font-mono text-[11px] desk:w-[72px] desk:justify-end desk:text-xs ${row.edited ? "font-bold text-green" : "text-ink-muted"}`}
+                        >
+                          {mult[i] === 0 ? "left out" : `${row.grams} g`}
+                          {!locked && <EditIcon size={12} aria-hidden />}
+                        </span>
+                        <span className="w-10 text-right text-[13px] font-semibold desk:w-[52px] desk:text-[15px]">
+                          {row.kcal}
+                        </span>
+                      </button>
+                      {openRow === i && !locked && (
+                        <p className="pb-1 font-mono text-[10px] text-ink-muted">
+                          Per 100 g · {Math.round(ingredients[i].per100.kcal)}{" "}
+                          kcal · P{" "}
+                          {Math.round(ingredients[i].per100.protein * 10) / 10}{" "}
+                          · C{" "}
+                          {Math.round(ingredients[i].per100.carbs * 10) / 10} ·
+                          F {Math.round(ingredients[i].per100.fat * 10) / 10} g
+                        </p>
+                      )}
+                      {openRow === i && !locked && (
+                        <AmountEditor
+                          id={`amount-${i}`}
+                          name={row.name}
+                          grams={row.grams}
+                          units={ingredients[i].units}
+                          estimated={
+                            Math.round(ingredients[i].grams * mult[i] * 10) / 10
+                          }
+                          baseLabel={
+                            row.added ? "Typical serving" : "As estimated"
+                          }
+                          onChange={(g) => setAmount(i, g)}
+                          onRemove={
+                            row.added
+                              ? () => removeAdded(i)
+                              : () => {
+                                  setRemoved((all) => [...all, i]);
+                                  setOpenRow(null);
+                                }
+                          }
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+                {adding ? (
+                  <IngredientSearch
+                    onPick={addFood}
+                    onClose={() => setAdding(false)}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdding(true);
+                      setOpenRow(null);
+                    }}
+                    className="flex min-h-11 cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-green desk:min-h-12 desk:text-sm"
+                  >
+                    <PlusIcon size={16} />
+                    Add an ingredient
+                  </button>
+                )}
+                {(view.edited || adjusted) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExtra([]);
+                      setGrams(aiGrams);
+                      setRemoved([]);
+                      setPlace("stall");
+                      setActive([]);
+                      setOpenRow(null);
+                      setAdding(false);
+                    }}
+                    className="min-h-11 cursor-pointer text-left text-[13px] font-semibold text-green desk:text-sm"
+                  >
+                    Reset to the estimate
+                  </button>
+                )}
+              </section>
+            </div>
+
+            {assumptions.length > 0 && (
+              <>
+                <details className="order-6 rounded-card bg-surface px-3.5 py-3 shadow-row desk:hidden">
+                  <summary className="cursor-pointer text-[13px] text-ink-muted">
+                    How we estimated this · {assumptions.length}{" "}
+                    {assumptions.length === 1 ? "note" : "notes"}
+                  </summary>
+                  <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs text-ink-muted">
+                    {assumptions.map((a) => (
+                      <li key={a}>{a}</li>
+                    ))}
+                  </ul>
+                </details>
+                <section className="hidden flex-col gap-2.5 rounded-hero bg-surface px-[26px] py-[22px] shadow-card desk:flex">
+                  <Eyebrow tone="muted">
+                    How we estimated this · {assumptions.length}{" "}
+                    {assumptions.length === 1 ? "note" : "notes"}
+                  </Eyebrow>
+                  <ul className="flex list-disc flex-col gap-1.5 pl-4 text-[13px] text-ink-muted">
+                    {assumptions.map((a) => (
+                      <li key={a}>{a}</li>
+                    ))}
+                  </ul>
+                </section>
+              </>
+            )}
+          </div>
         </div>
-      ) : (
-        <Link
-          href="/onboarding"
-          className="sticky bottom-5 mt-6 flex h-16 items-center gap-3 rounded-btn bg-green px-[18px] text-bg hover:bg-green-dark"
-        >
-          <LockIcon size={22} className="shrink-0 text-gold" />
-          <span className="flex flex-1 flex-col gap-0.5">
-            <span className="text-[15px] font-semibold">
-              See how this fits your day
-            </span>
-            <span className="text-xs text-green-soft">
-              Free account · log meals &amp; get coached
-            </span>
-          </span>
-          <ArrowRightIcon size={20} />
-        </Link>
-      )}
+      </div>
     </Screen>
   );
 }
@@ -492,11 +570,13 @@ function MacroTile({
   valueClass?: string;
 }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-field bg-bg p-2">
+    <div className="flex flex-col gap-0.5 rounded-field bg-bg p-2 desk:gap-1 desk:rounded-row desk:p-3">
       <span className="font-mono text-[9px] text-ink-muted uppercase">
         {label}
       </span>
-      <span className={`text-base font-semibold ${valueClass}`}>{value}</span>
+      <span className={`text-base font-semibold desk:text-xl ${valueClass}`}>
+        {value}
+      </span>
     </div>
   );
 }

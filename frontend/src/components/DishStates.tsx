@@ -1,5 +1,6 @@
 import { DishHeader } from "@/components/DishHeader";
 import { LoadingSteps } from "@/components/LoadingSteps";
+import { DishSearchBar } from "@/components/DishSearchBar";
 import { Screen } from "@/components/Screen";
 import type { MemberShell } from "@/lib/shell";
 import { Eyebrow, Title } from "@/components/Type";
@@ -35,7 +36,16 @@ export function DishProblem({
   member?: MemberShell | null;
 }) {
   return (
-    <Screen shell={member ? { kind: "member", member } : { kind: "guest" }}>
+    <Screen
+      shell={
+        member
+          ? { kind: "member", member }
+          : {
+              kind: "guest",
+              topBar: <DishSearchBar placeholder="Check another dish" />,
+            }
+      }
+    >
       <div className="flex flex-col gap-3.5">
         <DishHeader dish={query} />
         <section

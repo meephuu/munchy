@@ -16,7 +16,12 @@ export function FavoriteButton({ title }: { title: string }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = (await createClient()?.from("favorites").select("id").eq("key", key).maybeSingle()) ?? {};
+      const { data } =
+        (await createClient()
+          ?.from("favorites")
+          .select("id")
+          .eq("key", key)
+          .maybeSingle()) ?? {};
       if (!cancelled) setSaved(!!data);
     })();
     return () => {
@@ -31,7 +36,9 @@ export function FavoriteButton({ title }: { title: string }) {
     setFailed(false);
     const { error } = saved
       ? await supabase.from("favorites").delete().eq("key", key)
-      : await supabase.from("favorites").insert({ title: title.trim().slice(0, 500), key });
+      : await supabase
+          .from("favorites")
+          .insert({ title: title.trim().slice(0, 500), key });
     setBusy(false);
     if (error) return setFailed(true);
     setSaved(!saved);
@@ -45,11 +52,18 @@ export function FavoriteButton({ title }: { title: string }) {
       aria-pressed={saved === true}
       aria-label={saved ? "Remove from favorites" : "Save to favorites"}
       title={failed ? "Couldn't save, try again" : undefined}
-      className={`flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-row bg-surface shadow-row disabled:opacity-60 ${
-        failed ? "text-terracotta-text" : saved ? "text-terracotta" : "text-ink-muted"
+      className={`flex size-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-row bg-surface shadow-row disabled:opacity-60 desk:h-12 desk:w-auto desk:rounded-[14px] desk:px-4 ${
+        failed
+          ? "text-terracotta-text"
+          : saved
+            ? "text-terracotta"
+            : "text-ink-muted"
       }`}
     >
       <HeartIcon size={20} filled={saved === true} />
+      <span className="hidden text-sm font-semibold text-ink desk:inline">
+        {saved ? "Saved" : "Save"}
+      </span>
     </button>
   );
 }
