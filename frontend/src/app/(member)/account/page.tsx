@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AccountsOff } from "@/components/AccountsOff";
-import { BottomNav } from "@/components/BottomNav";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/Icons";
 import { LogoutButton } from "@/components/LogoutButton";
 import { PageSkeleton } from "@/components/PageSkeleton";
@@ -235,7 +234,6 @@ async function Account() {
           </p>
         </div>
       </div>
-      <BottomNav />
     </Screen>
   );
 }

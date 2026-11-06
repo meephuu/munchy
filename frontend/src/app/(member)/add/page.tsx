@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AccountsOff } from "@/components/AccountsOff";
-import { BottomNav } from "@/components/BottomNav";
 import { DishSearchBar } from "@/components/DishSearchBar";
 import { FavoritesManager } from "@/components/FavoritesManager";
 import { MyDishes } from "@/components/MyDishes";
@@ -62,7 +61,6 @@ async function Add() {
 
         <MyDishes favorites={<FavoritesManager />} />
       </div>
-      <BottomNav />
     </Screen>
   );
 }

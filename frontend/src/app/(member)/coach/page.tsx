@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AccountsOff } from "@/components/AccountsOff";
-import { BottomNav } from "@/components/BottomNav";
 import { CoachView } from "@/components/CoachView";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { Screen } from "@/components/Screen";
@@ -38,7 +37,6 @@ async function Coach() {
       <div className="flex flex-col gap-4 pt-4 desk:gap-6 desk:pt-0">
         <CoachView target={profile ? targetOf(profile) : null} />
       </div>
-      <BottomNav />
     </Screen>
   );
 }

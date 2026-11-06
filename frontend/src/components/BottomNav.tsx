@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { BarsIcon, ChatIcon, HomeIcon, PlusIcon, UserIcon } from "@/components/Icons";
 
 // Floating white bar for logged-in screens (design/screens/Main.dc.html): Home, Coach, the raised green
-// "+" (log a dish), Progress, Me. 68px tall, 12px from the sides of the phone, sticky at the bottom.
+// "+" (log a dish), Progress, Me. 68px tall, 12px from the sides of the phone, floating at the bottom of the window.
 
 const ITEMS: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/home", label: "Home", icon: <HomeIcon size={22} /> },
@@ -38,7 +38,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main"
-      className="sticky bottom-4 -mx-2 mt-6 flex h-[68px] desk:hidden items-center justify-around rounded-panel bg-surface shadow-nav"
+      className="fixed bottom-4 left-1/2 z-30 flex h-[68px] w-[calc(100%-24px)] max-w-[560px] -translate-x-1/2 items-center justify-around rounded-panel bg-surface shadow-nav desk:hidden"
     >
       {item(ITEMS[0])}
       {item(ITEMS[1])}

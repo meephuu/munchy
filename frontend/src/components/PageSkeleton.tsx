@@ -1,4 +1,3 @@
-import { BottomNav } from "@/components/BottomNav";
 import { Screen } from "@/components/Screen";
 
 /** What a (member) page shows while its data loads: quiet blocks in the shape of the page, and the phone's bottom nav,
@@ -23,7 +22,6 @@ export function PageSkeleton() {
           <div className="h-[84px] flex-1 animate-pulse rounded-card bg-sand/50" />
         </div>
       </div>
-      <BottomNav />
     </Screen>
   );
 }

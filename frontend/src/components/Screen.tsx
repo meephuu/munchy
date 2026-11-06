@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BottomNav } from "@/components/BottomNav";
 import { GuestTopBar } from "@/components/GuestTopBar";
 import { Sidebar } from "@/components/Sidebar";
 import type { MemberShell } from "@/lib/shell";
@@ -41,7 +42,9 @@ export function Screen({
         </GuestTopBar>
       )}
       <main
-        className={`flex min-h-dvh w-full flex-col px-5 pt-5 pb-5 frame:min-h-full tab:min-h-dvh desk:min-h-0 desk:min-w-0 desk:flex-1 ${
+        className={`flex min-h-dvh w-full flex-col px-5 pt-5 ${
+          shell?.kind === "inShell" ? "pb-28" : "pb-5"
+        } frame:min-h-full tab:min-h-dvh desk:min-h-0 desk:min-w-0 desk:flex-1 ${
           guest
             ? "desk:mx-auto desk:max-w-[1240px] desk:px-10 desk:pt-6 desk:pb-12"
             : "desk:px-10 desk:pt-9 desk:pb-12"
@@ -53,6 +56,9 @@ export function Screen({
           {children}
         </div>
       </main>
+      {/* the phone's bottom menu floats at the bottom of the window; it lives here, outside the page that fades in,
+          because a fixed element inside something that is being transformed would jump */}
+      {shell?.kind === "inShell" && <BottomNav />}
     </div>
   );
 }

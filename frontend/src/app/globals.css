@@ -414,13 +414,9 @@ li:has(> div > button[aria-expanded]) {
 /* List rows that run the full width of a card (ingredients, shortcuts, today's meals on desktop): on hover the row gets a
    soft rounded tint that reaches 12 px past the text on both sides (a sideways shadow, so nothing moves), instead of a flat
    band hard against the text. The divider under the row hides while it is tinted. */
-.row-hover {
-  border-radius: 12px;
-}
 .row-hover:hover {
   background-color: var(--color-bg);
-}
-.row-hover:hover {
+  border-radius: 12px;
   box-shadow:
     -12px 0 0 var(--color-bg),
     12px 0 0 var(--color-bg);
@@ -447,4 +443,40 @@ a[href].border-dashed:hover {
 button.bg-bg.border-border:not(:disabled):hover {
   border-color: var(--color-green);
   background-color: var(--color-green-tint);
+}
+
+/*
+ * Scrollbars: slim, rounded, in the app's own sand colours instead of the browser's grey. The thumb darkens when you point
+ * at it. The track is clear, so the bar floats over the cream page. (Chrome, Edge and Safari use the ::-webkit rules;
+ * Firefox gets the two standard properties.)
+ */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-sand-dark) transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-sand-dark);
+  background-clip: padding-box;
+  border: 4px solid transparent;
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-bronze-light);
+}
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--color-bronze);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
