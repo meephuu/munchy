@@ -344,7 +344,7 @@ def test_a_slice_of_an_unknown_dish_weighs_a_slice_not_a_serving_per_part(db_pat
 def test_no_amount_means_a_typical_serving_and_grams_are_used_as_given(db_path):
     one = estimate("x", parse_fn=lambda t: [ParsedItem(food="chocolate chip bread")],
                    matcher=bread_matcher(db_path), db_path=db_path, decompose_fn=lambda d: bread_parts())
-    assert sum(l.grams for l in one.lines) == pytest.approx(250, abs=0.5)
+    assert sum(l.grams for l in one.lines) == pytest.approx(200, abs=0.5)    # a bread dish: a lighter serving
     grams = estimate("x", parse_fn=lambda t: [ParsedItem(food="chocolate chip bread", qty=100, unit="g")],
                      matcher=bread_matcher(db_path), db_path=db_path, decompose_fn=lambda d: bread_parts())
     assert sum(l.grams for l in grams.lines) == pytest.approx(100, abs=0.5)
@@ -368,3 +368,24 @@ def test_a_weak_close_food_is_not_used(db_path):
     est = estimate("x", parse_fn=lambda t: [BREAD], matcher=matcher, db_path=db_path,
                    decompose_fn=lambda d: bread_parts(similar=["sweet bread"]))
     assert len(est.lines) == 3 and all(i.implied_for for i, _ in est.matches)
+
+
+# --- concentrated foods and seasonings are only ever a little of a dish ----------------------
+
+def test_a_dense_typical_part_is_limited_by_calories_and_says_so(db_path):
+    matcher = StubMatcher(db_path, {
+        "buttery treat": [candidate(db_path, "ไข่ต้ม", 0.70)],
+        "flour": [candidate(db_path, "ผักสลัด", 1.0, "exact")],
+        "butter": [candidate(db_path, "เนย", 1.0, "exact")],
+    })
+    parts = Decomposition(components=[Part(name="flour", role="base"), Part(name="butter", role="filling")])
+    est = estimate("x", parse_fn=lambda t: [ParsedItem(food="buttery treat")], matcher=matcher, db_path=db_path,
+                   decompose_fn=lambda d: parts)
+    butter = next(l for l in est.lines if l.name == "butter")
+    assert butter.kcal <= 150.5                                   # a quarter of a plate would be far more
+    assert any("limited butter" in n for n in est.notes)
+
+
+def test_a_part_the_user_gave_an_amount_for_is_never_limited(db_path):
+    est = run_with(db_path, {}, [ParsedItem(food="เนย", qty=100, unit="g")])
+    assert est.lines[0].grams == 100 and not any("limited" in n for n in est.notes)

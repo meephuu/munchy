@@ -32,6 +32,11 @@ UNIT_SYNONYMS = {"tablespoon": "tbsp", "tablespoons": "tbsp", "tbs": "tbsp", "tb
                  "cans": "can", "bars": "bar", "cookies": "cookie", "fillets": "fillet",
                  "servings": "serving", "portion": "serving", "portions": "serving"}
 MAX_COMBO_DEPTH = 5
+# A concentrated food (oats, nuts, butter, flour: 350+ kcal per 100 g) is not eaten by the cupful in a meal, but
+# the table's default serving can be exactly that (1 cup of dry oats = 156 g). An *assumed* serving of one is
+# limited to this many kcal; an amount the user gave is never touched.
+DENSE_KCAL_100G = 350
+MAX_ASSUMED_SERVING_KCAL = 300
 
 
 class CalcError(Exception):
@@ -95,7 +100,11 @@ def _grams(conn: sqlite3.Connection, food: sqlite3.Row,
     def serving_grams(n: float) -> float:
         if serving is None:
             raise CalcError(f"{name} has no default_serving_g")
-        return n * serving
+        kcal = food["kcal_100g"]
+        one = serving
+        if kcal and kcal >= DENSE_KCAL_100G and one * kcal / 100 > MAX_ASSUMED_SERVING_KCAL:
+            one = MAX_ASSUMED_SERVING_KCAL / kcal * 100     # a smaller, more realistic helping
+        return n * one
 
     if qty is None and u is None:
         return serving_grams(1), f"assumed 1 serving of {name} ({serving_grams(1):g} g)"

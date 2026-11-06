@@ -185,7 +185,7 @@ export function CoachView({ target }: { target: TargetLike | null }) {
                         {d.title}
                       </span>
                       <span className="font-mono text-[10px] tracking-[1px] text-ink-muted uppercase">
-                        About one serving · C {d.carbs} g · F {d.fat} g
+                        1 serving · C {d.carbs} g · F {d.fat} g
                       </span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-1">

@@ -5,6 +5,7 @@ Run `python warm_cache.py` first (so every dish is answered from the cache, with
     python build_catalog.py            # writes ../frontend/src/lib/catalog.json
 The numbers are estimates (assumed servings, typical parts), the same ones a person would see searching the dish.
 """
+import csv
 import json
 import re
 import sys
@@ -13,6 +14,7 @@ from pathlib import Path
 from src import config
 from src.matcher import Matcher
 from src.pipeline import estimate
+from check_plausible import BANDS, verdict
 from warm_cache import DEFAULT_LIST, read_dishes
 
 OUT = Path(__file__).resolve().parent.parent / "frontend" / "src" / "lib" / "catalog.json"
@@ -28,14 +30,25 @@ def entry(dish: str, est) -> dict | None:
             "carbs": round(est.carbs), "fat": round(est.fat)}
 
 
+def bands() -> dict[str, tuple[float, float]]:
+    """The believable kcal band per dish (data/eval/plausible.csv), keyed by lower-case name."""
+    with open(BANDS, encoding="utf-8", newline="") as f:
+        return {r["dish"].casefold(): (float(r["low"]), float(r["high"])) for r in csv.DictReader(f)}
+
+
 def main() -> int:
-    dishes = [d for d in read_dishes(DEFAULT_LIST) if not THAI.search(d)]
+    """Only dishes whose estimate lands inside its believable band are suggested: a suggestion with a doubtful
+    number is worse than no suggestion."""
+    bands_by_dish = bands()
+    dishes = [d for d in read_dishes(DEFAULT_LIST) if not THAI.search(d) and d.casefold() in bands_by_dish]
     matcher = Matcher(config.DB_PATH)
     matcher._embeddings()
     rows, skipped = [], []
     for dish in dishes:
         try:
             row = entry(dish, estimate(dish, matcher=matcher))
+            if row and verdict(row["kcal"], *bands_by_dish[dish.casefold()]) != "ok":
+                row = None
         except Exception as e:      # not cached and the language model is down: leave it out for now
             print(f"{dish}: {type(e).__name__}", file=sys.stderr)
             row = None

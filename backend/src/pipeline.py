@@ -1,8 +1,10 @@
 """text -> parse -> match -> calculate. Shared by the CLI now and the FastAPI endpoint later."""
+from contextlib import closing
 from pathlib import Path
 from typing import Callable
 
 from src import config
+from src.db import connect
 from src.matcher import Match, Matcher, classify
 from src.nutrition import Estimate, calculate
 from src.parse_cache import cached_decompose, cached_parse
@@ -56,10 +58,39 @@ ROLE_SHARE = {"base": 0.50, "protein": 0.25, "vegetable": 0.20, "filling": 0.25,
 
 # Rough weight of one unit of a dish we have no entry for (a slice of what? an average one).
 DISH_UNIT_G = {"slice": 40, "แผ่น": 40, "piece": 60, "ชิ้น": 60, "ลูก": 60, "cup": 240, "ถ้วย": 240,
-               "glass": 250, "แก้ว": 250, "bowl": 350, "ชาม": 350, "plate": 300, "จาน": 300,
-               "serving": 250, "portion": 250, "ที่": 250}
-DEFAULT_DISH_G = 250
+               "glass": 250, "แก้ว": 250, "bowl": 400, "ชาม": 400, "plate": 400, "จาน": 400}
+DEFAULT_DISH_G = 280       # a typical helping when nothing says what kind of dish it is
+
+# What kind of dish it is, from its name and its parts (plain words, no language model): sets a typical serving.
+SOUP_WORDS = ("soup", "tom yum", "gaeng", "stew", "broth", "ต้มยำ", "แกง", "ซุป")
+DRINK_WORDS = ("smoothie", "shake", "latte", "tea", "coffee", "juice", "milk")
+BREAD_WORDS = ("bread", "toast", "bun", "tortilla", "wrap", "cracker", "sandwich")
+MAIN_BASE_WORDS = ("rice", "noodle", "pasta", "spaghetti", "vermicelli", "potato", "ข้าว", "เส้น", "ก๋วยเตี๋ยว")
+KIND_SERVING_G = {"soup": 330, "drink": 300, "light": 200, "main": 380}
+
+
+def dish_kind(item: ParsedItem) -> str | None:
+    """soup / drink / light (bread-based) / main (rice or noodles), or None when it is not clear."""
+    name = f"{item.label} {item.food}".casefold()
+    parts = " ".join(item.components).casefold()
+    if any(w in name for w in SOUP_WORDS):
+        return "soup"
+    if any(w in name for w in DRINK_WORDS):
+        return "drink"
+    if any(w in name or w in parts for w in BREAD_WORDS):
+        return "light"
+    if any(w in name or w in parts for w in MAIN_BASE_WORDS):
+        return "main"
+    return None
+
+
 GRAMS = {"g": 1, "gram": 1, "grams": 1, "กรัม": 1, "kg": 1000, "กก.": 1000, "oz": 28.35, "lb": 453.6}
+# A typical part of a dish is a share of the dish's weight, but some foods are only ever a little of it: a
+# concentrated ingredient (peanut butter, butter, nuts) is limited by calories, seasonings by weight.
+PART_DENSE_KCAL_100G = 350
+PART_MAX_DENSE_KCAL = 150
+SEASONING = ("salt", "pepper", "spice", "seasoning", "msg", "monosodium")
+SEASONING_MAX_G = 2.0
 SIMILAR_MIN_CONFIDENCE = 0.80      # a close-enough single food for a dish we do not have
 
 
@@ -73,7 +104,9 @@ def _dish_grams(item: ParsedItem) -> tuple[float, str]:
     per = DISH_UNIT_G.get(key)
     if per:
         return qty * per, f"assumed about {per} g per {item.unit}"
-    return qty * DEFAULT_DISH_G, f"assumed about {DEFAULT_DISH_G} g for one serving"
+    kind = dish_kind(item)
+    per = KIND_SERVING_G.get(kind, DEFAULT_DISH_G)
+    return qty * per, f"assumed about {per} g for one serving" + (f" of a {kind} dish" if kind else "")
 
 
 def _split_into_parts(item: ParsedItem) -> tuple[list[ParsedItem], list[str]]:
@@ -100,6 +133,22 @@ def _split_into_parts(item: ParsedItem) -> tuple[list[ParsedItem], list[str]]:
                      "over its parts, so each part uses a default serving")
     parts = [ParsedItem(food=c, food_en=c, qty=scale, implied_for=item.label) for c in item.components]
     return parts, notes
+
+
+def _limit_part(item: ParsedItem, food_name: str, kcal_100g: float | None) -> tuple[ParsedItem, str | None]:
+    """Cap a typical part that got more of the dish's weight than such a food is ever eaten in."""
+    if not item.implied_for or item.unit != "g" or not item.qty:
+        return item, None
+    cap = None
+    if any(w in food_name.casefold() for w in SEASONING):
+        cap = SEASONING_MAX_G
+    elif kcal_100g and kcal_100g >= PART_DENSE_KCAL_100G:
+        cap = PART_MAX_DENSE_KCAL / kcal_100g * 100
+    if cap is None or item.qty <= cap:
+        return item, None
+    cap = round(cap, 1)
+    return (item.model_copy(update={"qty": cap}),
+            f"limited {food_name} to {cap:g} g in {item.implied_for}: it is only ever a little of a dish")
 
 
 def _as_decomposition(result: "Decomposition | list[str]") -> Decomposition:
@@ -176,6 +225,11 @@ def estimate(text: str, *, parse_fn: Callable[[str], list[ParsedItem]] | None = 
             matched.append((item, candidates[0], status, candidates))
 
     # What the user named beats a typical part, and a food is only counted once as a part.
+    with closing(connect(db_path)) as conn:      # calories per 100 g of what was matched, for the part limits
+        ids = [m.food_id for _, m, _, _ in matched]
+        marks = ",".join("?" * len(ids)) or "NULL"
+        kcal = {r["id"]: r["kcal_100g"] for r in conn.execute(
+            f"SELECT id, kcal_100g FROM foods WHERE id IN ({marks})", ids)}
     stated = {m.food_id for i, m, _, _ in matched if not i.implied_for}
     pairs, seen_parts = [], set()
     for item, top, status, candidates in matched:
@@ -189,6 +243,9 @@ def estimate(text: str, *, parse_fn: Callable[[str], list[ParsedItem]] | None = 
             others = ", ".join(m.name for m in candidates[1:])
             warnings.append(f"uncertain match: '{item.label}' -> {top.name} ({top.confidence:.2f})"
                             + (f"; other candidates: {others}" if others else ""))
+        item, limited = _limit_part(item, top.name, kcal.get(top.food_id))
+        if limited:
+            notes.append(limited)
         pairs.append((item, top))
 
     est = calculate(pairs, db_path)

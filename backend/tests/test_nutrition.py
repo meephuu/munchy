@@ -212,3 +212,30 @@ def test_lines_carry_the_units_their_food_is_counted_in(db_path):
     by = {l.name: l.units for l in est.lines}
     assert by[EN["หมูปิ้ง"]] == [("skewer", 30.0), ("piece", 30.0)]
     assert dict(by[EN["ข้าวเหนียวนึ่ง"]]).get("pack") == 90
+
+
+# --- an assumed serving of a concentrated food is limited -------------------------------------
+
+def _food_row(kcal_100g, serving_g):
+    import sqlite3
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute("CREATE TABLE foods (id INTEGER, name_th TEXT, name_en TEXT, kcal_100g REAL, default_serving_g REAL)")
+    conn.execute("INSERT INTO foods VALUES (1, 'x', 'dry oats', ?, ?)", (kcal_100g, serving_g))
+    return conn, conn.execute("SELECT * FROM foods").fetchone()
+
+
+def test_an_assumed_serving_of_a_dense_food_is_capped_by_calories():
+    from src.nutrition import _grams
+    conn, oats = _food_row(389, 156)                       # a cup of dry oats: 607 kcal
+    grams, note = _grams(conn, oats, None, None)
+    assert grams == pytest.approx(300 / 389 * 100)
+    assert "assumed 1 serving" in note
+
+
+def test_a_stated_amount_or_a_light_food_is_never_capped():
+    from src.nutrition import _grams
+    conn, oats = _food_row(389, 156)
+    assert _grams(conn, oats, 156, "g")[0] == 156
+    conn, rice = _food_row(130, 200)
+    assert _grams(conn, rice, None, None)[0] == 200

@@ -22,9 +22,10 @@ step list (steps 1–15, all done) stays in [`backend/ROADMAP.md`](backend/ROADM
 | B | Get started screen + daily target formula + Supabase accounts (sign-up, log-in, log-out, profile) | done | `da4c259`, `f8e38e1` |
 | — | Redesign to V2 "Forest & Bronze" | done | `da639bd` |
 | C | Home + meal logging | done, checked against the real Supabase project | `2029751`, `a547113`, `c81596a` |
-| D | Logged-in Bite check (tweak chips, "where's it from", favorites) | built; needs the new SQL run, then a real-project check | |
-| E | Progress (week bars, streak, weight log + trend, rule-based note) | built; needs the new SQL run, then a real-project check | |
-| — | My dishes: custom dishes with typed nutrition, ingredients optional | built; same SQL | |
+| D | Logged-in Bite check (tweak chips, "where's it from", favorites) | done, checked against the real Supabase project | `95e8f51` |
+| E | Progress (week bars, streak, weight log + trend, rule-based note) | done, checked against the real Supabase project | `95e8f51` |
+| — | My dishes, account page, date of birth, meal editing, time picker, search suggestions | done, checked against the real project | see git log |
+| F | Coach: room left today + dishes that fit (no places: no data) | done; ideas come from `catalog.json` (16 dishes) | |
 | F | Coach | planned, least defined | |
 
 Not in any phase yet (backlog): see the end of this file.
