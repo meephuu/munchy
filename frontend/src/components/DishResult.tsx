@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
 import { Chip } from "@/components/Chip";
+import { CountUp } from "@/components/CountUp";
 import { TimePicker } from "@/components/TimePicker";
 import { DishDayBars } from "@/components/DishDayBars";
 import { DishHeader } from "@/components/DishHeader";
@@ -218,7 +219,7 @@ export function DishResult({
                       aria-live="polite"
                       className="font-brand text-[46px] leading-none text-green desk:text-[64px]"
                     >
-                      {view.kcal}
+                      <CountUp value={view.kcal} />
                     </span>
                     <span className="text-[15px] font-semibold desk:text-[17px]">
                       kcal

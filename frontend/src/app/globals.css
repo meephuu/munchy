@@ -277,3 +277,20 @@ body {
     }
   }
 }
+
+/* Bars and the calorie ring fill in when a screen shows (Home, Coach, the dish page): bars are revealed left to right, the
+   ring draws round. The ring's own stroke-dashoffset is the end value. */
+@keyframes bar-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: 339.3;
+  }
+}

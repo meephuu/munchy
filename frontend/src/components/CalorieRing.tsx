@@ -48,6 +48,7 @@ export function CalorieRing({
             strokeLinecap="round"
             strokeDasharray={LENGTH}
             strokeDashoffset={LENGTH * (1 - filled)}
+            className="animate-[ring-fill_1.1s_cubic-bezier(0.2,0.8,0.2,1)_both]"
           />
         )}
       </svg>

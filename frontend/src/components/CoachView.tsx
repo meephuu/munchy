@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Chip } from "@/components/Chip";
+import { CountUp } from "@/components/CountUp";
 import { PlusIcon } from "@/components/Icons";
 import { Eyebrow, Title } from "@/components/Type";
 import catalogJson from "@/lib/catalog.json";
@@ -139,7 +140,7 @@ export function CoachView({ target }: { target: TargetLike | null }) {
               <span
                 className={`font-brand text-[40px] leading-none desk:text-[56px] ${left.kcal < 0 ? "text-terracotta" : "text-green"}`}
               >
-                {n0(Math.abs(left.kcal))}
+                <CountUp value={Math.abs(left.kcal)} />
               </span>
               <span className="text-[15px] font-semibold desk:text-base">
                 kcal {left.kcal < 0 ? "over" : "left"}
@@ -305,7 +306,7 @@ export function CoachView({ target }: { target: TargetLike | null }) {
                             aria-hidden="true"
                           >
                             <div
-                              className="h-1.5 rounded-[3px]"
+                              className="animate-[bar-reveal_0.9s_cubic-bezier(0.2,0.8,0.2,1)_both] h-1.5 rounded-[3px]"
                               style={{
                                 width: `${Math.min(100, Math.round((d.kcal / left.kcal) * 100))}%`,
                                 background:
@@ -369,7 +370,10 @@ function LeftBar({
         </span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-[3px] bg-sand">
-        <div className={`h-1.5 ${bar}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`animate-[bar-reveal_0.9s_cubic-bezier(0.2,0.8,0.2,1)_both] h-1.5 ${bar}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CalorieRing } from "@/components/CalorieRing";
+import { CountUp } from "@/components/CountUp";
 import { CoachPreview } from "@/components/CoachPreview";
 import { FavoritesList, type FavoriteItem } from "@/components/FavoritesList";
 import { MacroLine } from "@/components/MacroLine";
@@ -146,7 +147,9 @@ export function HomeToday({
                 <span
                   className={`font-brand text-[42px] leading-none desk:text-[64px] ${totals.over ? "text-terracotta" : "text-green"}`}
                 >
-                  {n0(left === null ? totals.eaten.kcal : Math.abs(left))}
+                  <CountUp
+                    value={left === null ? totals.eaten.kcal : Math.abs(left)}
+                  />
                 </span>
                 <span className="text-[13px] desk:text-base">
                   {target && left !== null ? (
@@ -172,7 +175,7 @@ export function HomeToday({
             {totals.pct !== null && (
               <div className="h-2.5 overflow-hidden rounded-[5px] bg-sand desk:w-[340px] desk:max-w-full">
                 <div
-                  className="h-2.5 rounded-[5px]"
+                  className="animate-[bar-reveal_0.9s_cubic-bezier(0.2,0.8,0.2,1)_both] h-2.5 rounded-[5px]"
                   style={{
                     width: `${Math.min(100, totals.pct)}%`,
                     background: totals.over
@@ -418,7 +421,7 @@ function MacroCard({
       {progress && (
         <div className="h-1.5 overflow-hidden rounded-[3px] bg-sand">
           <div
-            className={`h-1.5 ${bar}`}
+            className={`animate-[bar-reveal_0.9s_cubic-bezier(0.2,0.8,0.2,1)_both] h-1.5 ${bar}`}
             style={{ width: `${progress.pct}%` }}
           />
         </div>

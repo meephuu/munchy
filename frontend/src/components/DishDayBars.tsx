@@ -139,14 +139,16 @@ function Bar({
         aria-label={`${before} eaten plus ${add} of ${goal} ${unit}`}
         className={`relative flex overflow-hidden rounded-[5px] bg-sand ${thin ? "h-2" : "h-2.5"}`}
       >
-        <div
-          className={`h-full ${bar} opacity-45`}
-          style={{ width: pct(before) }}
-        />
-        <div
-          className={`h-full ${over ? "bg-terracotta" : bar}`}
-          style={{ width: pct(add) }}
-        />
+        <div className="flex h-full w-full animate-[bar-reveal_0.9s_cubic-bezier(0.2,0.8,0.2,1)_both]">
+          <div
+            className={`h-full ${bar} opacity-45 transition-[width] duration-500`}
+            style={{ width: pct(before) }}
+          />
+          <div
+            className={`h-full ${over ? "bg-terracotta" : bar} transition-[width] duration-500`}
+            style={{ width: pct(add) }}
+          />
+        </div>
         {over && (
           <div
             aria-hidden="true"
