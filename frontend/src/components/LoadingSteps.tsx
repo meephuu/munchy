@@ -34,11 +34,7 @@ export function LoadingSteps() {
       className="flex flex-col items-center gap-5 overflow-hidden rounded-hero bg-surface px-5 py-7 shadow-card desk:max-w-[880px] desk:flex-row desk:gap-10 desk:px-10 desk:py-9"
     >
       <div className="relative size-[150px] shrink-0 desk:size-[190px]">
-        <div
-          aria-hidden="true"
-          className="absolute inset-[8%] rounded-full bg-sand"
-        />
-        <BitingLogo className="absolute inset-[16%] size-[68%]" />
+        <BitingLogo className="absolute inset-0 size-full" />
       </div>
 
       <div className="flex w-full min-w-0 flex-col gap-4">

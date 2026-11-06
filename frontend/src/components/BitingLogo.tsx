@@ -9,24 +9,32 @@
 const M_PATH =
   "M43 214H457L524 504L588 214H979V796H680V472L603 796H404L327 474V796H43Z";
 
-// Each bite is a big circle with two smaller ones for the teeth. Together the ten take away the whole M (checked by
-// sampling every point of the letter against the circles). Order: corners first, then in towards the middle.
+// Each bite is a big circle with two smaller ones for the teeth, on its side facing down-right (the way the eating goes).
+// They start at the top-left corner and work across and down, each next to what is already gone, until the whole M is
+// taken (checked by sampling every point of the letter against the circles).
 const BITES = [
-  { x: 990, y: 230, r: 150 },
-  { x: 50, y: 230, r: 150 },
-  { x: 990, y: 790, r: 170 },
-  { x: 50, y: 790, r: 170 },
-  { x: 700, y: 300, r: 230 },
-  { x: 330, y: 320, r: 230 },
-  { x: 520, y: 520, r: 260 },
-  { x: 200, y: 600, r: 230 },
-  { x: 850, y: 560, r: 250 },
-  { x: 520, y: 760, r: 250 },
+  { x: 60, y: 260, r: 230 },
+  { x: 300, y: 260, r: 230 },
+  { x: 60, y: 560, r: 230 },
+  { x: 540, y: 290, r: 230 },
+  { x: 300, y: 560, r: 230 },
+  { x: 60, y: 800, r: 200 },
+  { x: 780, y: 290, r: 230 },
+  { x: 540, y: 580, r: 230 },
+  { x: 300, y: 800, r: 220 },
+  { x: 990, y: 300, r: 230 },
+  { x: 780, y: 600, r: 230 },
+  { x: 540, y: 800, r: 220 },
+  { x: 990, y: 640, r: 230 },
+  { x: 780, y: 810, r: 220 },
+  { x: 990, y: 800, r: 200 },
 ];
 
-/** The circles of one bite: the big one and two teeth, on the side facing the middle of the letter. */
+const EAT_DIRECTION = Math.PI / 4; // down and to the right
+
+/** The circles of one bite: the big one and two teeth on its leading (down-right) side. */
 function biteCircles({ x, y, r }: (typeof BITES)[number]) {
-  const a = Math.atan2(512 - y, 512 - x);
+  const a = EAT_DIRECTION;
   const teeth = [-1, 1].map((s) => {
     const t = a + (s * Math.PI) / 2;
     return {
@@ -47,7 +55,7 @@ const CRUMBS = [
   { dx: 260, dy: 310, rot: -180, size: 36 },
 ];
 
-const TICK = 0.52; // seconds between bites
+const TICK = 0.4; // seconds between bites
 const HOLD = 2; // ticks of the whole letter, wiggling, before the first bite
 const END = 2; // ticks with nothing left, before it pops back
 const LOOP = (HOLD + BITES.length + END) * TICK; // seconds for one whole eating
@@ -144,10 +152,9 @@ export function BitingLogo({ className = "" }: { className?: string }) {
       </g>
 
       {BITES.map((b, i) => {
-        // crumbs start from the edge of the bite that faces the middle of the letter
-        const a = Math.atan2(512 - b.y, 512 - b.x);
-        const sx = b.x + Math.cos(a) * b.r * 0.9;
-        const sy = b.y + Math.sin(a) * b.r * 0.9;
+        // crumbs start from the leading edge of the bite
+        const sx = b.x + Math.cos(EAT_DIRECTION) * b.r * 0.9;
+        const sy = b.y + Math.sin(EAT_DIRECTION) * b.r * 0.9;
         return CRUMBS.map((c, j) => (
           <rect
             key={`${i}-${j}`}
