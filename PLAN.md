@@ -26,7 +26,6 @@ step list (steps 1–15, all done) stays in [`backend/ROADMAP.md`](backend/ROADM
 | E | Progress (week bars, streak, weight log + trend, rule-based note) | done, checked against the real Supabase project | `95e8f51` |
 | — | My dishes, account page, date of birth, meal editing, time picker, search suggestions | done, checked against the real project | see git log |
 | F | Coach: room left today + dishes that fit (no places: no data) | done; ideas come from `catalog.json` (16 dishes) | |
-| F | Coach | planned, least defined | |
 
 Not in any phase yet (backlog): see the end of this file.
 
@@ -155,6 +154,8 @@ streak, weight trend, protein average, a "Buddy's note".
 - **Housekeeping:** delete the test user `munchy-test-1793713114@example.com` in Supabase (Authentication → Users).
 
 ## Decisions log
+- Coach has no "near me" / 7-Eleven: we have no place data. Ideas are dishes from a catalog built by `backend/build_catalog.py`; only dishes whose estimate is inside a believable band (`backend/data/eval/plausible.csv`) are included.
+- Estimator: a dish we do not have becomes a stand-in food (closest match) or typical parts sharing a dish weight by role; concentrated foods (oats, butter, nuts) and seasonings are limited (`backend/src/pipeline.py`).
 - The day runs from 2 am to 2 am (local): a meal or weigh-in before 2 am counts for the evening before (`DAY_STARTS_AT` in `frontend/src/lib/meals.ts`). Meals logged before this change keep the day they were saved with.
 - Phase D: "where's it from" = fixed rules (restaurant +6% oil, home-cooked oil x0.7); tweak chips are built from the
   dish's real ingredients and only change amounts. No sodium anywhere (we cannot measure it).

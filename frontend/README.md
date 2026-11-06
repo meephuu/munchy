@@ -76,6 +76,8 @@ protein average, a smoothed weight trend with a daily weight log, and "Buddy's n
 
 **Search suggestions:** the Home and Log search boxes offer favorites, dishes searched on this device (kept in localStorage) or logged before, and new dishes that suit the person's goal (a curated list in `src/lib/suggest.ts`, rotated daily, never ones they already have).
 
+**Coach (`/coach`):** the room left today (calories and protein) and up to 3 dishes that fit, on three tabs (Best fit, High protein, Lighter). Rules in `src/lib/coach.ts` over `src/lib/catalog.json`, which `backend/build_catalog.py` writes from our own estimator. No place data, so no "near me".
+
 **My dishes:** on the Log screen ("+") a person can create their own dish: type calories and macros for one
 serving, and/or add ingredients (optional) that add up into those numbers. Saved in `custom_dishes`, loggable in one tap.
 Needs `supabase/migrations/20261105000000_favorites_weights_dishes.sql`.

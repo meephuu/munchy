@@ -46,6 +46,9 @@ GET  /health
 ## Tests
 ```powershell
 python -m pytest              # offline and fast
+python warm_cache.py          # fill the parse cache for common dishes (uses the LLM; skips cached ones)
+python check_plausible.py     # do estimates of common dishes land in a believable kcal band?
+python build_catalog.py       # write the Coach dish catalog (frontend/src/lib/catalog.json) from cached estimates
 python -m pytest -m live      # real Gemini API (needs a key)
 python -m pytest -m slow      # real BGE-M3 embedding model
 ```
