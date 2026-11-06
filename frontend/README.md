@@ -72,6 +72,8 @@ this". Logged-in people also get a heart (favorites, shown on Home and the Log s
 protein average, a smoothed weight trend with a daily weight log, and "Buddy's note" written from rules in
 `src/lib/progress.ts` (no LLM, no sodium).
 
+**Desktop layout (V3):** from 1024 px wide the phone frame is dropped and every screen has its desktop layout (design/DESIGN.md, `design/screens/desktop/`). Logged-in screens get a sticky sidebar (`Sidebar.tsx`, replaces the bottom nav), guest screens a top bar (`GuestTopBar.tsx`), log in / sign up a split screen (`AuthScreen.tsx`). `Screen` takes a `shell` prop to pick one. Pages are one component for both sizes, using the `desk:` Tailwind breakpoint; between 600 and 1023 px the phone frame stays.
+
 **Account (`/account`, the Me tab):** profile card, daily target, the numbers behind it (edit goes to `/onboarding`, which has its own heading for logged-in people), shortcuts and log out.
 
 **Search suggestions:** the Home and Log search boxes offer favorites, dishes searched on this device (kept in localStorage) or logged before, and new dishes that suit the person's goal (a curated list in `src/lib/suggest.ts`, rotated daily, never ones they already have).

@@ -25,6 +25,7 @@ step list (steps 1–15, all done) stays in [`backend/ROADMAP.md`](backend/ROADM
 | D | Logged-in Bite check (tweak chips, "where's it from", favorites) | done, checked against the real Supabase project | `95e8f51` |
 | E | Progress (week bars, streak, weight log + trend, rule-based note) | done, checked against the real Supabase project | `95e8f51` |
 | — | My dishes, account page, date of birth, meal editing, time picker, search suggestions | done, checked against the real project | see git log |
+| — | Desktop layout (V3): sidebar / top bar shells and all 10 screens | done (checked in a browser at 1440, 800 and 390 px) | see git log |
 | F | Coach: room left today + dishes that fit (no places: no data) | done; ideas come from `catalog.json` (16 dishes) | |
 
 Not in any phase yet (backlog): see the end of this file.
