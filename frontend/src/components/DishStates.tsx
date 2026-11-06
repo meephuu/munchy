@@ -9,9 +9,14 @@ import { Eyebrow, Title } from "@/components/Type";
 export function DishLoading() {
   return (
     <Screen>
-      <div className="flex flex-col gap-3.5">
+      {/* on a wide window the loading card sits in the middle of the page (under the header), not stuck in the top-left */}
+      <div className="flex flex-col gap-3.5 desk:min-h-[calc(100dvh-6rem)]">
         <DishHeader />
-        <div role="status" aria-label="Loading">
+        <div
+          role="status"
+          aria-label="Loading"
+          className="desk:flex desk:flex-1 desk:items-center desk:justify-center desk:pb-16"
+        >
           <LoadingSteps />
         </div>
       </div>

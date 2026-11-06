@@ -31,7 +31,7 @@ export function LoadingSteps() {
   return (
     <section
       aria-live="polite"
-      className="flex flex-col items-center gap-5 overflow-hidden rounded-hero bg-surface px-5 py-7 shadow-card desk:max-w-[880px] desk:flex-row desk:gap-10 desk:px-10 desk:py-9"
+      className="flex flex-col items-center gap-5 overflow-hidden rounded-hero bg-surface px-5 py-7 shadow-card desk:w-full desk:max-w-[880px] desk:flex-row desk:gap-10 desk:px-10 desk:py-9"
     >
       <div className="relative size-[210px] shrink-0 desk:size-[190px]">
         <BitingLogo className="absolute inset-0 size-full" />
