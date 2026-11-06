@@ -294,3 +294,10 @@ body {
     stroke-dashoffset: 339.3;
   }
 }
+
+/* The Progress chart's bars grow up from the baseline, one after another. */
+@keyframes bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+}

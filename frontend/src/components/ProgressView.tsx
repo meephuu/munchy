@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { CountUp } from "@/components/CountUp";
 import { Eyebrow, Title } from "@/components/Type";
 import { useWeek } from "@/components/useWeek";
 import { friendlyMealError, localDate, type TargetLike } from "@/lib/meals";
@@ -94,7 +95,10 @@ export function ProgressView({ target }: { target: TargetLike | null }) {
             <Eyebrow>Calories vs target</Eyebrow>
             {stats.avgKcal !== null && (
               <span className="font-mono text-[10px] text-ink-muted desk:font-sans desk:text-sm">
-                avg <b className="text-ink">{n0(stats.avgKcal)}</b>
+                avg{" "}
+                <b className="text-ink">
+                  <CountUp value={stats.avgKcal} />
+                </b>
                 {target ? ` / ${n0(target.kcal)}` : ""}
                 <span className="hidden desk:inline"> kcal</span>
               </span>
@@ -113,7 +117,11 @@ export function ProgressView({ target }: { target: TargetLike | null }) {
           <div className="flex flex-col gap-1.5 rounded-row bg-surface p-3 shadow-row desk:gap-2 desk:rounded-hero desk:p-[22px] desk:shadow-card">
             <Eyebrow>Protein avg</Eyebrow>
             <span className="font-brand text-[28px] leading-none text-green desk:text-[40px]">
-              {stats.avgProtein === null ? "–" : `${stats.avgProtein}`}
+              {stats.avgProtein === null ? (
+                "–"
+              ) : (
+                <CountUp value={stats.avgProtein} />
+              )}
               <span className="font-sans text-xs font-normal text-ink-muted desk:text-sm">
                 {" "}
                 g / day
@@ -210,7 +218,7 @@ function Bars({ bars, target }: { bars: DayBar[]; target: TargetLike | null }) {
             </span>
           </>
         )}
-        {bars.map((b) => (
+        {bars.map((b, i) => (
           <div
             key={b.date}
             className="flex h-full flex-1 flex-col items-center justify-end gap-2"
@@ -219,15 +227,16 @@ function Bars({ bars, target }: { bars: DayBar[]; target: TargetLike | null }) {
               <span
                 className={`hidden font-mono text-[11px] desk:block ${b.over ? "text-terracotta-text" : "text-ink-muted"}`}
               >
-                {n0(b.kcal)}
+                <CountUp value={b.kcal} />
               </span>
             )}
             <div
-              className={`w-full max-w-7 rounded-t-md desk:max-w-14 desk:rounded-t-[10px] ${
+              className={`origin-bottom animate-[bar-rise_0.8s_cubic-bezier(0.2,0.8,0.2,1)_both] w-full max-w-7 rounded-t-md desk:max-w-14 desk:rounded-t-[10px] ${
                 b.today ? "bg-sand-dark" : b.over ? "bg-terracotta" : "bg-green"
               }`}
               style={{
                 height: b.logged ? `max(4px, ${heightOf(b.kcal)}%)` : 0,
+                animationDelay: `${i * 70}ms`,
               }}
             />
           </div>
@@ -291,7 +300,14 @@ function WeightCard({
     <div className="flex flex-col gap-1.5 rounded-row bg-surface p-3 shadow-row desk:gap-2 desk:rounded-hero desk:p-[22px] desk:shadow-card">
       <Eyebrow>Weight trend</Eyebrow>
       <span className="font-brand text-[28px] leading-none text-green desk:text-[40px]">
-        {trend ? trend.kg : "–"}
+        {trend ? (
+          <CountUp
+            value={Math.round(trend.kg * 10)}
+            format={(n) => (n / 10).toFixed(1)}
+          />
+        ) : (
+          "–"
+        )}
         <span className="font-sans text-xs font-normal text-ink-muted desk:text-sm">
           {" "}
           kg
