@@ -112,5 +112,5 @@ The backend's own step list is `backend/ROADMAP.md`.
 ## UI design
 The frontend UI must follow `design/DESIGN.md` (tokens, fonts, components, screens, guest vs logged-in rules).
 `design/screens/*.dc.html` are the visual reference for each screen (design-tool markup: rebuild as real components, do not ship them).
-From 1024 px wide the desktop layout in `design/DESIGN.md` ("Desktop layout (V3)", `design/screens/desktop/`) applies.
+From 768 px wide (tablet) the phone layout loses its frame and sits in a centered 680 px column; from 1024 px wide the desktop layout in `design/DESIGN.md` ("Desktop layout (V3)", `design/screens/desktop/`) applies.
 `design/v1/` is the old V1 design, kept for reference only. Build the V2 design in `design/`.

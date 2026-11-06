@@ -52,7 +52,7 @@ export function AuthScreen({ children }: { children: ReactNode }) {
       </aside>
 
       <main className="flex min-h-dvh w-full flex-col px-5 pt-5 pb-5 frame:min-h-full desk:min-h-0 desk:min-w-0 desk:flex-[1_1_440px] desk:items-center desk:justify-center desk:px-10 desk:py-12">
-        <div className="flex flex-1 flex-col desk:w-full desk:max-w-[420px] desk:flex-none">
+        <div className="flex flex-1 flex-col tab:mx-auto tab:w-full tab:max-w-[440px] desk:w-full desk:max-w-[420px] desk:flex-none">
           {children}
         </div>
       </main>

@@ -36,14 +36,14 @@ export function Screen({
         </GuestTopBar>
       )}
       <main
-        className={`flex min-h-dvh w-full flex-col px-5 pt-5 pb-5 frame:min-h-full desk:min-h-0 desk:min-w-0 desk:flex-1 ${
+        className={`flex min-h-dvh w-full flex-col px-5 pt-5 pb-5 frame:min-h-full tab:min-h-dvh desk:min-h-0 desk:min-w-0 desk:flex-1 ${
           guest
             ? "desk:mx-auto desk:max-w-[1240px] desk:px-10 desk:pt-6 desk:pb-12"
             : "desk:px-10 desk:pt-9 desk:pb-12"
         }`}
       >
         <div
-          className={`flex flex-1 flex-col desk:mx-auto desk:w-full desk:flex-none desk:gap-6 ${guest ? "" : "desk:max-w-[1120px]"}`}
+          className={`flex flex-1 flex-col tab:mx-auto tab:w-full tab:max-w-[680px] tab:px-4 desk:max-w-none desk:flex-none desk:gap-6 desk:px-0 ${guest ? "" : "desk:max-w-[1120px]"}`}
         >
           {children}
         </div>
