@@ -7,6 +7,7 @@ import { useState, useSyncExternalStore } from "react";
 import { AmountEditor } from "@/components/AmountEditor";
 import { Chip } from "@/components/Chip";
 import { TimePicker } from "@/components/TimePicker";
+import { DishDayBars } from "@/components/DishDayBars";
 import { DishHeader } from "@/components/DishHeader";
 import {
   ArrowRightIcon,
@@ -238,7 +239,9 @@ export function DishResult({
                   className="hidden shrink-0 desk:block"
                 />
               </div>
-              <div className="grid grid-cols-4 gap-2 desk:grid-cols-2 desk:gap-2.5">
+              <div
+                className={`grid grid-cols-4 gap-2 desk:grid-cols-2 desk:gap-2.5 ${memberInfo?.target ? "desk:hidden" : ""}`}
+              >
                 <MacroTile
                   label="Protein"
                   value={`${view.protein}g`}
@@ -256,6 +259,22 @@ export function DishResult({
                 />
                 <MacroTile label="Weight" value={`${view.weight}g`} />
               </div>
+              {memberInfo?.target && (
+                <div className="hidden flex-col gap-3 desk:flex">
+                  <DishDayBars
+                    target={memberInfo.target}
+                    dish={{
+                      kcal: view.kcal,
+                      protein: view.protein,
+                      carbs: view.carbs,
+                      fat: view.fat,
+                    }}
+                  />
+                  <span className="text-[13px] text-ink-muted">
+                    Weight <b className="text-ink">{view.weight}g</b>
+                  </span>
+                </div>
+              )}
             </section>
 
             {dish.notices.length > 0 && (
