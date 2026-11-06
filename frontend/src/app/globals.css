@@ -301,3 +301,112 @@ body {
     transform: scaleY(0);
   }
 }
+
+/*
+ * Hover and press feedback for everything that can be clicked. These rules are outside the cascade layers on purpose: they
+ * apply to every link and button by what it looks like (a white card or row, a chip, a green button, an outlined pill, a
+ * text link), so a new screen gets them without each element needing hover classes. Buttons that already have their own
+ * hover classes keep them (they are in the same families, so the result is the same).
+ */
+a[href],
+button,
+summary {
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    filter 0.15s ease,
+    transform 0.15s ease;
+}
+
+:is(a[href], button, summary):not(:disabled) {
+  cursor: pointer;
+}
+
+/* white cards, rows and icon buttons: a cream tint, a small lift and a softer shadow */
+:is(a[href], button).bg-surface:is(.shadow-row, .shadow-card, .shadow-panel):not(:disabled):hover {
+  background-color: #fcf9f3;
+  transform: translateY(-1px);
+  filter: drop-shadow(0 5px 8px rgb(70 50 20 / 0.08));
+}
+
+:is(a[href], button).bg-surface:is(.shadow-row, .shadow-card, .shadow-panel):not(:disabled):active {
+  transform: translateY(0) scale(0.99);
+  filter: none;
+}
+
+/* the green round "+" of a card nudges when its card is hovered */
+.bg-green.rounded-full {
+  transition: transform 0.15s ease;
+}
+a:is(.shadow-row, .shadow-card):hover .bg-green.rounded-full {
+  transform: scale(1.12);
+}
+
+/* chips and choice buttons that are not chosen: green edge and tint */
+:is(a[href], button).bg-surface.border-border:not(:disabled):hover {
+  border-color: var(--color-green);
+  background-color: var(--color-green-tint);
+}
+
+/* green buttons: darker on hover, pressed in on click */
+:is(a[href], button).bg-green:not(:disabled):hover {
+  background-color: var(--color-green-dark);
+}
+:is(a[href], button).bg-green:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* outlined pills ("Log in", "Log out"...) */
+:is(a[href], button).border-green:not(.bg-green):not(:disabled):hover {
+  background-color: var(--color-green-tint);
+}
+
+/* plain text links */
+a[href]:not([class*="bg-"]):not([class*="border"]):not([class*="flex"]):not(:has(img)):hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* plain text buttons, by their colour */
+button:not([class*="bg-"]):not([class*="border"]):not(:disabled)[class*="text-green"]:hover {
+  color: var(--color-green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+button:not([class*="bg-"]):not([class*="border"]):not(:disabled)[class*="text-ink-muted"]:hover {
+  color: var(--color-ink);
+}
+button:not([class*="bg-"]):not([class*="border"]):not(:disabled)[class*="text-terracotta"]:hover,
+button[aria-label^="Delete"]:not(:disabled):hover {
+  color: #7f3219;
+}
+
+summary:hover {
+  color: var(--color-ink);
+}
+
+/* the bottom nav: its items turn green, and the raised + grows a little */
+nav[aria-label="Main"] a:not([aria-current]):hover {
+  color: var(--color-green);
+}
+a[aria-label="Log a dish"]:hover {
+  transform: scale(1.07);
+}
+
+/* a meal on Home: the whole row tints, since only its title is the button */
+li:has(> div > button[aria-expanded]):hover {
+  background-color: #f8f3ea;
+}
+
+/* the dashed "next meal" rows */
+a[href].border-dashed:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-bronze-light);
+}
+
+/* the time button and other cream buttons with a border */
+button.bg-bg.border-border:not(:disabled):hover {
+  border-color: var(--color-green);
+  background-color: var(--color-green-tint);
+}

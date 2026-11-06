@@ -83,7 +83,7 @@ export function Sidebar({ shell }: { shell: MemberShell | null }) {
 
         <Link
           href="/account"
-          className={`flex items-center gap-2.5 px-1 text-ink ${!shell || shell.targetKcal === null ? "mt-auto" : ""}`}
+          className={`-mx-1 flex items-center gap-2.5 rounded-field p-1 text-ink hover:bg-bg ${!shell || shell.targetKcal === null ? "mt-auto" : ""}`}
         >
           <span
             aria-hidden="true"

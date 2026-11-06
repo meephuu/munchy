@@ -42,10 +42,10 @@ export function CoachPreview({
         {proteinLeft > 0 ? ` and ${proteinLeft} g protein` : ""} to go
       </span>
       {ideas.map((d) => (
+        <div key={d.title} className="border-t border-divider py-1">
         <Link
-          key={d.title}
           href={`/dish?q=${encodeURIComponent(d.title)}`}
-          className="flex items-center gap-3 border-t border-divider py-2.5 text-ink hover:bg-bg/60"
+          className="-mx-2.5 flex items-center gap-3 rounded-row px-2.5 py-2 text-ink hover:bg-bg"
         >
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="truncate text-sm font-semibold">{d.title}</span>
@@ -60,6 +60,7 @@ export function CoachPreview({
             <PlusIcon size={16} />
           </span>
         </Link>
+        </div>
       ))}
     </section>
   );
