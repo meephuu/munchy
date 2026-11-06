@@ -48,7 +48,7 @@ export function Screen({
         }`}
       >
         <div
-          className={`${still ? "" : "animate-[page-in_0.28s_ease-out] motion-reduce:animate-none "}flex flex-1 flex-col tab:mx-auto tab:w-full tab:max-w-[840px] tab:px-6 desk:max-w-none desk:flex-none desk:gap-6 desk:px-0 ${guest ? "" : "desk:max-w-[1120px]"}`}
+          className={`${still ? "" : "animate-[page-in_0.28s_ease-out] "}flex flex-1 flex-col tab:mx-auto tab:w-full tab:max-w-[840px] tab:px-6 desk:max-w-none desk:flex-none desk:gap-6 desk:px-0 ${guest ? "" : "desk:max-w-[1120px]"}`}
         >
           {children}
         </div>

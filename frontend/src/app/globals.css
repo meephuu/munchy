@@ -165,28 +165,54 @@ body {
   }
 }
 
-/* Loading animation of a dish being worked out (LoadingSteps): the bowl bobs, steam rises, a bar sweeps. */
-@keyframes bowl-bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-2deg);
+/* Loading animation of a dish being worked out (LoadingSteps, BitingLogo): the M wiggles and is eaten bite by bite. */
+@keyframes logo-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
   }
-  50% {
-    transform: translateY(-7px) rotate(2deg);
+  65% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
-@keyframes steam-rise {
+@keyframes logo-wiggle {
+  0%,
+  100% {
+    transform: rotate(-4deg) scale(1.02, 0.97);
+  }
+  50% {
+    transform: rotate(4deg) scale(0.98, 1.03);
+  }
+}
+
+@keyframes logo-jolt {
   0% {
-    opacity: 0;
-    transform: translateY(10px) scaleX(0.9);
+    transform: translate(0, 0) scale(1);
   }
   35% {
-    opacity: 0.8;
+    transform: translate(-14px, 6px) scale(0.94, 1.04);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes crumb-fall {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--dx) * 0.5), -50px) rotate(calc(var(--rot) * 0.3));
   }
   100% {
     opacity: 0;
-    transform: translateY(-22px) scaleX(1.3);
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
   }
 }
 
@@ -196,6 +222,24 @@ body {
   }
   100% {
     transform: translateX(260%);
+  }
+}
+
+@keyframes step-show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes step-hide {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -219,5 +263,17 @@ body {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* "Reduce motion": a page still fades in, without the rise. */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes page-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
