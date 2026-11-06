@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AccountsOff } from "@/components/AccountsOff";
@@ -59,13 +58,6 @@ async function Add() {
               breakfast, lunch, dinner or a snack.
             </p>
           </div>
-          <Image
-            src="/bowl.png"
-            alt=""
-            width={220}
-            height={220}
-            className="hidden h-auto w-[220px] max-w-full desk:block"
-          />
         </section>
 
         <MyDishes favorites={<FavoritesManager />} />
